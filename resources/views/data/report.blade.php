@@ -42,7 +42,7 @@
         </div>
     </div>
 </div>
-<!-- Sisanya tetap seperti sebelumnya -->
+
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card">

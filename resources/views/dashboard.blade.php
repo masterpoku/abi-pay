@@ -3,50 +3,58 @@
 @section('content')
 
 <div class="container mt-5">
-    <div class="d-flex justify-content-around mb-4">
 
-        <!-- Card untuk jumlah transaksi sukses dalam nominal -->
-        <div class="card" style="width: 19rem;">
-            <div class="card-body text-center">
-                <h5 class="card-title">Jumlah Transaksi Sukses</h5>
-                <h1 style="color: green;">Rp. {{ number_format($totalSuccessAmount, 0, ',', '.') }}</h1>
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Transaksi Sukses</h5>
+                    <h1 class="text-primary">Rp. {{ number_format($totalSuccessAmount, 0, ',', '.') }}</h1>
+                </div>
             </div>
         </div>
-
-        <!-- Card untuk jumlah transaksi sukses -->
-        <div class="card" style="width: 19rem;">
-            <div class="card-body text-center">
-                <h5 class="card-title">Transaksi Sukses</h5>
-                <h1 style="color: green;">{{ $totalSuccessTransactions }}</h1>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Transaksi Sukses</h5>
+                    <h1 class="text-success">{{ $totalSuccessTransactions }}</h1>
+                </div>
             </div>
         </div>
-
-        <!-- Card untuk jumlah transaksi pending -->
-        <div class="card" style="width: 19rem;">
-            <div class="card-body text-center">
-                <h5 class="card-title">Transaksi Pending</h5>
-                <h1 style="color: orange;">{{ $totalPendingTransactions }}</h1>
-            </div>
-        </div>
-
-        <!-- Card untuk jumlah transaksi gagal -->
-        <div class="card" style="width: 19rem;">
-            <div class="card-body text-center">
-                <h5 class="card-title">Transaksi Gagal</h5>
-                <h1 style="color: red;">{{ $totalFailedTransactions }}</h1>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Transaksi Gagal</h5>
+                    <div>
+                        <h1><span class="text-danger">{{ $totalFailedTransactions }}</span></h1>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Grafik batang untuk history pembayaran per bulan -->
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title text-center">History Pembayaran Periode Bulan</h5>
-            <div id="myBarChart"></div>
-        </div>
+
+</div>
+<!-- Grafik batang untuk history pembayaran per bulan -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title text-center">History Pembayaran Periode Bulan</h5>
+        <div id="myBarChart"></div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var options = {
@@ -99,5 +107,17 @@
         chart.render();
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.add('fade-out');
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 3000); // Notifikasi akan hilang dalam 3 detik
+    });
+</script>
+
 
 @endsection

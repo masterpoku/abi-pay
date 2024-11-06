@@ -1,17 +1,20 @@
 <?php
 
-use App\Http\Controllers\Api\PaymentBSIController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\InquiryController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\PaymentBSIController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/payment', [PaymentBSIController::class, 'index']);
-Route::post('/payment', [PaymentBSIController::class, 'handleRequest']);
-Route::get('/payment/{id}', [PaymentBSIController::class, 'show']);
-Route::put('/payment/{id}', [PaymentBSIController::class, 'update']);
-Route::delete('/payment/{id}', [PaymentBSIController::class, 'destroy']);
-Route::get('/payment/{id}/status', [PaymentBSIController::class, 'status']);
+Route::get('/payments', [PaymentController::class, 'index']);
+Route::post('/payments', [PaymentController::class, 'store']);
+Route::get('/payments/{id}', [PaymentController::class, 'show']);
+Route::put('/payments/{id}', [PaymentController::class, 'update']);
+Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
+Route::get('/payments/{id}/status', [PaymentController::class, 'status']);
 
+
+Route::post('/payment', [PaymentBSIController::class, 'handleRequest']);
+Route::get('/payment', [InquiryController::class, 'index']);
 Route::get('/inqury', [InquiryController::class, 'index']);
 Route::post('/inqury', [InquiryController::class, 'inquiry']);

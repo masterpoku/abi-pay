@@ -59,8 +59,8 @@
                 <td>{{ $payment->nama_jamaah }}</td>
                 <td>{{ $payment->nama_paket }}</td>
                 <td>{{ $payment->nama_agen }}</td>
-                <td>{{ $payment->channel_pembayaran }}</td>
-                <td>Rp {{ number_format($payment->nominal_tagihan, 2, ',', '.') }}</td>
+                <td>{{ $payment->pembayaran_via }}</td>
+                <td>Rp {{ number_format($payment->nominal, 2, ',', '.') }}</td>
                 <td>{{ $payment->status_pembayaran === 'SUKSES' ? 'Sukses' : 'Pending' }}</td>
             </tr>
             @endforeach

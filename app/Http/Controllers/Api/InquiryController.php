@@ -18,8 +18,8 @@ class InquiryController extends Controller
 
     public function index()
     {
-        Log::info('Index method accessed');
-        return response()->json(['message' => 'Welcome to payment API'], 200);
+        Log::error('Index method encountered an error');
+        return response()->json(['error' => 'An error occurred'], 501);
     }
     public function __construct()
     {

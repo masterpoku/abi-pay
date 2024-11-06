@@ -33,7 +33,7 @@ class PaymentBSIController extends Controller
     public function handleRequest(Request $request)
     {
         Log::info('REQUEST:', $request->all());
-        Log::info('Inquiry method accessed');
+        Log::info('handleRequest method accessed');
 
         $data = $request->json()->all();
 
@@ -52,6 +52,7 @@ class PaymentBSIController extends Controller
                 'msg' => 'Collecting agent is not allowed by ' . $this->biller_name
             ]);
         }
+
         if (!in_array($data['kodeChannel'], $this->allowed_channels)) {
             return response()->json([
                 'rc' => 'ERR-CHANNEL-UNKNOWN',
@@ -112,19 +113,21 @@ class PaymentBSIController extends Controller
             ]);
         }
 
-        if (is_null($tagihan->status_pembayaran)) {
-            return $this->processPayment($data, $tagihan);
-        } else {
+        if ($tagihan->status_pembayaran === 'SUKSES') {
             return response()->json([
                 'rc' => 'ERR-ALREADY-PAID',
                 'msg' => 'Sudah Terbayar'
             ]);
+        } else {
+            return $this->processPayment($data, $tagihan);
         }
     }
 
     // Handle payment processing
     private function processPayment($data, $tagihan)
     {
+        Log::info('processPayment REQUEST:', $data);
+
         DB::beginTransaction();
 
         try {

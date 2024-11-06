@@ -93,10 +93,10 @@
                             <div data-i18n="Blast Message">Report</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->is('activity-log*') ? 'active' : '' }}">
-                        <a href="" class="menu-link">
-                            <i class='menu-icon notepad bx bx-file'></i>
-                            <div data-i18n="Inbox">Activity Log</div>
+                    <li class="menu-item {{ request()->is('user*') ? 'active' : '' }}">
+                        <a href="{{ route('users.index') }}" class="menu-link">
+                            <i class='menu-icon notepad bx bx-user'></i>
+                            <div data-i18n="Inbox">User</div>
                         </a>
                     </li>
 
@@ -134,12 +134,10 @@
                                         <a class="dropdown-item" href="#">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
-                                                    <div class="avatar avatar-online">
-                                                        <img src="{{ asset('templateAdmin/assets/img/avatars/Mark.png') }}" alt="Default Avatar" class="w-px-40 h-auto rounded-circle" />
-                                                    </div>
+
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">maruji</span>
+                                                    <span class="fw-semibold d-block">Abitour Admin</span>
                                                     <small class="text-muted">Admin</small>
                                                 </div>
                                             </div>
@@ -148,25 +146,52 @@
                                     <li>
                                         <div class="dropdown-divider"></div>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i class="bx bx-user me-2"></i> My
-                                            Profile</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bx bx-cog me-2"></i>
-                                            Settings</a></li>
+
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal"><i class="bx bx-cog me-2"></i> Change Password</a></li>
                                     <li>
                                         <div class="dropdown-divider"></div>
                                     </li>
-                                    <li><a class="dropdown-item" href=""><i class="bx bx-power-off me-2"></i>
+                                    <li><a class="dropdown-item" href="{{ route('logout') }}"><i class="bx bx-power-off me-2"></i>
                                             Log Out</a></li>
                                 </ul>
                             </li>
 
                             <!--/ User -->
                         </ul>
+
                     </div>
                 </nav>
 
                 <!-- / Navbar -->
-
+                <!-- Change Password Modal -->
+                <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="changePasswordForm" method="POST" action="{{ route('password.update') }}">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label for="currentPassword" class="form-label">Current Password</label>
+                                        <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="newPassword" class="form-label">New Password</label>
+                                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                        <input type="password" class="form-control" id="confirmPassword" name="new_password_confirmation" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Update Password</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
@@ -230,8 +255,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- Datepicker --}}
-    {{-- <script src="{{ asset('air-datepicker') }}/datepicker.js"></script>
-    <script src="/air-datepicker/air-datepicker.js"></script> --}}
+    <script src="{{ asset('air-datepicker') }}/datepicker.js"></script>
+    <script src="/air-datepicker/air-datepicker.js"></script>
     <script src="{{ asset('templateAdmin') }}/air-datepicker\dist\js\datepicker.js"></script>
     <script src="{{ asset('templateAdmin') }}/air-datepicker\dist\js\i18n\datepicker.id.js"></script>
     <!-- Place this tag in your head or just before your close body tag. -->

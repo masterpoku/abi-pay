@@ -22,7 +22,7 @@ class CreateTagihanPembayaranTable extends Migration
             $table->string('nama_agen'); // Nama agen yang melakukan penjualan
             $table->decimal('nominal_tagihan', 15, 2); // Jumlah tagihan
             $table->string('informasi')->nullable(); // Informasi tambahan, seperti keterangan tagihan
-            $table->enum('status_pembayaran', ['PENDING', 'SUKSES', 'GAGAL'])->nullable(); // Status pembayaran
+            $table->enum('status_pembayaran', ['SUKSES', 'NULL'])->default('NULL')->nullable(); // Status pembayaran
             $table->string('channel_pembayaran')->nullable(); // Channel pembayaran (kode channel)
             $table->timestamp('waktu_transaksi')->nullable(); // Waktu transaksi pembayaran
             $table->timestamp('tanggal_invoice')->default(now()); // Tanggal invoice dikeluarkan
