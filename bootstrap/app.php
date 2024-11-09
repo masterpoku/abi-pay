@@ -20,17 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (NotFoundHttpException $exception) {
-            return response()->json([
-                'error' => 'Ngapain?',
-
-            ], Response::HTTP_NOT_FOUND);
+            return response('', Response::HTTP_OK);
         });
 
         $exceptions->render(function (MethodNotAllowedHttpException $exception) {
-            return response()->json([
-                'error' => 'ngapain?',
-
-            ], Response::HTTP_NOT_FOUND);
+            return response('', Response::HTTP_OK);
         });
     })
     ->create();

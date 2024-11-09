@@ -4,25 +4,13 @@
 
 <div class="container mt-5">
 
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
 
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body text-center">
                     <h5 class="card-title">Total Transaksi Sukses</h5>
-                    <h1 class="text-primary">Rp. {{ number_format($totalSuccessAmount, 0, ',', '.') }}</h1>
+                    <h1 class="text-primary">Rp. {{ number_format($nominal_bayar, 0, ',', '.') }}</h1>
                 </div>
             </div>
         </div>
@@ -30,7 +18,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h5 class="card-title">Transaksi Sukses</h5>
-                    <h1 class="text-success">{{ $totalSuccessTransactions }}</h1>
+                    <h1 class="text-success">{{ $status_bayar }}</h1>
                 </div>
             </div>
         </div>
@@ -39,7 +27,7 @@
                 <div class="card-body text-center">
                     <h5 class="card-title">Transaksi Gagal</h5>
                     <div>
-                        <h1><span class="text-danger">{{ $totalFailedTransactions }}</span></h1>
+                        <h1><span class="text-danger">{{ $status_blmbayar }}</span></h1>
                     </div>
                 </div>
             </div>

@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'jwt', // atau 'passport' tergantung library yang digunakan
+            'provider' => 'users',
+        ],
+
     ],
 
 

@@ -21,8 +21,8 @@ class PaymentController extends Controller
         Log::info('REQUEST:', $request->all());
         Log::info('Store method accessed in PaymentController');
         $validatedData = $request->validate([
-            'id_invoice' => 'required|string|max:255',
-            'user_id' => 'required|string|max:255',
+            'id_invoice' => 'required|int',
+            'user_id' => 'required|int',
             'nama_jamaah' => 'required|string|max:255',
             'nama_paket' => 'required|string|max:255',
             'nama_agen' => 'required|string|max:255',
