@@ -27,7 +27,7 @@ class ReportController extends Controller
         // Data ringkasan transaksi
         $totalTransaksiSukses = $payments->where('status_pembayaran', 'SUKSES')->sum('nominal_tagihan');
         $jumlahTransaksiSukses = $payments->where('status_pembayaran', 'SUKSES')->count();
-        $jumlahTransaksiGagal = $payments->where('status_pembayaran', 'GAGAL')->count();
+        $jumlahTransaksiGagal = $payments->where('status_pembayaran', NULL)->count();
 
         return view('data.report', compact('payments', 'totalTransaksiSukses', 'jumlahTransaksiSukses', 'jumlahTransaksiGagal'));
     }
