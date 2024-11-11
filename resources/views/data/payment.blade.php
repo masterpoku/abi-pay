@@ -34,6 +34,7 @@
                 <thead>
                     <tr>
                         <th>No</th>
+                        <th>ID Invoice</th>
                         <th>Nama Jamaah</th> <!-- Menambahkan Nama Jamaah -->
                         <th>Nama Paket</th>
                         <th>Nama Agen</th>
@@ -48,6 +49,7 @@
                     @foreach ($payments as $payment)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+                        <td>{{ $payment->id_invoice }}</td>
                         <td>{{ $payment->nama_jamaah }}</td>
                         <td>{{ $payment->nama_paket }}</td>
                         <td>{{ $payment->nama_agen }}</td>
