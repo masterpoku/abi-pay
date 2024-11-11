@@ -143,23 +143,15 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-
-
-            //jika pembayaran berhasil maka akses url dari admin panel menggunakan signature dan merubah status terbayar
             $client = new \GuzzleHttp\Client();
             $signature = md5($tagihan->id_invoice . $tagihan->user_id);
-            $response = $client->post('http://192.168.1.21:8000/api/payment/check', [
-                'headers' => [
-                    'Accept' => '*/*',
-                    'User-Agent' => 'Thunder Client (https://www.thunderclient.com)',
-                    'Content-Type' => 'application/json',
-                ],
+            $client->post('http://192.168.1.21:8000/api/payment/check', [
                 'json' => [
                     'signature' => $signature,
                 ],
             ]);
 
-
+            // dd($response);
 
             return response()->json([
                 'rc' => 'OK',
