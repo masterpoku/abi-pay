@@ -15,6 +15,7 @@ class PaymentBSIController extends Controller
     private $secret_key;
     private $allowed_collecting_agents;
     private $allowed_channels;
+    private $baseurl = "http://192.168.1.21:8000/api/payment/check";
     public function __construct()
     {
         $this->biller_name = env('BILLER_NAME', 'MALANGGLEERRR');
@@ -145,11 +146,14 @@ class PaymentBSIController extends Controller
 
             $client = new \GuzzleHttp\Client();
             $signature = md5($tagihan->id_invoice . $tagihan->user_id);
-            $client->post('http://192.168.1.21:8000/api/payment/check', [
+            $url = $this->baseurl; // Ambil URL dari .env
+
+            $client->post($url, [
                 'json' => [
                     'signature' => $signature,
                 ],
             ]);
+
 
             // dd($response);
 
