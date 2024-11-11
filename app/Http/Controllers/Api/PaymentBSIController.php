@@ -143,6 +143,9 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
+
+
+            //jika pembayaran berhasil maka akses url dari admin panel menggunakan signature dan merubah status terbayar
             $client = new \GuzzleHttp\Client();
             $signature = md5($tagihan->id_invoice . $tagihan->user_id);
             $response = $client->post('http://192.168.1.21:8000/api/payment/check', [
@@ -156,7 +159,7 @@ class PaymentBSIController extends Controller
                 ],
             ]);
 
-            // dd($response);
+
 
             return response()->json([
                 'rc' => 'OK',

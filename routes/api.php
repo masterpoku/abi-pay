@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('/login', [JwtAuthController::class, 'login']);
-Route::post('/payment/status', [PaymentBSIController::class, 'PaymentCheck']);
 
 Route::post('/payment', [PaymentBSIController::class, 'handleRequest']);
 Route::post('/inqury', [InquiryController::class, 'inquiry']);
