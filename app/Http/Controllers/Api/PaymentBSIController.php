@@ -143,6 +143,21 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
+            $client = new \GuzzleHttp\Client();
+            $signature = md5($tagihan->id_invoice . $tagihan->user_id);
+            $response = $client->post('http://192.168.1.21:8000/api/payment/check', [
+                'headers' => [
+                    'Accept' => '*/*',
+                    'User-Agent' => 'Thunder Client (https://www.thunderclient.com)',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'signature' => $signature,
+                ],
+            ]);
+
+            // dd($response);
+
             return response()->json([
                 'rc' => 'OK',
                 'msg' => 'Payment Succeded',
@@ -173,5 +188,35 @@ class PaymentBSIController extends Controller
                 'msg' => 'Error saat Update Transaksi'
             ]);
         }
+    }
+
+    public function PaymentCheck(Request $request)
+    {
+        $md5 = $request->input('signature');
+        if (empty($md5)) {
+            return response()->json([
+                'rc' => 'ERR-NOT-FOUND',
+                'msg' => 'MD5 tidak ditemukan'
+            ]);
+        }
+
+        $tagihan = DB::table('tagihan_pembayaran')
+            ->whereRaw("MD5(CONCAT(id_invoice, user_id)) = ?", [$md5])
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$tagihan) {
+            return response()->json([
+                'rc' => 'ERR-NOT-FOUND',
+                'msg' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        dd($tagihan->status_pembayaran);
+        return response()->json([
+            'rc' => 'OK',
+            'msg' => 'Data ditemukan',
+            'data' => $tagihan
+        ]);
     }
 }
