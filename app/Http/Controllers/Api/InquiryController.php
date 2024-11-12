@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,13 +19,11 @@ class InquiryController extends Controller
 
     public function index()
     {
-        Log::error('Index method encountered an error');
-        return response()->json(['error' => 'An error occurred'], 501);
     }
     public function __construct()
     {
-        $this->biller_name = env('BILLER_NAME', 'MALANGGLEERRR');
-        $this->secret_key = env('SECRET_KEY', '!jK%5XGX-M0)8_NIXb1Ldjj{u2>9L');
+        $this->biller_name = env('BILLER_NAME', 'ABITOUR');
+        $this->secret_key = env('SECRET_KEY', 'CND7gy4Fwo6hajUznM0elsR9OukT2HYmiPx18vEf');
         $this->allowed_collecting_agents = ['BSM'];
         $this->allowed_channels = ['TELLER', 'IBANK', 'ATM', 'MBANK', 'FLAGGING'];
     }
@@ -55,10 +54,10 @@ class InquiryController extends Controller
         }
 
         // Validate checksum
-        $checksum = sha1($nomorPembayaran . $this->secret_key . $tanggalTransaksi);
-        if ($checksum !== ($data['checksum'] ?? '')) {
-            return response()->json(['rc' => 'ERR-SECURE-HASH', 'msg' => 'H2H Checksum is invalid']);
-        }
+        // $checksum = sha1($nomorPembayaran . $this->secret_key . $tanggalTransaksi);
+        // if ($checksum !== ($data['checksum'] ?? '')) {
+        //     return response()->json(['rc' => 'ERR-SECURE-HASH', 'msg' => 'H2H Checksum is invalid']);
+        // }
 
         // Database check for the user and unpaid invoices
         $user_data = DB::table('tagihan_pembayaran')

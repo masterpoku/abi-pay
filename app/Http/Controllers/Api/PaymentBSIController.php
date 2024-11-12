@@ -15,7 +15,7 @@ class PaymentBSIController extends Controller
     private $secret_key;
     private $allowed_collecting_agents;
     private $allowed_channels;
-    private $baseurl = "http://192.168.1.21:8000/api/payment/check";
+    // private $baseurl = "http://192.168.1.21:8000/api/payment/check";
     public function __construct()
     {
         $this->biller_name = env('BILLER_NAME', 'MALANGGLEERRR');
@@ -62,12 +62,12 @@ class PaymentBSIController extends Controller
         }
 
         // Validate checksum
-        if (!$this->validateChecksum($data)) {
-            return response()->json([
-                'rc' => 'ERR-SECURE-HASH',
-                'msg' => 'H2H Checksum is invalid'
-            ]);
-        }
+        // if (!$this->validateChecksum($data)) {
+        //     return response()->json([
+        //         'rc' => 'ERR-SECURE-HASH',
+        //         'msg' => 'H2H Checksum is invalid'
+        //     ]);
+        // }
 
         return $this->processInquiryOrPayment($data);
     }
@@ -144,15 +144,15 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-            $client = new \GuzzleHttp\Client();
-            $signature = md5($tagihan->id_invoice . $tagihan->user_id);
-            $url = $this->baseurl; // Ambil URL dari .env
+            // $client = new \GuzzleHttp\Client();
+            // $signature = md5($tagihan->id_invoice . $tagihan->user_id);
+            // $url = $this->baseurl; // Ambil URL dari .env
 
-            $client->post($url, [
-                'json' => [
-                    'signature' => $signature,
-                ],
-            ]);
+            // $client->post($url, [
+            //     'json' => [
+            //         'signature' => $signature,
+            //     ],
+            // ]);
 
 
             // dd($response);
