@@ -91,13 +91,13 @@ class PaymentBSIController extends Controller
     }
 
     // Validate the checksum
-    private function validateChecksum($data)
-    {
-        $calculatedChecksum = sha1(
-            $data['nomorPembayaran'] . $this->secret_key . $data['tanggalTransaksi'] . $data['totalNominal'] . $data['nomorJurnalPembukuan']
-        );
-        return $calculatedChecksum === $data['checksum'];
-    }
+    // private function validateChecksum($data)
+    // {
+    //     $calculatedChecksum = sha1(
+    //         $data['nomorPembayaran'] . $this->secret_key . $data['tanggalTransaksi'] . $data['totalNominal'] . $data['nomorJurnalPembukuan']
+    //     );
+    //     return $calculatedChecksum === $data['checksum'];
+    // }
 
     // Process inquiry or payment
     private function processInquiryOrPayment($data)
@@ -212,6 +212,36 @@ class PaymentBSIController extends Controller
         }
 
         dd($tagihan->status_pembayaran);
+        return response()->json([
+            'rc' => 'OK',
+            'msg' => 'Data ditemukan',
+            'data' => $tagihan
+        ]);
+    }
+
+    public function callback($id)
+    {
+        $md5 = $id;
+        if (empty($md5)) {
+            return response()->json([
+                'rc' => 'ERR-NOT-FOUND',
+                'msg' => 'MD5 tidak ditemukan'
+            ]);
+        }
+
+        $tagihan = DB::table('tagihan_pembayaran')
+            ->whereRaw("MD5(CONCAT(id_invoice, user_id)) = ?", [$md5])
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$tagihan) {
+            return response()->json([
+                'rc' => 'ERR-NOT-FOUND',
+                'msg' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        // dd($tagihan->status_pembayaran);
         return response()->json([
             'rc' => 'OK',
             'msg' => 'Data ditemukan',

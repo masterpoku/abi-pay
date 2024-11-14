@@ -13,6 +13,7 @@ Route::post('/login', [JwtAuthController::class, 'login']);
 
 Route::post('/payment', [PaymentBSIController::class, 'handleRequest']);
 Route::post('/inqury', [InquiryController::class, 'inquiry']);
+Route::get('/callback/{id}', [PaymentBSIController::class, 'callback']);
 
 Route::get('/payment', [InquiryController::class, 'index']);
 Route::get('/inqury', [InquiryController::class, 'index']);
