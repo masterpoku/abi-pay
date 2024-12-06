@@ -11,7 +11,7 @@ class PaymentBCAController extends Controller
 {
 
 
-    private $apiBaseUrl = 'https://sandbox.bca.co.id'; // URL Sandbox, ubah ke Production jika sudah live
+    private $apiBaseUrl = 'https://sandbox.bca.co.id'; // URL Sandbox/ Production
     private $clientId = 'YOUR_CLIENT_ID';
     private $clientSecret = 'YOUR_CLIENT_SECRET';
     private $apiKey = 'YOUR_API_KEY';
