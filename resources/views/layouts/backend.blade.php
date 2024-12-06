@@ -10,6 +10,7 @@
 
     <meta name="description" content="" />
 
+
     @yield('top')
 
     <!-- Favicon -->

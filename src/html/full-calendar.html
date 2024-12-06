@@ -1,0 +1,282 @@
+<!-- include mainhead.html"-->
+
+</head>
+
+<body>
+
+    <!-- include switcher.html"-->
+     <!-- include loader.html"-->
+
+    <div class="page">
+         <!-- include header.html"-->
+         <!-- include sidebar.html"-->
+
+        <!-- Start::app-content -->
+        <div class="main-content app-content">
+            <div class="container-fluid">
+
+              <!-- Page Header -->
+              <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                      <h1 class="page-title fw-medium fs-18 mb-2">Full Calendar</h1>
+                      <div class="">
+                          <nav>
+                              <ol class="breadcrumb mb-0">
+                                  <li class="breadcrumb-item"><a href="javascript:void(0);">Apps</a></li>
+                                  <li class="breadcrumb-item active" aria-current="page">Full Calendar</li>
+                              </ol>
+                          </nav>
+                      </div>
+                  </div>
+                  <div>
+                      <button class="btn btn-primary-light btn-wave me-2 waves-effect waves-light">
+                          <i class="bx bx-crown align-middle"></i> Plan Upgrade
+                      </button>
+                      <button class="btn btn-secondary-light btn-wave me-0">
+                          <i class="ri-upload-cloud-line align-middle"></i> Export Report
+                      </button>
+                  </div>
+              </div>
+              <!-- Page Header Close -->
+
+                <!-- Start::row-1 -->
+                <div class="row">
+                  <div class="col-xl-3">
+                    <div class="card custom-card">
+                      <div class="card-header justify-content-between">
+                        <div class="card-title">All Events</div>
+                        <button class="btn btn-primary btn-wave"><i class="ri-add-line align-middle me-1 fw-medium d-inline-block"></i>Create New Event</button>
+                      </div>
+                      <div class="card-body p-0">
+                          <div id="external-events" class="p-3">
+                              <div class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-primary-transparent border border-primary border-opacity-10">
+                                <div class="fc-event-main text-primary"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-primary-transparent text-primary me-2 align-middle"></i>Calendar Events</div>
+                              </div>
+                              <div
+                                class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-secondary-transparent border border-secondary border-opacity-10"
+                                data-class="bg-secondary-transparent">
+                                <div class="fc-event-main text-secondary"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-secondary-transparent text-secondary me-2 align-middle"></i>Birthday Events</div>
+                              </div>
+                              <div class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-success-transparent border border-success border-opacity-10"
+                                data-class="bg-success-transparent text-success">
+                                <div class="fc-event-main text-success"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-success-transparent text-success me-2 align-middle"></i>Holiday Calendar</div>
+                              </div>
+                              <div class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-info-transparent border border-info border-opacity-10"
+                                data-class="bg-info-transparent text-info">
+                                <div class="fc-event-main text-info"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-info-transparent text-info me-2 align-middle"></i>Office Events</div>
+                              </div>
+                              <div
+                                class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-warning-transparent border border-warning border-opacity-10"
+                                data-class="bg-warning">
+                                <div class="fc-event-main text-warning"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-warning-transparent text-warning me-2 align-middle"></i>Other Events</div>
+                              </div>
+                              <div class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-danger-transparent border border-danger border-opacity-10"
+                                data-class="bg-danger">
+                                <div class="fc-event-main text-danger"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-danger-transparent text-danger me-2 align-middle"></i>Festival Events</div>
+                              </div>
+                              <div class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-teal-transparent border border-teal border-opacity-10"
+                                data-class="bg-danger">
+                                <div class="fc-event-main text-teal"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-teal-transparent text-teal me-2 align-middle"></i>Timeline Events</div>
+                              </div>
+                              <div class="fc-event fc-h-event fc-daygrid-event d-flex align-items-center fc-daygrid-block-event bg-pink-transparent border border-pink border-opacity-10"
+                              data-class="bg-danger">
+                              <div class="fc-event-main text-pink"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-pink-transparent text-pink me-2 align-middle"></i>Special Events</div>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+                    <div class="card custom-card">
+                      <div class="card-header justify-content-between">
+                         <div class="card-title">Activity</div>
+                         <button class="btn btn-primary-light btn-sm btn-wave">View All <i class="ri-arrow-right-line"></i></button>
+                      </div>
+                      <div class="card-body p-0">
+                        <div class="table-responsive">
+                          <table class="table text-nowrap">
+                              <tbody>
+                                  <tr>
+                                      <td>
+                                          <div class="d-flex align-items-start gap-2">
+                                              <div>
+                                                  <span class="avatar avatar-md avatar-rounded bg-primary-transparent">
+                                                      <i class="ri-group-line fs-18"></i> 
+                                                  </span>
+                                              </div>
+                                              <div>
+                                                  <span class="d-block fw-semibold mb-1">Monday, Jan 1,2024</span>
+                                                  <span class="d-block fs-13 text-muted">Meeting with a client...</span>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="text-end">
+                                          <div>
+                                            <span class="badge bg-light text-default mb-1">12:00PM - 1:00PM</span>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td>
+                                          <div class="d-flex align-items-start gap-2">
+                                              <div>
+                                                  <span class="avatar avatar-md avatar-rounded bg-secondary-transparent">
+                                                    <i class="ri-gift-line fs-18"></i>
+                                                  </span>
+                                              </div>
+                                              <div>
+                                                  <span class="d-block fw-semibold mb-1">Thursday, Dec 29,2022</span>
+                                                  <span class="d-block fs-13 text-muted">Attend A party to..</span>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="text-end">
+                                          <div>
+                                            <span class="badge bg-light text-default mb-1">09:30PM - 12:50PM</span>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td>
+                                          <div class="d-flex align-items-start gap-2">
+                                              <div>
+                                                  <span class="avatar avatar-md avatar-rounded bg-success-transparent">
+                                                      <i class="ri-briefcase-2-line fs-18"></i>
+                                                  </span>
+                                              </div>
+                                              <div>
+                                                  <span class="d-block fw-semibold mb-1">Wednesday, Jan 3,2024</span>
+                                                  <span class="d-block fs-13 text-muted">WOrk taget for new ...</span>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="text-end">
+                                          <div>
+                                            <span class="badge bg-light text-default mb-1">1:00PM - 2:30PM</span>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td>
+                                          <div class="d-flex align-items-start gap-2">
+                                              <div>
+                                                  <span class="avatar avatar-md avatar-rounded bg-info-transparent">
+                                                      <i class="ri-movie-2-line fs-18"></i>
+                                                  </span>
+                                              </div>
+                                              <div>
+                                                  <span class="d-block fw-semibold mb-1">Friday, Jan 20,2024</span>
+                                                  <span class="d-block fs-13 text-muted">Watch new movie with..</span>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="text-end">
+                                          <div>
+                                            <span class="badge bg-light text-default mb-1">2:30PM - 6:30PM</span>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td class="">
+                                          <div class="d-flex align-items-start gap-2">
+                                              <div>
+                                                  <span class="avatar avatar-md avatar-rounded bg-warning-transparent">
+                                                    <i class="ri-money-rupee-circle-line fs-18"></i>
+                                                  </span>
+                                              </div>
+                                              <div>
+                                                  <span class="d-block fw-semibold mb-1">Saturday, Jan 07,2024</span>
+                                                  <span class="d-block fs-13 text-muted">Last day to pay the...</span>
+                                              </div>
+                                          </div>
+                                      </td>
+                                      <td class="text-end">
+                                          <div>
+                                            <span class="badge bg-light text-default mb-1">8:30AM - 9:00AM</span>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                    <td>
+                                        <div class="d-flex align-items-start gap-2">
+                                            <div>
+                                                <span class="avatar avatar-md avatar-rounded bg-danger-transparent">
+                                                    <i class="ri-stethoscope-line fs-18"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block fw-semibold mb-1">Sunday, Jul 08,2024</span>
+                                                <span class="d-block fs-13 text-muted">Denstist Appointment...</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div>
+                                          <span class="badge bg-light text-default mb-1">9:40AM - 1:30PM</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border-bottom-0 rounded">
+                                        <div class="d-flex align-items-start gap-2">
+                                            <div>
+                                                <span class="avatar avatar-md avatar-rounded bg-teal-transparent">
+                                                    <i class="ri-parent-line fs-18"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block fw-semibold mb-1">Thursday, Jan 15,2024</span>
+                                                <span class="d-block fs-13 text-muted">Go to Park with family...</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border-bottom-0 text-end rounded">
+                                        <div>
+                                          <span class="badge bg-light text-default mb-1">12:10PM - 3:40PM</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                              </tbody>  
+                          </table>
+                      </div>
+                      </div>
+                    </div>
+                  </div>
+                    <div class="col-xl-9">
+                        <div class="card custom-card">
+                          <div class="card-header">
+                              <div class="card-title">Full Calendar</div>
+                          </div>
+                          <div class="card-body">
+                              <div id='calendar2'></div>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End::row-1 -->
+
+            </div>
+        </div>
+        <!-- End::app-content -->
+
+        
+        <!-- include footer.html"-->
+         <!-- include responsive-search-modal.html"-->
+
+    </div>
+
+   <!-- include commonjs.html"-->
+
+   <!-- include custom_switcherjs.html"-->
+    
+  <!-- Moment JS -->
+  <script src="../assets/libs/moment/min/moment.min.js"></script>
+
+  <!-- Fullcalendar JS -->
+  <script src="../assets/libs/fullcalendar/index.global.min.js"></script>
+  <script src="../assets/js/fullcalendar.js"></script>
+
+  <!-- Custom JS -->
+  <script src="../assets/js/custom.js"></script>
+
+</body>
+
+</html>
