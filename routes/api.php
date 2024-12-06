@@ -50,8 +50,6 @@ Route::prefix('bca')->group(function () {
 
 
 
-
-
    // Route::post('/access-token', [PaymentBCAController::class, 'getAccessToken'])->name('bca.accessToken');
     // Route::post('/bill/create', [PaymentBCAController::class, 'createBill'])->name('bca.createBill');
     // Route::post('/payment-flag', [PaymentBCAController::class, 'sendPaymentFlag'])->name('bca.paymentFlag');
