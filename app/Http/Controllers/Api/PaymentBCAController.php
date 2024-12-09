@@ -11,13 +11,13 @@ class PaymentBCAController extends Controller
 {
 
 
-    private $apiBaseUrl = 'https://sandbox.bca.co.id'; // URL Sandbox/ Production
-    private $clientId = 'YOUR_CLIENT_ID';
-    private $clientSecret = 'YOUR_CLIENT_SECRET';
+    private $apiBaseUrl = 'http://devapi.klikbca.com'; // URL Sandbox/ Production
+    private $clientId = '03697a86-9ce0-4b17-ad93-1b89ccace372';
+    private $clientSecret = '8c1ab46f-070d-4338-91da-b2befcfb11cc';
     private $apiKey = 'YOUR_API_KEY';
     private $apiSecret = 'YOUR_API_SECRET';
     private $channelId = '95231'; // WSID Channel ID
-    private $partnerId = 'YOUR_PARTNER_ID'; // X-PARTNER-ID
+    private $partnerId = '14999'; // X-PARTNER-ID
 
     // Fungsi untuk mendapatkan token akses
     public function getAccessToken()
