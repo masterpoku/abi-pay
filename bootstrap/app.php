@@ -1,12 +1,8 @@
 <?php
 
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Illuminate\Http\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,12 +15,5 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (NotFoundHttpException $exception) {
-            return response('', Response::HTTP_OK);
-        });
-
-        $exceptions->render(function (MethodNotAllowedHttpException $exception) {
-            return response('', Response::HTTP_OK);
-        });
-    })
-    ->create();
+        //
+    })->create();

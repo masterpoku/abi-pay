@@ -39,7 +39,6 @@ Route::prefix('bca')->group(function () {
     Route::post('/payment-status', [PaymentBCAController::class, 'checkPaymentStatus'])->name('bca.paymentStatus');
 
     // Oauth Endpoint: v1.0/access-token/b2b
-    Route::post('/v1.0/access-token/b2b', [PaymentBCAController::class, 'getAccessToken'])->name('bca.oauth');
     // Bill Presentment: v1.0/transfer-va/inquiry
     Route::post('/v1.0/transfer-va/inquiry', [PaymentBCAController::class, 'createBill'])->name('bca.billPresentment');
     // Payment Flag: v1.0/transfer-va/payment
@@ -47,7 +46,8 @@ Route::prefix('bca')->group(function () {
 });
 
 
-
+Route::get('/v1.0/access-token/b2b', [PaymentBCAController::class, 'getAccessToken'])->name('bca.oauth');
+  
 
 
    // Route::post('/access-token', [PaymentBCAController::class, 'getAccessToken'])->name('bca.accessToken');
