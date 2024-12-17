@@ -5,20 +5,23 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TagihanPembayaran;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+
+
     public function index(Request $request)
     {
-        Log::info('Index method accessed in PaymentController');
-        Log::info('REQUEST:', $request->all());
+        Log::info('PaymentController index REQUEST:', $request->all());
         return response()->json(['message' => 'Welcome to payment API'], 200);
     }
 
     public function store(Request $request)
     {
-        Log::info('REQUEST:', $request->all());
+        Log::info('PaymentController store REQUEST:', $request->all());
+
         Log::info('Store method accessed in PaymentController');
         $validatedData = $request->validate([
             'id_invoice' => 'required|int',
@@ -45,6 +48,7 @@ class PaymentController extends Controller
 
     public function show($id)
     {
+        Log::info('PaymentController show REQUEST:', $id);
         $tagihanPembayaran = TagihanPembayaran::findOrFail($id);
 
         return response()->json([
@@ -55,6 +59,7 @@ class PaymentController extends Controller
 
     public function update(Request $request, $id)
     {
+        Log::info('PaymentController update REQUEST:', $request->all());
         $validatedData = $request->validate([
             'id_invoice' => 'required|string|max:255',
             'user_id' => 'required|string|max:255',
@@ -78,6 +83,7 @@ class PaymentController extends Controller
 
     public function destroy($id)
     {
+        Log::info('PaymentController destroy REQUEST:', $id);
         $tagihanPembayaran = TagihanPembayaran::findOrFail($id);
         $tagihanPembayaran->delete();
 
@@ -88,6 +94,7 @@ class PaymentController extends Controller
 
     public function status($id)
     {
+        Log::info('PaymentController status REQUEST:', $id);
         $tagihanPembayaran = TagihanPembayaran::findOrFail($id);
 
         return response()->json([

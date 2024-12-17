@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class PaymentBSIController extends Controller
 {
@@ -15,7 +15,8 @@ class PaymentBSIController extends Controller
     private $secret_key;
     private $allowed_collecting_agents;
     private $allowed_channels;
-    // private $baseurl = "http://192.168.1.21:8000/api/payment/check";
+    private $baseurl = "http://admin.abitour.id/api/payments/call";
+
     public function __construct()
     {
         $this->biller_name = env('BILLER_NAME', 'MALANGGLEERRR');
@@ -27,14 +28,13 @@ class PaymentBSIController extends Controller
     // Log function
     private function debugLog($message)
     {
-        Log::info('DEBUG LOG: ' . json_encode($message));
+        Log::info('DEBUG LOG BSI CONTROLER: ' . json_encode($message));
     }
 
     // Main method to handle the incoming request
     public function handleRequest(Request $request)
     {
-        Log::info('REQUEST:', $request->all());
-        Log::info('handleRequest method accessed');
+        Log::info('REQUEST handleRequest:', $request->all());
 
         $data = $request->json()->all();
 
@@ -61,14 +61,6 @@ class PaymentBSIController extends Controller
             ]);
         }
 
-        // Validate checksum
-        // if (!$this->validateChecksum($data)) {
-        //     return response()->json([
-        //         'rc' => 'ERR-SECURE-HASH',
-        //         'msg' => 'H2H Checksum is invalid'
-        //     ]);
-        // }
-
         return $this->processInquiryOrPayment($data);
     }
 
@@ -90,15 +82,6 @@ class PaymentBSIController extends Controller
         return true;
     }
 
-    // Validate the checksum
-    // private function validateChecksum($data)
-    // {
-    //     $calculatedChecksum = sha1(
-    //         $data['nomorPembayaran'] . $this->secret_key . $data['tanggalTransaksi'] . $data['totalNominal'] . $data['nomorJurnalPembukuan']
-    //     );
-    //     return $calculatedChecksum === $data['checksum'];
-    // }
-
     // Process inquiry or payment
     private function processInquiryOrPayment($data)
     {
@@ -115,6 +98,7 @@ class PaymentBSIController extends Controller
         }
 
         if ($tagihan->status_pembayaran === 'SUKSES') {
+
             return response()->json([
                 'rc' => 'ERR-ALREADY-PAID',
                 'msg' => 'Sudah Terbayar'
@@ -144,18 +128,15 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-            // $client = new \GuzzleHttp\Client();
-            // $signature = md5($tagihan->id_invoice . $tagihan->user_id);
-            // $url = $this->baseurl; // Ambil URL dari .env
+            $client = new \GuzzleHttp\Client();
+            $signature = md5($tagihan->id_invoice);
+            $url = $this->baseurl;
 
-            // $client->post($url, [
-            //     'json' => [
-            //         'signature' => $signature,
-            //     ],
-            // ]);
-
-
-            // dd($response);
+            $client->post($url, [
+                'json' => [
+                    'signature' => $signature,
+                ],
+            ]);
 
             return response()->json([
                 'rc' => 'OK',
@@ -163,7 +144,6 @@ class PaymentBSIController extends Controller
                 'nomorPembayaran' => $data['nomorPembayaran'],
                 'idPelanggan' => $data['nomorPembayaran'],
                 'nama' => $tagihan->nama_jamaah,
-
                 'totalNominal' => $tagihan->nominal_tagihan,
                 'idTagihan' => $tagihan->id_invoice,
                 'informasi' => [
@@ -191,6 +171,8 @@ class PaymentBSIController extends Controller
 
     public function PaymentCheck(Request $request)
     {
+        Log::info('PaymentCheck REQUEST:', $request->all());
+
         $md5 = $request->input('signature');
         if (empty($md5)) {
             return response()->json([
@@ -211,7 +193,6 @@ class PaymentBSIController extends Controller
             ]);
         }
 
-        dd($tagihan->status_pembayaran);
         return response()->json([
             'rc' => 'OK',
             'msg' => 'Data ditemukan',
@@ -221,6 +202,8 @@ class PaymentBSIController extends Controller
 
     public function callback($id)
     {
+        Log::info('callback REQUEST:', ['id' => $id]);
+
         $md5 = $id;
         if (empty($md5)) {
             return response()->json([
@@ -241,7 +224,6 @@ class PaymentBSIController extends Controller
             ]);
         }
 
-        // dd($tagihan->status_pembayaran);
         return response()->json([
             'rc' => 'OK',
             'msg' => 'Data ditemukan',

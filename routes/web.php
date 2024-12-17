@@ -40,8 +40,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // Rute autentikasi (tidak membutuhkan autentikasi)
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('postlogin');

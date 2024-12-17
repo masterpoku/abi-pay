@@ -17,9 +17,6 @@ class InquiryController extends Controller
     private $allowed_collecting_agents;
     private $allowed_channels;
 
-    public function index()
-    {
-    }
     public function __construct()
     {
         $this->biller_name = env('BILLER_NAME', 'ABITOUR');
@@ -30,8 +27,8 @@ class InquiryController extends Controller
 
     public function inquiry(Request $request)
     {
-        Log::info('REQUEST:', $request->all());
-        Log::info('Inquiry method accessed');
+        Log::info('REQUEST Inquiry:', $request->all());
+
         // Extract JSON parameters
         $data = $request->json()->all();
         $kodeBank = $data['kodeBank'] ?? null;
