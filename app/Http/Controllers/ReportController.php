@@ -19,7 +19,7 @@ class ReportController extends Controller
         if ($request->has('from') && $request->has('to')) {
             $from = Carbon::parse($request->from)->startOfDay();
             $to = Carbon::parse($request->to)->endOfDay();
-            $query->whereBetween('tanggal_invoice', [$from, $to]);
+            $query->whereBetween('waktu_transaksi', [$from, $to]);
         }
 
         $payments = $query->get();

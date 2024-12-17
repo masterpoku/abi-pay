@@ -105,7 +105,7 @@
                         <td>{{ $payment->nama_agen }}</td>
                         <td>Rp. {{ number_format($payment->nominal_tagihan, 2) }}</td>
                         <td>{{ $payment->channel_pembayaran }}</td>
-                        <td>{{ $payment->tanggal_invoice ? $payment->tanggal_invoice : '' }}</td> <!-- Menampilkan Tanggal Invoice jika tidak kosong -->
+                        <td>{{ $payment->waktu_transaksi ? $payment->waktu_transaksi : '' }}</td> <!-- Menampilkan Tanggal Invoice jika tidak kosong -->
                         <td>
                             <span class="badge {{ $payment->status_pembayaran === 'SUKSES' ? 'bg-success' : 'bg-danger' }}">
                                 {{ $payment->status_pembayaran === 'SUKSES' ? 'Sukses' : 'Gagal' }}

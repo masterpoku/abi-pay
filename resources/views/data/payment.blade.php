@@ -57,7 +57,7 @@
                         <td>{{ $payment->nama_agen }}</td>
                         <td>{{ number_format($payment->nominal_tagihan, 2) }}</td> <!-- Menampilkan Nominal Tagihan -->
                         <td>{{ $payment->channel_pembayaran }}</td> <!-- Menampilkan Channel Pembayaran -->
-                        <td>{{ $payment->tanggal_invoice ? $payment->tanggal_invoice : '' }}</td> <!-- Menampilkan Tanggal Invoice jika tidak kosong -->
+                        <td>{{ $payment->waktu_transaksi ? $payment->waktu_transaksi : '' }}</td> <!-- Menampilkan Tanggal Invoice jika tidak kosong -->
                         <td>
                             @if($payment->status_pembayaran === 'SUKSES')
                             <span class="badge bg-success">Sukses</span>
