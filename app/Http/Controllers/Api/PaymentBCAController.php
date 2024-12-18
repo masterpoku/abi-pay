@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+use function Illuminate\Log\log;
+
 class PaymentBCAController extends Controller
 {
     private $apiBaseUrl = 'https://devapi.klikbca.com'; // URL Sandbox/ Production
@@ -32,6 +34,8 @@ class PaymentBCAController extends Controller
 
     public function getAccessToken(Request $request)
     {
+        Log::info('Request headers:', $request->header());
+        Log::info('Request all:', $request->all());
         // dd($request->header());
         $response = Http::withHeaders([
             'User-Agent' => $request->header('User-Agent'),
