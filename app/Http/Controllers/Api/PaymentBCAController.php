@@ -53,7 +53,7 @@ class PaymentBCAController extends Controller
             'grantType' => 'client_credentials'
         ]);
 
-
+        Log::info('Response getAccessToken:', $response->json());
 
         return $response->json();
     }
