@@ -24,7 +24,9 @@ class PaymentBCAController extends Controller
     {
         $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
             ->post("{$this->apiBaseUrl}/api/oauth/token", [
-                'grant_type' => 'client_credentials'
+                'grant_type' => 'client_credentials',
+                'verify' => false,
+                'timeout' => 60
             ]);
 
         return $response->json()['access_token'] ?? null;
