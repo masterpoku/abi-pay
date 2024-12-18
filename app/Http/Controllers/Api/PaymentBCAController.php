@@ -11,8 +11,7 @@ use function Illuminate\Log\log;
 
 class PaymentBCAController extends Controller
 {
-
-    private $apiBaseUrl = 'https://api.klikbca.com'; // URL Sandbox/ Production
+    private $apiBaseUrl = 'https://devapi.klikbca.com'; // URL Sandbox/ Production
     private $clientId = '03697a86-9ce0-4b17-ad93-1b89ccace372';
     private $clientSecret = '8c1ab46f-070d-4338-91da-b2befcfb11cc';
     private $apiKey = 'YOUR_API_KEY';
