@@ -49,13 +49,9 @@ class PaymentBCAController extends Controller
             'grantType' => 'client_credentials'
         ]);
 
-        $responseData = $response->json();
-        if ($responseData['responseCode'] === '4017300') {
-            Log::error('Unauthorized. [Unknown client]');
-            return null;
-        }
 
-        return $responseData;
+
+        return $response->json();
     }
 
     // // Fungsi untuk membuat pembayaran Virtual Account
