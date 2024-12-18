@@ -18,7 +18,7 @@ class PaymentBCAController extends Controller
     private $partnerId = '14999'; // X-PARTNER-ID
 
     // Fungsi untuk mendapatkan token akses
-    public function getAccessToken()
+    public function getAccessTokens()
     {
         $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
             ->post("{$this->apiBaseUrl}/api/oauth/token", [
@@ -30,10 +30,23 @@ class PaymentBCAController extends Controller
         return $response->json()['access_token'] ?? null;
     }
 
+    public function getAccessToken(Request $request)
+    {
+        $response = Http::withHeaders([
+            'X-CLIENT-KEY' => $request->header('X-CLIENT-KEY'),
+            'X-SIGNATURE' => $request->header('X-SIGNATURE'),
+            'Content-Type' => 'application/json'
+        ])->post("{$this->apiBaseUrl}/openapi/v1.0/access-token/b2b", [
+            'grantType' => 'client_credentials'
+        ]);
+
+        return $response->json()['access_token'] ?? null;
+    }
+
     // // Fungsi untuk membuat pembayaran Virtual Account
     // public function createVirtualAccount(Request $request)
     // {
-    //     $accessToken = $this->getAccessToken();
+    //       $accessToken = $this->getAccessToken($request);
     //     if (!$accessToken) {
     //         return response()->json(['error' => 'Unable to fetch access token'], 500);
     //     }
@@ -50,7 +63,7 @@ class PaymentBCAController extends Controller
     // }
     public function getBankStatement(Request $request)
     {
-        $accessToken = $this->getAccessToken();
+        $accessToken = $this->getAccessToken($request);
 
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to fetch access token'], 500);
@@ -83,7 +96,7 @@ class PaymentBCAController extends Controller
 
     public function getAccountBalance(Request $request)
     {
-        $accessToken = $this->getAccessToken();
+        $accessToken = $this->getAccessToken($request);
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to fetch access token'], 500);
         }
@@ -106,9 +119,11 @@ class PaymentBCAController extends Controller
 
         return $response->json();
     }
+
     public function createBill(Request $request)
     {
-        $accessToken = $this->getAccessToken();
+        $accessToken = $this->getAccessToken($request);
+
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to fetch access token'], 500);
         }
@@ -161,7 +176,7 @@ class PaymentBCAController extends Controller
 
     public function sendPaymentFlag(Request $request)
     {
-        $accessToken = $this->getAccessToken();
+        $accessToken = $this->getAccessToken($request);
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to fetch access token'], 500);
         }
@@ -211,7 +226,7 @@ class PaymentBCAController extends Controller
 
     public function checkPaymentStatus(Request $request)
     {
-        $accessToken = $this->getAccessToken();
+        $accessToken = $this->getAccessToken($request);
         if (!$accessToken) {
             return response()->json(['error' => 'Unable to fetch access token'], 500);
         }
