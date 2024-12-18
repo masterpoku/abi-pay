@@ -34,8 +34,13 @@ class PaymentBCAController extends Controller
     {
         // dd($request->header());
         $response = Http::withHeaders([
+            'User-Agent' => $request->header('User-Agent'),
+            'ECID-Context' => $request->header('ECID-Context'),
+            'Accept' => $request->header('Accept'),
+            'Max-Forwards' => 19,
+            'Via' => '1.1 (), 1.1 ()',
             'X-API-HashCode' => $request->header('X-API-HashCode'),
-            'X-CLIENT-KEY' => $request->header('X-CLIENT-KEY'),
+            'X-CLIENT-KEY' => $this->clientId,
             'X-SIGNATURE' => $request->header('X-SIGNATURE'),
             'X-TIMESTAMP' => $request->header('X-TIMESTAMP'),
             'X-CorrelationID' => $request->header('X-CorrelationID'),
@@ -44,7 +49,13 @@ class PaymentBCAController extends Controller
             'grantType' => 'client_credentials'
         ]);
 
-        return $response->json();
+        $responseData = $response->json();
+        if ($responseData['responseCode'] === '4017300') {
+            Log::error('Unauthorized. [Unknown client]');
+            return null;
+        }
+
+        return $responseData;
     }
 
     // // Fungsi untuk membuat pembayaran Virtual Account
