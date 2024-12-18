@@ -32,7 +32,7 @@ class PaymentBCAController extends Controller
 
     public function getAccessToken(Request $request)
     {
-        dd($request->all());
+        dd($request->header());
         $response = Http::withHeaders([
             'X-API-HashCode' => $request->header('X-API-HashCode'),
             'X-CLIENT-KEY' => $request->header('X-CLIENT-KEY'),
