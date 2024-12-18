@@ -44,7 +44,7 @@ class PaymentBCAController extends Controller
             'grantType' => 'client_credentials'
         ]);
 
-        return $response->json()['access_token'] ?? null;
+        return $response->json();
     }
 
     // // Fungsi untuk membuat pembayaran Virtual Account
