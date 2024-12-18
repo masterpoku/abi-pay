@@ -36,6 +36,7 @@ class PaymentBCAController extends Controller
             'X-API-HashCode' => $request->header('X-API-HashCode'),
             'X-CLIENT-KEY' => $request->header('X-CLIENT-KEY'),
             'X-SIGNATURE' => $request->header('X-SIGNATURE'),
+            'X-TIMESTAMP' => $request->header('X-TIMESTAMP'),
             'Content-Type' => 'application/json'
         ])->post("{$this->apiBaseUrl}/openapi/v1.0/access-token/b2b", [
             'grantType' => 'client_credentials'
