@@ -40,7 +40,7 @@ class PaymentBCAController extends Controller
             'Max-Forwards' => 19,
             'Via' => '1.1 (), 1.1 ()',
             'X-API-HashCode' => $request->header('X-API-HashCode'),
-            'X-CLIENT-KEY' => $this->clientId,
+            'X-CLIENT-KEY' => $request->header('X-CLIENT-KEY'),
             'X-SIGNATURE' => $request->header('X-SIGNATURE'),
             'X-TIMESTAMP' => $request->header('X-TIMESTAMP'),
             'X-CorrelationID' => $request->header('X-CorrelationID'),
