@@ -11,13 +11,24 @@ use function Illuminate\Log\log;
 
 class PaymentBCAController extends Controller
 {
-    private $apiBaseUrl = 'https://api.klikbca.com'; // URL Sandbox/ Production
-    private $clientId = '03697a86-9ce0-4b17-ad93-1b89ccace372';
-    private $clientSecret = '8c1ab46f-070d-4338-91da-b2befcfb11cc';
-    private $apiKey = 'YOUR_API_KEY';
-    private $apiSecret = 'YOUR_API_SECRET';
-    private $channelId = '95231'; // WSID Channel ID
-    private $partnerId = '14999'; // X-PARTNER-ID
+    private $apiBaseUrl;
+    private $clientId;
+    private $clientSecret;
+    private $apiKey;
+    private $apiSecret;
+    private $channelId;
+    private $partnerId;
+
+    public function __construct()
+    {
+        $this->apiBaseUrl = env('API_BASE_URL');
+        $this->clientId = env('CLIENT_ID');
+        $this->clientSecret = env('CLIENT_SECRET');
+        $this->apiKey = env('API_KEY');
+        $this->apiSecret = env('API_SECRET');
+        $this->channelId = env('CHANNEL_ID');
+        $this->partnerId = env('PARTNER_ID');
+    }
 
     // Fungsi untuk mendapatkan token akses
     public function getAccessTokens()
