@@ -34,9 +34,14 @@ class PaymentBCAController extends Controller
 
     public function getAccessToken(Request $request)
     {
+        // Log header dan data request yang diterima untuk debugging
         Log::info('Request headers:', $request->header());
         Log::info('Request all:', $request->all());
-        // dd($request->header());
+
+        // Pastikan grantType ada dan set default ke 'client_credentials' jika tidak ada
+        $grantType = $request->input('grantType', 'client_credentials');
+
+        // Kirim permintaan ke API BCA dengan header dan grantType
         $response = Http::withHeaders([
             'User-Agent' => $request->header('User-Agent'),
             'ECID-Context' => $request->header('ECID-Context'),
@@ -50,13 +55,20 @@ class PaymentBCAController extends Controller
             'X-CorrelationID' => $request->header('X-CorrelationID'),
             'Content-Type' => 'application/json'
         ])->post("{$this->apiBaseUrl}/openapi/v1.0/access-token/b2b", [
-            'grantType' => 'client_credentials'
+            'grantType' => $grantType // kirim grantType yang diterima dari client
         ]);
 
-        Log::info('Response getAccessToken:', $response->json());
+        // Log response untuk debugging
+        if ($response->successful()) {
+            Log::info('Response getAccessToken:', $response->json());
+        } else {
+            Log::error('Error response from API:', $response->json());
+        }
 
+        // Mengembalikan response JSON ke client
         return $response->json();
     }
+
 
     // // Fungsi untuk membuat pembayaran Virtual Account
     // public function createVirtualAccount(Request $request)
