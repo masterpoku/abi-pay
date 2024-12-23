@@ -72,7 +72,7 @@
                     <div class="row">
 
                         <div class="col mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label">Email sss</label>
                             <input type="email" id="email" name="email" class="form-control" value="{{ $item->email }}" placeholder="email@example.com" />
                         </div>
                     </div>

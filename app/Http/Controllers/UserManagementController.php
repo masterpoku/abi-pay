@@ -69,25 +69,34 @@ class UserManagementController extends Controller
     // Update the specified user in the database
     public function update(Request $request, $id)
     {
+        // Cari user berdasarkan ID
         $user = User::findOrFail($id);
 
+        // Validasi input dari request
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|max:255|unique:users,email,' . $id,
-            'password' => 'nullable|min:8|confirmed',
+            'name' => 'required|string|max:255', // Menambahkan validasi string dan maksimal 255 karakter
+            'email' => 'required|email|max:255|unique:users,email,' . $id, // Validasi email unik, kecuali untuk user yang sedang diupdate
+            'password' => 'nullable|min:8|confirmed', // Validasi password jika diisi
         ]);
 
+        // Cek apakah validasi gagal
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->withErrors($validator)->withInput(); // Kembalikan jika gagal validasi
         }
 
+        // Update data user
         $user->name = $request->name;
         $user->email = $request->email;
+
+        // Jika password diisi, update password
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
+
+        // Simpan perubahan
         $user->save();
 
+        // Redirect ke daftar user dengan pesan sukses
         return redirect()->route('users.index')->with('success', 'User updated successfully');
     }
     // Remove the specified user from the database
