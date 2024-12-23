@@ -30,269 +30,64 @@ class PaymentBCAController extends Controller
         $this->partnerId = env('PARTNER_ID');
     }
 
-    // Fungsi untuk mendapatkan token akses
-    public function getAccessTokens()
+    public function getAccessToken()
     {
-        $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
-            ->post("{$this->apiBaseUrl}/api/oauth/token", [
-                'grant_type' => 'client_credentials',
-                'verify' => false,
-                'timeout' => 60
-            ]);
-
-        return $response->json()['access_token'] ?? null;
-    }
-
-    public function getAccessToken(Request $request)
-    {
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_URL, 'https://sandbox.bca.co.id/openapi/v1.0/access-token/b2b');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"grantType\":\"client_credentials\"}");
-
-        $headers = array();
-        $headers[] = 'Host: sandbox.abitour.id';
-        $headers[] = 'Max-Forwards: 19';
-        $headers[] = 'Via: 1.1 (), 1.1 ()';
-        $headers[] = 'Accept: text/html, image/gif, image/jpeg, */*; q=.2';
-        $headers[] = 'Ecid-Context: 1.006AUQ8XZmrBt1_5pRWByY005luu001Iep;kXhgv0XIVVNLCKIHVKHM5VML5JGLFINN1ODDs9DEn4DDt2C';
-        $headers[] = 'User-Agent: Jersey/2.22.4 (HttpUrlConnection 1.8.0_411)';
-        $headers[] = 'X-Api-Hashcode: Id-22c768670a0816039c446e3d';
-        $headers[] = 'X-Client-Key: 03697a86-9ce0-4b17-ad93-1b89ccace372';
-        $headers[] = 'X-Signature: hMVm3KutZg0rWJNhBzfW7gg7BjNITmG6twQdDgbSBaQ2MpxM6HHhnxNMjuohu0wBgmzI0M0Y/vHwD4Vpn/T7poX3hHyBjJUd2zHnI+Env7BRNU00lff5nz82aOqwWHInluybfnAsxQPy19D+INJ4AdEUbkAQ1Icf0sPiPJqPf/fw+kihrTeuJ+yeVpkccU0BWGYsWcnU8xqNpQi8nBgLtTaQFsMvkBO/bAQFlKp9L0w+tKUIPfaLEJZ3MGp9Hd4IkwQt2X9Oy+YyZpSeg775sE/vFSEPNo9FR7LTbXEVBIXyacHLtPGMTyDL/UgJtvtLD7EaJX0fzmkAI/CcgUerJQ==';
-        $headers[] = 'X-Timestamp: 2024-12-23T09:12:49+07:00';
-        $headers[] = 'Content-Length: 34';
-        $headers[] = 'Connection: close';
-        $headers[] = 'X-Correlationid: Id-22c76867a7434852a49f2b50 1';
-        $headers[] = 'Content-Type: application/json';
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        $result = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
-        }
-        curl_close($ch);
-
-        // Mengembalikan response JSON ke client
-        return $result;
-    }
-
-
-    // // Fungsi untuk membuat pembayaran Virtual Account
-    // public function createVirtualAccount(Request $request)
-    // {
-    //       $accessToken = $this->getAccessToken($request);
-    //     if (!$accessToken) {
-    //         return response()->json(['error' => 'Unable to fetch access token'], 500);
-    //     }
-
-    //     $response = Http::withToken($accessToken)
-    //         ->post("{$this->apiBaseUrl}/banking/v3/corporates/YOUR_CORPORATE_ID/virtualaccounts", [
-    //             'virtual_account_number' => $request->input('va_number'),
-    //             'virtual_account_name' => $request->input('va_name'),
-    //             'amount' => $request->input('amount'),
-    //             'expiration_date' => $request->input('expiration_date')
-    //         ]);
-
-    //     return $response->json();
-    // }
-    public function getBankStatement(Request $request)
-    {
-        $accessToken = $this->getAccessToken($request);
-
-        if (!$accessToken) {
-            return response()->json(['error' => 'Unable to fetch access token'], 500);
-        }
-
-        // Data dari request
-        $corporateId = 'YOUR_CORPORATE_ID'; // Ganti dengan Corporate ID
-        $accountNumber = $request->input('account_number');
-        $startDate = $request->input('start_date'); // Format: YYYY-MM-DD
-        $endDate = $request->input('end_date'); // Format: YYYY-MM-DD
-
-        // Signature sesuai dokumentasi SNAP API
-        $timestamp = now()->format('Y-m-d\TH:i:sP'); // ISO8601 format
-        $signatureString = "GET:/banking/v3/corporates/{$corporateId}/accounts/{$accountNumber}/statements?StartDate={$startDate}&EndDate={$endDate}:{$accessToken}:{$timestamp}";
-        $signature = base64_encode(hash_hmac('sha256', $signatureString, $this->apiSecret, true));
-
-        // Panggil API BCA
+        $auth = base64_encode($this->clientId . ':' . $this->clientSecret);
         $response = Http::withHeaders([
-            'Authorization' => "Bearer {$accessToken}",
-            'X-BCA-Key' => $this->apiKey,
-            'X-BCA-Timestamp' => $timestamp,
-            'X-BCA-Signature' => $signature
-        ])->get("{$this->apiBaseUrl}/banking/v3/corporates/{$corporateId}/accounts/{$accountNumber}/statements", [
-            'StartDate' => $startDate,
-            'EndDate' => $endDate
+            'Authorization' => 'Basic ' . $auth,
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ])->asForm()->post($this->apiBaseUrl . '/api/oauth/token', [
+            'grant_type' => 'client_credentials',
         ]);
 
-        return $response->json();
-    }
-
-    public function getAccountBalance(Request $request)
-    {
-        $accessToken = $this->getAccessToken($request);
-        if (!$accessToken) {
-            return response()->json(['error' => 'Unable to fetch access token'], 500);
+        if ($response->successful()) {
+            return $response->json();
         }
 
-        $corporateId = 'YOUR_CORPORATE_ID'; // Ganti dengan Corporate ID
-        $accountNumber = $request->input('account_number'); // Masukkan nomor rekening
-
-        // Membuat signature
-        $timestamp = now()->format('Y-m-d\TH:i:sP'); // ISO8601 format
-        $signatureString = "GET:/banking/v3/corporates/{$corporateId}/accounts/{$accountNumber}:{$accessToken}:{$timestamp}";
-        $signature = base64_encode(hash_hmac('sha256', $signatureString, $this->apiSecret, true));
-
-        // Panggil API BCA
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer {$accessToken}",
-            'X-BCA-Key' => $this->apiKey,
-            'X-BCA-Timestamp' => $timestamp,
-            'X-BCA-Signature' => $signature
-        ])->get("{$this->apiBaseUrl}/banking/v3/corporates/{$corporateId}/accounts/{$accountNumber}");
-
-        return $response->json();
+        throw new \Exception('Gagal mendapatkan access token: ' . $response->body());
     }
 
-    public function createBill(Request $request)
+    /**
+     * Fungsi untuk membuat Signature
+     */
+    private function generateSignature($method, $path, $accessToken, $timestamp)
     {
-        $accessToken = $this->getAccessToken($request);
+        $stringToSign = $method . ':' . $path . ':' . $accessToken . ':' . $this->clientSecret . ':' . $timestamp;
+        return base64_encode(hash_hmac('sha256', $stringToSign, $this->clientSecret, true));
+    }
 
-        if (!$accessToken) {
-            return response()->json(['error' => 'Unable to fetch access token'], 500);
+    /**
+     * Fungsi untuk mengecek saldo
+     */
+    public function checkBalance($corporateId, $accountNumber)
+    {
+        try {
+            $accessToken = $this->getAccessToken();
+            $path = "/banking/v3/corporates/$corporateId/accounts/$accountNumber";
+            $timestamp = now()->toIso8601String();
+            $signature = $this->generateSignature('GET', $path, $accessToken, $timestamp);
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $accessToken,
+                'X-Client-Key' => $this->clientSecret,
+                'X-Timestamp' => $timestamp,
+                'X-Signature' => $signature,
+                'Content-Type' => 'application/json',
+            ])->get($this->apiBaseUrl . $path);
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json([
+                'error' => 'Gagal mendapatkan saldo',
+                'details' => $response->body(),
+            ], $response->status());
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan',
+                'message' => $e->getMessage(),
+            ], 500);
         }
-
-        // Header tambahan
-        $externalId = 'EXTERNAL_' . now()->format('YmdHis'); // Reference number
-        $headers = [
-            'Authorization' => "Bearer {$accessToken}",
-            'X-BCA-Key' => $this->apiKey,
-            'X-BCA-Timestamp' => now()->format('Y-m-d\TH:i:sP'),
-            'X-BCA-Signature' => $this->generateSignature($externalId),
-            'CHANNEL-ID' => $this->channelId,
-            'X-PARTNER-ID' => $this->partnerId,
-            'X-EXTERNAL-ID' => $externalId
-        ];
-
-        // Payload data
-        $payload = [
-            'partnerServiceId' => $this->partnerId,
-            'customerNo' => $request->input('customer_no'),
-            'virtualAccountNo' => $this->partnerId . $request->input('customer_no'),
-            'trxDateInit' => now()->format('Y-m-d\TH:i:sP'),
-            'channelCode' => $request->input('channel_code'),
-            'language' => 'id', // ISO-639-1 code
-            'amount' => [
-                'value' => $request->input('amount'),
-                'currency' => 'IDR' // ISO-4217 currency
-            ],
-            'inquiryRequestId' => $externalId,
-            'additionalInfo' => $request->input('additional_info', [])
-        ];
-
-        // Kirim request ke API BCA
-        $response = Http::withHeaders($headers)
-            ->post("{$this->apiBaseUrl}/va/billpresentment", $payload);
-        // Masukkan respons ke log
-        Log::info('BCA Bill Presentment Response:', $response->json());
-
-        return $response->json();
-        return $response->json();
-    }
-
-    // Fungsi untuk membuat signature
-    private function generateSignature($externalId)
-    {
-        $timestamp = now()->format('Y-m-d\TH:i:sP');
-        $stringToSign = "POST:/va/billpresentment:{$this->apiKey}:{$timestamp}:{$externalId}";
-        return base64_encode(hash_hmac('sha256', $stringToSign, $this->apiSecret, true));
-    }
-
-    public function sendPaymentFlag(Request $request)
-    {
-        $accessToken = $this->getAccessToken($request);
-        if (!$accessToken) {
-            return response()->json(['error' => 'Unable to fetch access token'], 500);
-        }
-
-        // Header tambahan
-        $externalId = 'EXTERNAL_' . now()->format('YmdHis'); // Reference number
-        $headers = [
-            'Authorization' => "Bearer {$accessToken}",
-            'X-BCA-Key' => $this->apiKey,
-            'X-BCA-Timestamp' => now()->format('Y-m-d\TH:i:sP'),
-            'CHANNEL-ID' => $this->channelId,
-            'X-PARTNER-ID' => $this->partnerId,
-            'X-EXTERNAL-ID' => $externalId
-        ];
-
-        // Payload data
-        $payload = [
-            'partnerServiceId' => $this->partnerId,
-            'customerNo' => $request->input('customer_no'),
-            'virtualAccountNo' => $this->partnerId . $request->input('customer_no'),
-            'virtualAccountName' => $request->input('virtual_account_name'),
-            'virtualAccountEmail' => $request->input('virtual_account_email'),
-            'virtualAccountPhone' => $request->input('virtual_account_phone'),
-            'trxId' => $request->input('trx_id'),
-            'paymentRequestId' => $request->input('payment_request_id'),
-            'channelCode' => $request->input('channel_code'),
-            'paidAmount' => [
-                'value' => $request->input('paid_amount'),
-                'currency' => 'IDR'
-            ],
-            'totalAmount' => [
-                'value' => $request->input('total_amount'),
-                'currency' => 'IDR'
-            ],
-            'trxDateTime' => now()->format('Y-m-d\TH:i:sP'),
-            'referenceNo' => $request->input('reference_no'),
-            'flagAdvise' => $request->input('flag_advise', 'N'),
-            'billDetails' => $request->input('bill_details', []) // Jika ada multi-bill details
-        ];
-
-        // Kirim request ke API BCA
-        $response = Http::withHeaders($headers)
-            ->post("{$this->apiBaseUrl}/va/payment-flag", $payload);
-
-        return $response->json();
-    }
-
-    public function checkPaymentStatus(Request $request)
-    {
-        $accessToken = $this->getAccessToken($request);
-        if (!$accessToken) {
-            return response()->json(['error' => 'Unable to fetch access token'], 500);
-        }
-
-        // Header tambahan
-        $externalId = 'EXTERNAL_' . now()->format('YmdHis'); // Reference number
-        $headers = [
-            'Authorization' => "Bearer {$accessToken}",
-            'X-BCA-Key' => $this->apiKey,
-            'X-BCA-Timestamp' => now()->format('Y-m-d\TH:i:sP'),
-            'CHANNEL-ID' => $this->channelId,
-            'X-PARTNER-ID' => $this->partnerId,
-            'X-EXTERNAL-ID' => $externalId
-        ];
-
-        // Payload data
-        $payload = [
-            'partnerServiceId' => $this->partnerId,
-            'customerNo' => $request->input('customer_no'),
-            'virtualAccountNo' => $this->partnerId . $request->input('customer_no'),
-            'inquiryRequestId' => $request->input('inquiry_request_id'),
-            'paymentRequestId' => $request->input('payment_request_id'),
-            'additionalInfo' => $request->input('additional_info', [])
-        ];
-
-        // Kirim request ke API BCA
-        $response = Http::withHeaders($headers)
-            ->post("{$this->apiBaseUrl}/va/payment-status", $payload);
-
-        return $response->json();
     }
 }
