@@ -35,8 +35,12 @@ Route::prefix('bca')->group(function () {
 
     Route::post('/virtual-account/create', [PaymentBCAController::class, 'createVirtualAccount'])->name('bca.createVirtualAccount');
     Route::post('/bank-statement', [PaymentBCAController::class, 'getBankStatement'])->name('bca.bankStatement');
-    Route::post('/account-balance', [PaymentBCAController::class, 'getAccountBalance'])->name('bca.accountBalance');
     Route::post('/payment-status', [PaymentBCAController::class, 'checkPaymentStatus'])->name('bca.paymentStatus');
+
+
+
+
+    Route::get('/account-balance/{corporateId}/{accountNumber}', [PaymentBCAController::class, 'checkBalance'])->name('bca.checkBalance');
 
     // Oauth Endpoint: v1.0/access-token/b2b
     Route::post('/v1.0/access-token/b2b', [PaymentBCAController::class, 'getAccessToken'])->name('bca.oauth');

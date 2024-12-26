@@ -52,8 +52,16 @@ class PaymentBCAController extends Controller
      */
     private function generateSignature($method, $path, $accessToken, $timestamp)
     {
-        $stringToSign = $method . ':' . $path . ':' . $accessToken . ':' . $this->clientSecret . ':' . $timestamp;
-        return base64_encode(hash_hmac('sha256', $stringToSign, $this->clientSecret, true));
+        // Step 1: Compute SHA-256 hash of the request body
+
+
+        // Step 2: Construct StringToSign
+        $stringToSign = "{$method}:{$path}:{$accessToken}:" . strtolower($requestBodyHash) . ":{$timestamp}";
+
+        // Step 3: Compute HMAC-SHA256 signature
+        $signature = hash_hmac('sha256', $stringToSign, $apiSecret);
+
+        return $signature;
     }
 
     /**
@@ -62,14 +70,17 @@ class PaymentBCAController extends Controller
     public function checkBalance($corporateId, $accountNumber)
     {
         try {
-            $accessToken = $this->getAccessToken();
+            $accessToken = $this->getAccessToken()['access_token'];
+            Log::info('Access Token: ' . $accessToken);
+
             $path = "/banking/v3/corporates/$corporateId/accounts/$accountNumber";
             $timestamp = now()->toIso8601String();
             $signature = $this->generateSignature('GET', $path, $accessToken, $timestamp);
-
+            log::info('signature :' . $signature);
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $accessToken,
                 'X-Client-Key' => $this->clientSecret,
+                'X-TIMESTAMP' => $timestamp,
                 'X-Timestamp' => $timestamp,
                 'X-Signature' => $signature,
                 'Content-Type' => 'application/json',
