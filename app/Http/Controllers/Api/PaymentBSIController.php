@@ -15,7 +15,7 @@ class PaymentBSIController extends Controller
     private $secret_key;
     private $allowed_collecting_agents;
     private $allowed_channels;
-    private $baseurl = "http://admin.abitour.id/api/payments/call";
+    private $baseurl = "https://admin.abitour.id/api/payments/call";
 
     public function __construct()
     {
@@ -128,15 +128,15 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-            // $client = new \GuzzleHttp\Client();
-            // $signature = md5($tagihan->id_invoice);
-            // $url = $this->baseurl;
+            $client = new \GuzzleHttp\Client();
+            $signature = md5($tagihan->id_invoice);
+            $url = $this->baseurl;
 
-            // $client->post($url, [
-            //     'json' => [
-            //         'signature' => $signature,
-            //     ],
-            // ]);
+            $client->post($url, [
+                'json' => [
+                    'signature' => $signature,
+                ],
+            ]);
 
             return response()->json([
                 'rc' => 'OK',

@@ -30,22 +30,55 @@ class PaymentBCAController extends Controller
         $this->partnerId = env('PARTNER_ID');
     }
 
-    public function getAccessToken()
+    public function getAccessToken(Request $request)
     {
-        $auth = base64_encode($this->clientId . ':' . $this->clientSecret);
-        $response = Http::withHeaders([
-            'Authorization' => 'Basic ' . $auth,
-            'Content-Type' => 'application/x-www-form-urlencoded',
-        ])->asForm()->post($this->apiBaseUrl . '/api/oauth/token', [
-            'grant_type' => 'client_credentials',
+        Log::info('Request get access token', [
+            'headers' => $request->header(),
+            'query' => $request->query(),
+            'body' => $request->all(),
         ]);
 
-        if ($response->successful()) {
-            return $response->json();
+        // Extract only the necessary headers
+        $timestamp = $request->header('X-TIMESTAMP');
+        $clientKey = $request->header('X-CLIENT-KEY');
+        $signature = $request->header('X-SIGNATURE');
+
+        // Initialize cURL
+        $ch = curl_init();
+
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $this->apiBaseUrl . '/api/bca/v1.0/access-token/b2b');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+            'grantType' => 'client_credentials',
+        ]));
+
+        // Set the specific headers
+        $headers = [
+            "X-TIMESTAMP: $timestamp",
+            "X-CLIENT-KEY: $clientKey",
+            "X-SIGNATURE: $signature",
+        ];
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        // Execute cURL and get the response
+        $result = curl_exec($ch);
+
+        // Check for errors
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
         }
 
-        throw new \Exception('Gagal mendapatkan access token: ' . $response->body());
+        // Close the cURL session
+        curl_close($ch);
+
+        // Return the decoded JSON response
+        return response()->json(json_decode($result));
     }
+
+
 
     /**
      * Fungsi untuk membuat Signature
