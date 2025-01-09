@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\PaymentBCAController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
@@ -44,17 +43,3 @@ Route::middleware('auth')->group(function () {
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('postlogin');
-Route::prefix('bca')->group(function () {
-
-    // Oauth Endpoint: v1.0/access-token/b2b
-    Route::post('/v1.0/access-token/b2b', [PaymentBCAController::class, 'getAccessToken'])->name('bca.oauth');
-    
-    // Bill Presentment: v1.0/transfer-va/inquiry
-    Route::post('/v1.0/transfer-va/inquiry', [PaymentBCAController::class, 'virtualAccountInquiry'])->name('bca.billPresentment');
-    
-    // Payment Flag: v1.0/transfer-va/payment
-    Route::post('/v1.0/transfer-va/payment', [PaymentBCAController::class, 'sendPaymentRequest'])->name('bca.paymentFlag');
-
-    // Endpoint untuk membuat Virtual Account
-    Route::post('/v1.0/transfer-va/create', [PaymentBCAController::class, 'createVirtualAccount'])->name('bca.createVA');
-});
