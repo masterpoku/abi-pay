@@ -123,7 +123,7 @@ class PaymentBCAController extends Controller
                 'CHANNEL-ID' => $channelId,
                 'X-PARTNER-ID' => $partnerId,
                 'X-EXTERNAL-ID' => $externalId,
-            ])->post('https://sandbox.bca.co.id/api/v1/virtual-account/inquiry', $payload);
+            ])->post('https://sandbox.bca.co.id/openapi/v1.0/transfer-va/inquiry', $payload);
 
             // Menangani respon
             if ($response->successful()) {
