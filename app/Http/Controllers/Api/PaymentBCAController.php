@@ -14,6 +14,7 @@ class PaymentBCAController extends Controller
      */
     public function getAccessToken(Request $request)
     {
+        // dd($request->all());
         $url = env('BCA_ACCESS_TOKEN_URL', 'https://sandbox.bca.co.id/openapi/v1.0/access-token/b2b');
 
         $clientKey = $request->header('X-CLIENT-KEY');
