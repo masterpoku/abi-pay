@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -73,6 +74,11 @@ class InquiryController extends Controller
             ->orderByDesc('tanggal_invoice')
             ->first();
 
+            $createdAt = Carbon::parse($invoice_data->created_at);
+            if ($createdAt->diffInDays(Carbon::now()) > 2) {
+                return response()->json(['rc' => 'ERR-EXPIRED', 'msg' => 'Tagihan Expired']);
+            }
+    
         if (!$invoice_data) {
             return response()->json(['rc' => 'ERR-ALREADY-PAID', 'msg' => 'Sudah Terbayar']);
         }

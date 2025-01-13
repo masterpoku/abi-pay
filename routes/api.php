@@ -26,28 +26,46 @@ Route::post('/payments', [PaymentController::class, 'store']);
 Route::get('/payments/{id}', [PaymentController::class, 'show']);
 Route::put('/payments/{id}', [PaymentController::class, 'update']);
 
-// Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
 Route::get('/payments/{id}/status', [PaymentController::class, 'status']);
 Route::group(['middleware' => 'jwt.auth'], function () {
 });
 
-    // Oauth Endpoint: v1.0/access-token/b2b
-Route::post('/v1.0/access-token/b2b', [PaymentBCAController::class, 'getAccessToken'])->name('bca.oauth');
+
+
+// Route::prefix('v1.0')->group(function () {
+//     // OAuth Endpoint untuk mendapatkan Access Token
+//     Route::post('/access-token/b2b', [PaymentBCAController::class, 'getAccessToken'])->name('bca.oauth');
+
+//     // Bill Presentment: Virtual Account Inquiry
+//     Route::post('/transfer-va/inquiry', [PaymentBCAController::class, 'virtualAccountInquiry'])->name('bca.billPresentment');
     
-    // Bill Presentment: v1.0/transfer-va/inquiry
-Route::post('/v1.0/transfer-va/inquiry', [PaymentBCAController::class, 'virtualAccountInquiry'])->name('bca.billPresentment');
+//     // Payment Flag: Mengirim permintaan pembayaran
+//     Route::post('/transfer-va/payment', [PaymentBCAController::class, 'sendPaymentRequest'])->name('bca.paymentFlag');
+
+//     // Endpoint untuk membuat Virtual Account
+//     Route::post('/transfer-va/create', [PaymentBCAController::class, 'createVirtualAccount'])->name('bca.createVA');
+
+//     // Balance Inquiry: Cek saldo
+//     Route::post('/balance-inquiry', [PaymentBCAController::class, 'balanceInquiry'])->name('bca.balanceInquiry');
+// });
+
+
+Route::prefix('v1.0')->group(function () {
+    // Route untuk mendapatkan Access Token
+    Route::post('access-token/b2b', [PaymentBCAController::class, 'getAccessToken']);
     
-    // Payment Flag: v1.0/transfer-va/payment
-Route::post('/v1.0/transfer-va/payment', [PaymentBCAController::class, 'sendPaymentRequest'])->name('bca.paymentFlag');
-
-    // Endpoint untuk membuat Virtual Account
-Route::post('/v1.0/transfer-va/create', [PaymentBCAController::class, 'createVirtualAccount'])->name('bca.createVA');
-
-
-
-
-
-
-   // Route::post('/access-token', [PaymentBCAController::class, 'getAccessToken'])->name('bca.accessToken');
-    // Route::post('/bill/create', [PaymentBCAController::class, 'createBill'])->name('bca.createBill');
-    // Route::post('/payment-flag', [PaymentBCAController::class, 'sendPaymentFlag'])->name('bca.paymentFlag');
+    // Route untuk membuat Virtual Account
+    Route::post('create-va', [PaymentBCAController::class, 'createVirtualAccount']);
+    
+    // Route untuk mengecek status Virtual Account
+    Route::post('check-va-status', [PaymentBCAController::class, 'checkVirtualAccountStatus']);
+    
+    // Route untuk Virtual Account Inquiry
+    Route::post('virtual-account-inquiry', [PaymentBCAController::class, 'virtualAccountInquiry']);
+    
+    // Route untuk mengirimkan Payment Request
+    Route::post('send-payment-request', [PaymentBCAController::class, 'sendPaymentRequest']);
+    
+    // Route untuk Payment Flag
+    Route::post('payment-flag', [PaymentBCAController::class, 'paymentFlag']);
+});
