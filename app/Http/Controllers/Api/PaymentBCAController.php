@@ -14,53 +14,85 @@ class PaymentBCAController extends Controller
      */
 
 
-public function getAccessToken(Request $request)
-{
-    $authUrl = env('BCA_AUTH_URL');
-
-    // Ambil header dari request
-    $clientKey = $request->header('X-CLIENT-KEY');
-    $timestamp = $request->header('X-TIMESTAMP');
-    $signature = $request->header('X-SIGNATURE');
-
-    // Validasi header wajib
-    if (!$clientKey || !$timestamp || !$signature) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Header X-CLIENT-KEY, X-TIMESTAMP, dan X-SIGNATURE wajib disertakan.',
-        ], 400);
-    }
-
-    try {
-        // Kirim request ke BCA API
-        $response = Http::withHeaders([
-            'X-CLIENT-KEY' => $clientKey,
-            'X-TIMESTAMP' => $timestamp,
-            'X-SIGNATURE' => $signature,
-            'Content-Type' => 'application/json',
-        ])->post($authUrl, [
-            'grantType' => 'client_credentials', // Body sesuai format yang diminta
-        ]);
-
-        if ($response->successful()) {
-            return response()->json([
-                'success' => true,
-                'data' => $response->json(),
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => $response->json(),
-        ], $response->status());
-    } catch (\Exception $e) {
-        Log::error('Error fetching BCA Access Token: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-        ], 500);
-    }
-}
+     public function getAccessToken(Request $request)
+     {
+         // Endpoint URL
+         $url = 'https://sandbox.bca.co.id/openapi/v1.0/access-token/b2b';
+     
+         // Ambil header dari request
+         $clientKey = $request->header('X-CLIENT-KEY');
+         $timestamp = $request->header('X-TIMESTAMP');
+         $signature = $request->header('X-SIGNATURE');
+     
+         // Validasi header wajib
+         if (!$clientKey || !$timestamp || !$signature) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Header X-CLIENT-KEY, X-TIMESTAMP, dan X-SIGNATURE wajib disertakan.',
+             ], 400);
+         }
+     
+         // Body permintaan
+         $requestBody = json_encode([
+             'grantType' => 'client_credentials',
+         ]);
+     
+         // Header permintaan
+         $headers = [
+             'X-TIMESTAMP: ' . $timestamp,
+             'X-CLIENT-KEY: ' . $clientKey,
+             'X-SIGNATURE: ' . $signature,
+             'Content-Type: application/json',
+         ];
+     
+         try {
+             // Inisialisasi cURL
+             $ch = curl_init($url);
+     
+             // Atur opsi cURL
+             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+             curl_setopt($ch, CURLOPT_POST, true);
+             curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
+     
+             // Kirim permintaan dan ambil respons
+             $response = curl_exec($ch);
+     
+             // Periksa jika ada kesalahan pada cURL
+             if ($response === false) {
+                 $error = curl_error($ch);
+                 curl_close($ch);
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'cURL Error: ' . $error,
+                 ], 500);
+             }
+     
+             // Tutup koneksi cURL
+             curl_close($ch);
+     
+             // Dekode respons JSON
+             $responseArray = json_decode($response, true);
+     
+             if (json_last_error() !== JSON_ERROR_NONE) {
+                 return response()->json([
+                     'success' => false,
+                     'message' => 'Invalid JSON response: ' . json_last_error_msg(),
+                 ], 500);
+             }
+     
+             // Kembalikan data respons
+             return response()->json([
+                 'success' => true,
+                 'data' => $responseArray,
+             ]);
+         } catch (\Exception $e) {
+             return response()->json([
+                 'success' => false,
+                 'message' => $e->getMessage(),
+             ], 500);
+         }
+     }
 
 
 //     /**
