@@ -83,8 +83,7 @@ class PaymentBCAController extends Controller
      
              // Kembalikan data respons
              return response()->json([
-                 'success' => true,
-                 'data' => $responseArray,
+                $responseArray
              ]);
          } catch (\Exception $e) {
              return response()->json([
