@@ -14,7 +14,7 @@ class PaymentBCAController extends Controller
      */
     public function getAccessToken(Request $request)
     {
-        // dd($request->all());
+      
         $url = env('BCA_ACCESS_TOKEN_URL', 'https://sandbox.bca.co.id/openapi/v1.0/access-token/b2b');
 
         $clientKey = $request->header('X-CLIENT-KEY');
@@ -41,9 +41,8 @@ class PaymentBCAController extends Controller
             ]);
 
             if ($response->successful()) {
-                return response()->json([
-                    $response->json(),
-                ]);
+                return $response;
+               
             }
 
             return response()->json([
@@ -111,19 +110,16 @@ class PaymentBCAController extends Controller
     /**
      * Virtual Account Inquiry
      */
+
+
+
     public function virtualAccountInquiry(Request $request)
     {
-        $accessTokenResponse = $this->getAccessToken($request);
-        $accessTokenData = json_decode($accessTokenResponse->getContent(), true);
+          
+    $accessTokenResponse = $this->getAccessToken($request);
+    $accessTokenArray = json_decode($accessTokenResponse, true);
+    $accessToken = $accessTokenArray['accessToken'];
 
-        if (!$accessTokenData['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch access token.',
-            ], 500);
-        }
-
-        $accessToken = $accessTokenData['data']['access_token'];
 
         $payload = $request->validate([
             'partnerServiceId' => 'required|string|max:8',
@@ -142,7 +138,7 @@ class PaymentBCAController extends Controller
                 'CHANNEL-ID' => env('BCA_CHANNEL_ID'),
                 'X-PARTNER-ID' => env('BCA_PARTNER_ID'),
                 'X-EXTERNAL-ID' => uniqid('va_inquiry_'),
-            ])->post(env('BCA_INQUIRY_VA_URL'), $payload);
+            ])->post(env('BCA_VA_INQUIRY_URL'), $payload);
 
             return $response->successful() ? response()->json($response->json(), 200) : response()->json([
                 'error' => 'Failed to perform virtual account inquiry',

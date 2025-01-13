@@ -61,7 +61,7 @@ Route::prefix('v1.0')->group(function () {
     Route::post('check-va-status', [PaymentBCAController::class, 'checkVirtualAccountStatus']);
     
     // Route untuk Virtual Account Inquiry
-    Route::post('virtual-account-inquiry', [PaymentBCAController::class, 'virtualAccountInquiry']);
+    Route::post('transfer-va/inquiry', [PaymentBCAController::class, 'virtualAccountInquiry']);
     
     // Route untuk mengirimkan Payment Request
     Route::post('send-payment-request', [PaymentBCAController::class, 'sendPaymentRequest']);
