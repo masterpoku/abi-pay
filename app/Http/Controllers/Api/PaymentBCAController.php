@@ -14,6 +14,10 @@ class PaymentBCAController extends Controller
      */
     public function getAccessToken(Request $request)
     {
+        // Log the entire request including headers
+        Log::info('Request GetAccessToken Headers:', $request->headers->all());
+        Log::info('Request GetAccessToken Body:', $request->all());
+
       
         $url = env('BCA_ACCESS_TOKEN_URL', 'https://sandbox.bca.co.id/openapi/v1.0/access-token/b2b');
 
@@ -58,54 +62,7 @@ class PaymentBCAController extends Controller
         }
     }
 
-    /**
-     * Create Virtual Account
-     */
-    public function createVirtualAccount(Request $request)
-    {
-        $accessTokenResponse = $this->getAccessToken($request);
-        $accessTokenData = json_decode($accessTokenResponse->getContent(), true);
-
-        if (!$accessTokenData['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch access token.',
-            ], 500);
-        }
-
-        $accessToken = $accessTokenData['data']['access_token'];
-
-        $payload = $request->validate([
-            'partnerServiceId' => 'required|string|max:8',
-            'customerNo' => 'required|string',
-            'trxDateInit' => 'required|date',
-            'channelCode' => 'required|string',
-            'inquiryRequestId' => 'required|string',
-            'additionalInfo' => 'nullable|string',
-        ]);
-
-        $payload['virtualAccountNo'] = str_pad($payload['partnerServiceId'], 8, '0', STR_PAD_LEFT) . $payload['customerNo'];
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
-                'CHANNEL-ID' => env('BCA_CHANNEL_ID'),
-                'X-PARTNER-ID' => env('BCA_PARTNER_ID'),
-                'X-EXTERNAL-ID' => uniqid('create_va_'),
-            ])->post(env('BCA_CREATE_VA_URL'), $payload);
-
-            return $response->successful() ? response()->json($response->json(), 200) : response()->json([
-                'error' => 'Failed to create virtual account',
-                'message' => $response->json()['responseMessage'] ?? 'Unknown error',
-            ], $response->status());
-        } catch (\Exception $e) {
-            Log::error('Error creating virtual account: ' . $e->getMessage());
-            return response()->json([
-                'error' => 'Something went wrong',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
+  
 
     /**
      * Virtual Account Inquiry
@@ -115,7 +72,9 @@ class PaymentBCAController extends Controller
 
     public function virtualAccountInquiry(Request $request)
     {
-          
+        Log::info('Request VirtualAccountInquiry Headers:', $request->headers->all());
+        Log::info('Request VirtualAccountInquiry Body:', $request->all());
+
     $accessTokenResponse = $this->getAccessToken($request);
     $accessTokenArray = json_decode($accessTokenResponse, true);
     $accessToken = $accessTokenArray['accessToken'];
