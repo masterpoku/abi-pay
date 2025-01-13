@@ -81,7 +81,7 @@ class PaymentBCAController extends Controller
 
         try {
             // Mengirim request ke BCA API untuk membuat Virtual Account
-            $response = Http::withHeaders($headers)->post('https://sandbox.bca.co.id/openapi/v1.0/transfer-va/create', $payload);
+            $response = Http::withHeaders($headers)->post('https://api.klikbca.com/openapi/v1.0/transfer-va/create', $payload);
 
             $responseData = $response->json();
 
@@ -136,7 +136,7 @@ class PaymentBCAController extends Controller
 
         try {
             // Mengirim request ke BCA API untuk cek status Virtual Account
-            $response = Http::withHeaders($headers)->post('https://sandbox.bca.co.id/openapi/v1.0/transfer-va/status', $payload);
+            $response = Http::withHeaders($headers)->post('https://api.klikbca.com/openapi/v1.0/transfer-va/status', $payload);
 
             $responseData = $response->json();
 
@@ -241,7 +241,7 @@ class PaymentBCAController extends Controller
 
     try {
         // Mengirim request ke BCA API untuk Virtual Account Inquiry
-        $response = Http::withHeaders($headers)->post('https://sandbox.bca.co.id/openapi/v1.0/transfer-va/quiry', $payload);
+        $response = Http::withHeaders($headers)->post('https://api.klikbca.com/openapi/v1.0/transfer-va/quiry', $payload);
 
         // Mendapatkan data response JSON
         $responseData = $response->json();
