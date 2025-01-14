@@ -97,7 +97,7 @@ EOF;
     /**
      * Lakukan request token jika validasi berhasil.
      */
-    private function requestAccessToken(Request $request)
+    public function requestAccessToken(Request $request)
     {
         $url = 'https://devapi.klikbca.com/openapi/v1.0/access-token/b2b';
         $timeStamp = $request->header('X-TIMESTAMP');
