@@ -6,109 +6,74 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class PaymentBCAController extends Controller
 {
+   
+
     /**
-     * Get Access Token from BCA API
+     * Validate signature from BCA API request
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function getAccessToken(Request $request)
+    public function validateSignature(Request $request)
     {
-        // Log the entire request including headers
-        Log::info('Request GetAccessToken Headers:', $request->headers->all());
-        Log::info('Request GetAccessToken Body:', $request->all());
-
-      
-        $url = env('BCA_ACCESS_TOKEN_URL', 'https://sandbox.bca.co.id/openapi/v1.0/access-token/b2b');
-
-        $clientKey = $request->header('X-CLIENT-KEY');
-        $timestamp = $request->header('X-TIMESTAMP');
-        $signature = $request->header('X-SIGNATURE');
-
-        if (!$clientKey || !$timestamp || !$signature) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Header X-CLIENT-KEY, X-TIMESTAMP, dan X-SIGNATURE wajib disertakan.',
-            ], 400);
-        }
-
-        $headers = [
-            'X-CLIENT-KEY' => $clientKey,
-            'X-TIMESTAMP' => $timestamp,
-            'X-SIGNATURE' => $signature,
-            'Content-Type' => 'application/json',
-        ];
-
         try {
-            $response = Http::withHeaders($headers)->post($url, [
-                'grantType' => 'client_credentials',
-            ]);
+            // Ambil header dari request
+            $clientId = $request->header('X-CLIENT-ID');
+            $timeStamp = $request->header('X-TIMESTAMP');
+            $signature = $request->header('X-SIGNATURE');
 
-            if ($response->successful()) {
-                return $response;
-               
+            if (!$clientId || !$timeStamp || !$signature) {
+                return response()->json(['message' => 'Missing required headers'], 400);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => $response->json()['responseMessage'] ?? 'Unknown error',
-            ], $response->status());
-        } catch (\Exception $e) {
-            Log::error('Error fetching BCA Access Token: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while fetching the access token.',
-            ], 500);
+            // Public key (sebaiknya diambil dari .env)
+            // $publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAroD08oxYa+AQjhik/VguGFfiUf7Ga3Nxf/jOlNHy5qhyIKr56j9lTVD8yKx9Qm0sceMfp7lyC6PNyQnyp3jZj14F59FsIC4Sm1dtETZ21ODV9/No+YzVj0eo/1zMtSim9HW6ukVUSPoXa2618XBbtwFN4qqOkjdcZLGsn5KYdr7SGnjZKe/KDyZsGHPQSZXATXKDUpcqU56zx2ku+Adlv/vdOrem60mWg6PSy8i3FOI1NXgoNJodD9hVfHZu8SwkepBAfKCqDfkHL2CuVKvzOVSHjpD6HbACwZ/lmavEF89S/nhdxN7sVL122jzlssbEx+6/Id/DR2QS66z8c6QWWwIDAQAB";
+            $publicKey = env('BCA_PUBLIC_KEY');
+            // Validasi signature
+            $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
+
+            if ($isValid) {
+                return response()->json(['message' => 'Valid signature'], 200);
+            }
+
+            return response()->json(['message' => 'Invalid signature'], 401);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
-  
 
     /**
-     * Virtual Account Inquiry
+     * Validasi OAuth Signature
+     *
+     * @param string $publicKey Public key untuk validasi
+     * @param string $clientId Client ID dari header
+     * @param string $timeStamp x-time dari header
+     * @param string $signature Signature dari header
+     * @return bool True jika valid, false jika tidak
+     * @throws Exception
      */
-
-
-
-    public function virtualAccountInquiry(Request $request)
+    public function validateOauthSignature($public_key_str, $client_id, $iso_time, $signature)
     {
-        Log::info('Request VirtualAccountInquiry Headers:', $request->headers->all());
-        Log::info('Request VirtualAccountInquiry Body:', $request->all());
-
-    $accessTokenResponse = $this->getAccessToken($request);
-    $accessTokenArray = json_decode($accessTokenResponse, true);
-    $accessToken = $accessTokenArray['accessToken'];
-
-
-        $payload = $request->validate([
-            'partnerServiceId' => 'required|string|max:8',
-            'customerNo' => 'required|string',
-            'trxDateInit' => 'required|date',
-            'channelCode' => 'required|string',
-            'inquiryRequestId' => 'required|string',
-            'additionalInfo' => 'nullable|string',
-        ]);
-
-        $payload['virtualAccountNo'] = str_pad($payload['partnerServiceId'], 8, '0', STR_PAD_LEFT) . $payload['customerNo'];
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
-                'CHANNEL-ID' => env('BCA_CHANNEL_ID'),
-                'X-PARTNER-ID' => env('BCA_PARTNER_ID'),
-                'X-EXTERNAL-ID' => uniqid('va_inquiry_'),
-            ])->post(env('BCA_VA_INQUIRY_URL'), $payload);
-
-            return $response->successful() ? response()->json($response->json(), 200) : response()->json([
-                'error' => 'Failed to perform virtual account inquiry',
-                'message' => $response->json()['responseMessage'] ?? 'Unknown error',
-            ], $response->status());
-        } catch (\Exception $e) {
-            Log::error('Error during virtual account inquiry: ' . $e->getMessage());
-            return response()->json([
-                'error' => 'Something went wrong',
-                'message' => $e->getMessage(),
-            ], 500);
+        $is_valid = false;
+        $public_key = <<<EOF
+-----BEGIN PUBLIC KEY-----
+$public_key_str
+-----END PUBLIC KEY-----
+EOF;
+        $algo = "SHA256";
+        $dataToSign = $client_id . "|" . $iso_time;
+        $is_valid = openssl_verify($dataToSign, base64_decode($signature), $public_key, $algo);
+        //$is_valid = openssl_verify($dataToSign, hex2bin($signature), $public_key, $algo);
+        if($is_valid == 1){
+            $is_valid =  true;
         }
+        return $is_valid;
     }
+   
+    
+
 }

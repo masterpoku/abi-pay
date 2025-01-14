@@ -52,20 +52,6 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 
 Route::prefix('v1.0')->group(function () {
     // Route untuk mendapatkan Access Token
-    Route::post('access-token/b2b', [PaymentBCAController::class, 'getAccessToken']);
+    Route::post('access-token/b2b', [PaymentBCAController::class, 'validateSignature']);
     
-    // Route untuk membuat Virtual Account
-    Route::post('create-va', [PaymentBCAController::class, 'createVirtualAccount']);
-    
-    // Route untuk mengecek status Virtual Account
-    Route::post('check-va-status', [PaymentBCAController::class, 'checkVirtualAccountStatus']);
-    
-    // Route untuk Virtual Account Inquiry
-    Route::post('transfer-va/inquiry', [PaymentBCAController::class, 'virtualAccountInquiry']);
-    
-    // Route untuk mengirimkan Payment Request
-    Route::post('send-payment-request', [PaymentBCAController::class, 'sendPaymentRequest']);
-    
-    // Route untuk Payment Flag
-    Route::post('payment-flag', [PaymentBCAController::class, 'paymentFlag']);
 });
