@@ -22,9 +22,10 @@ class PaymentBCAController extends Controller
     {
         try {
             // Ambil header dari request
-            $clientId = $request->header('X-CLIENT-ID');
-            $timeStamp = $request->header('X-TIMESTAMP');
+            $clientId = $request->header('X-CLIENT-KEY');
             $signature = $request->header('X-SIGNATURE');
+            $timeStamp = $request->header('X-TIMESTAMP');
+            
 
             if (!$clientId || !$timeStamp || !$signature) {
                 return response()->json(['message' => 'Missing required headers'], 400);
