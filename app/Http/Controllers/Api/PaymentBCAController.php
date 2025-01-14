@@ -39,9 +39,9 @@ class PaymentBCAController extends Controller
             // Batasi waktu request untuk 10 menit
             $now = time();
             $timeDifference = $now - $requestTime;
-            if ($timeDifference > 10 * 60) {
-                return response()->json(['message' => 'Timestamp expired'], 400);
-            }
+            // if ($timeDifference > 10 * 60) {
+            //     return response()->json(['message' => 'Timestamp expired'], 400);
+            // }
     
             // Validasi Client ID
             if ($clientId !== $clientKey) {
@@ -157,7 +157,13 @@ EOF;
             }
     
             // Kembalikan access token
-            return response()->json(['data' => $responseArray], 200);
+            return response()->json([
+                'responseCode' => '2007300',
+                'responseMessage' => 'Successful',
+                'accessToken' => $responseArray['access_token'],
+                'tokenType' => 'bearer',
+                'expiresIn' => $responseArray['expires_in']
+            ], 200);
     
         } catch (Exception $e) {
             // Tangani error dan kembalikan pesan
