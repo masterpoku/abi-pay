@@ -9,7 +9,7 @@ use Exception;
 class PaymentBCAController extends Controller
 {
     /**
-     * Validasi signature dari header API request.
+     * Validasi signature dan lanjutkan ke proses permintaan access token.
      */
     public function validateAndRequestToken(Request $request)
     {
@@ -18,27 +18,63 @@ class PaymentBCAController extends Controller
             $clientId = $request->header('X-CLIENT-KEY');
             $signature = $request->header('X-SIGNATURE');
             $timeStamp = $request->header('X-TIMESTAMP');
-
-            if (!$clientId || !$timeStamp || !$signature) {
+            $clientKey = env('BCA_CLIENT_KEY');
+    
+            // Validasi keberadaan header
+            if (!$clientId || !$signature || !$timeStamp) {
                 return response()->json(['message' => 'Missing required headers'], 400);
             }
-
+    
+            // Validasi format timestamp (ISO 8601)
+            if (!$this->isValidIso8601($timeStamp)) {
+                return response()->json(['message' => 'Invalid timestamp format'], 400);
+            }
+    
+            // Konversi timestamp ke UNIX time
+            $requestTime = strtotime($timeStamp);
+            if ($requestTime === false) {
+                return response()->json(['message' => 'Invalid timestamp value'], 400);
+            }
+    
+            // Batasi waktu request untuk 10 menit
+            $now = time();
+            $timeDifference = $now - $requestTime;
+            if ($timeDifference > 10 * 60) {
+                return response()->json(['message' => 'Timestamp expired'], 400);
+            }
+    
+            // Validasi Client ID
+            if ($clientId !== $clientKey) {
+                return response()->json(['message' => 'Client key is not valid'], 401);
+            }
+    
             // Public key (ambil dari .env untuk keamanan)
             $publicKey = env('BCA_PUBLIC_KEY');
-
+            if (!$publicKey) {
+                return response()->json(['message' => 'Public key not configured'], 500);
+            }
+    
             // Validasi signature
             $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
-
             if (!$isValid) {
                 return response()->json(['message' => 'Invalid signature'], 401);
             }
-
-            // Jika valid, lanjutkan dengan request token
+    
+            // Jika validasi berhasil, lanjutkan ke proses permintaan token
             return $this->requestAccessToken($request);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+    
+    /**
+     * Validasi apakah string adalah format ISO 8601.
+     */
+    private function isValidIso8601($timestamp)
+    {
+        return (bool) date_create($timestamp);
+    }
+    
 
     /**
      * Validasi OAuth Signature
@@ -60,59 +96,72 @@ EOF;
     }
 
     /**
-     * Kirim permintaan untuk mendapatkan access token dari BCA API.
-     */
-    private function getAccessToken($url, $timestamp, $clientKey, $signature, $requestBody)
-    {
-        try {
-            $requestBodyJson = json_encode($requestBody);
-
-            $headers = [
-                'X-TIMESTAMP: ' . $timestamp,
-                'X-CLIENT-KEY: ' . $clientKey,
-                'X-SIGNATURE: ' . $signature,
-                'Content-Type: application/json',
-            ];
-
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBodyJson);
-
-            $response = curl_exec($ch);
-
-            if ($response === false) {
-                throw new Exception("cURL Error: " . curl_error($ch));
-            }
-
-            curl_close($ch);
-
-            return json_decode($response, true);
-        } catch (Exception $e) {
-            return ['error' => $e->getMessage()];
-        }
-    }
-
-    /**
      * Lakukan request token jika validasi berhasil.
      */
     public function requestAccessToken(Request $request)
     {
-        $url = 'https://devapi.klikbca.com/openapi/v1.0/access-token/b2b';
-        $timeStamp = $request->header('X-TIMESTAMP');
-        $clientKey = $request->header('X-CLIENT-KEY');
-        $signature = $request->header('X-SIGNATURE');
-        $requestBody = [
-            'grantType' => 'client_credentials',
-        ];
-
-        $response = $this->getAccessToken($url, $timeStamp, $clientKey, $signature, $requestBody);
-
-        if (isset($response['error'])) {
-            return response()->json(['message' => $response['error']], 500);
+        try {
+            // Endpoint URL untuk mendapatkan access token
+            $url = 'https://sandbox.bca.co.id/api/oauth/token';
+    
+            // Ambil header dari request
+            $timeStamp = $request->header('X-TIMESTAMP');
+            $signature = $request->header('X-SIGNATURE');
+    
+            // Data dari client key dan secret (sebaiknya disimpan di .env)
+            $clientKey = env('BCA_CLIENT_KEY');
+            $clientSecret = env('BCA_CLIENT_SECRET');
+    
+            // Encode Client ID dan Secret ke Base64
+            $authString = base64_encode($clientKey . ':' . $clientSecret);
+    
+            // Body request untuk mendapatkan token
+            $requestBody = [
+                'grant_type' => 'client_credentials',
+            ];
+    
+            // Header untuk request
+            $headers = [
+                'Authorization: Basic ' . $authString,
+                'Content-Type: application/x-www-form-urlencoded',
+                'X-TIMESTAMP: ' . $timeStamp,
+                'X-SIGNATURE: ' . $signature,
+            ];
+    
+            // Inisialisasi cURL
+            $ch = curl_init($url);
+    
+            // Konfigurasi cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($requestBody));
+    
+            // Kirim permintaan dan ambil respons
+            $response = curl_exec($ch);
+    
+            // Periksa jika ada kesalahan pada cURL
+            if ($response === false) {
+                throw new Exception("cURL Error: " . curl_error($ch));
+            }
+    
+            // Tutup koneksi cURL
+            curl_close($ch);
+    
+            // Konversi respons JSON menjadi array
+            $responseArray = json_decode($response, true);
+    
+            // Periksa jika ada error dalam respons
+            if (isset($responseArray['error'])) {
+                return response()->json(['message' => $responseArray['error_description'] ?? 'Error occurred'], 500);
+            }
+    
+            // Kembalikan access token
+            return response()->json(['data' => $responseArray], 200);
+    
+        } catch (Exception $e) {
+            // Tangani error dan kembalikan pesan
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-
-        return response()->json(['data' => $response]);
     }
 }
