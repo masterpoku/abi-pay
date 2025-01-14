@@ -52,6 +52,6 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 
 Route::prefix('bca')->group(function () {
     // Route untuk mendapatkan Access Token
-    Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'validateSignature']);
+    Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'validateAndRequestToken']);
     
 });
