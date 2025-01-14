@@ -162,7 +162,7 @@ EOF;
                 'responseMessage' => 'Successful',
                 'accessToken' => $responseArray['access_token'],
                 'tokenType' => 'bearer',
-                'expiresIn' => $responseArray['expires_in']
+                'expiresIn' => 900
             ], 200);
     
         } catch (Exception $e) {
