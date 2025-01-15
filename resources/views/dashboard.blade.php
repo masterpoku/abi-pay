@@ -4,9 +4,7 @@
 
 <div class="container mt-5">
 
-
-    <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-body text-center">
                     <h5 class="card-title">Total Transaksi Sukses</h5>
@@ -14,6 +12,9 @@
                 </div>
             </div>
         </div>
+        <br>
+    <div class="row mb-4">
+       
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body text-center">
@@ -25,9 +26,19 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body text-center">
-                    <h5 class="card-title">Transaksi Gagal</h5>
+                    <h5 class="card-title">Transaksi Pandding</h5>
                     <div>
-                        <h1><span class="text-danger">{{ $status_blmbayar }}</span></h1>
+                        <h1><span class="text-danger">{{  $status_pandding }}</span></h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Transaksi Expired</h5>
+                    <div>
+                        <h1><span class="text-danger">{{  $status_expired }}</span></h1>
                     </div>
                 </div>
             </div>
