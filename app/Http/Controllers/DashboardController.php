@@ -28,11 +28,11 @@ class DashboardController extends Controller
         $months = range(1, 12);
 
         foreach ($months as $month) {
-            $monthlySalesData[] = TagihanPembayaran::where('status_pembayaran', 'SUKSES')
+            $monthlySalesData[] = TagihanPembayaran::where('status_pembayaran', '1')
                 ->whereMonth('tanggal_invoice', $month)
                 ->sum('nominal_tagihan');
 
-            $monthlyFailedData[] = TagihanPembayaran::where('status_pembayaran', null)
+            $monthlyFailedData[] = TagihanPembayaran::where('status_pembayaran', '2')
                 ->whereMonth('tanggal_invoice', $month)
                 ->sum('nominal_tagihan');
         }
