@@ -63,7 +63,7 @@ class InquiryController extends Controller
     // Periksa tagihan yang belum dibayar
     $invoice_data = DB::table('tagihan_pembayaran')
         ->where('id_invoice', $nomorPembayaran)
-        ->whereNull('status_pembayaran') // Hanya tagihan yang belum dibayar
+        ->where('status_pembayaran', null) // Hanya tagihan yang belum dibayar
         ->orderByDesc('tanggal_invoice')
         ->first();
 
