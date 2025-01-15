@@ -40,16 +40,16 @@ class DashboardController extends Controller
         $date = Carbon::now()->locale('id');
         $jml_data = TagihanPembayaran::count();
         $nominal_bayar = TagihanPembayaran::where([['status_pembayaran', '1']], [['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
-        $status_bayar = TagihanPembayaran::whereNotNull('status_pembayaran')->where([['tanggal_invoice', 'like', $tahun . '%']])->count('id_invoice');
-        $nominal_blmbayar = TagihanPembayaran::whereNull('status_pembayaran')->where([['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
-        $status_blmbayar = TagihanPembayaran::whereNull('status_pembayaran')->where([['tanggal_invoice', 'like', $tahun . '%']])->count('id_invoice');
+        $status_bayar = TagihanPembayaran::where('status_pembayaran', '1')->where([['tanggal_invoice', 'like', $tahun . '%']])->count('id_invoice');
+        $nominal_blmbayar = TagihanPembayaran::where('status_pembayaran', '0')->where([['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
+        $status_blmbayar = TagihanPembayaran::where('status_pembayaran', '0')->where([['tanggal_invoice', 'like', $tahun . '%']])->count('id_invoice');
 
 
         $date_bulan = date('Y-m', strtotime($tgl_akhir));
         // $t_bulanini = TagihanPembayaran::where([['waktu_transaksi', 'like', $date_bulan . '%'], ['status_pembayaran', '=', 'SUKSES']])->sum('nominal_tagihan');
-        $t_bulanini = TagihanPembayaran::where([['status_pembayaran', '=', 'SUKSES']])->whereBetween('waktu_transaksi', [$tgl_awal_f, $tgl_akhir__f])->sum('nominal_tagihan');
-        $t_hariini = TagihanPembayaran::where([['waktu_transaksi', 'like', $tgl_awal . '%'], ['status_pembayaran', '=', 'SUKSES']])->sum('nominal_tagihan');
-        $t_kemarin = TagihanPembayaran::where([['waktu_transaksi', 'like', $tgl_akhir . '%'], ['status_pembayaran', '=', 'SUKSES']])->sum('nominal_tagihan');
+        $t_bulanini = TagihanPembayaran::where([['status_pembayaran', '=', '1']])->whereBetween('waktu_transaksi', [$tgl_awal_f, $tgl_akhir__f])->sum('nominal_tagihan');
+        $t_hariini = TagihanPembayaran::where([['waktu_transaksi', 'like', $tgl_awal . '%'], ['status_pembayaran', '=', '1']])->sum('nominal_tagihan');
+        $t_kemarin = TagihanPembayaran::where([['waktu_transaksi', 'like', $tgl_akhir . '%'], ['status_pembayaran', '=', '1']])->sum('nominal_tagihan');
         return view('dashboard', compact('monthlyFailedData', 'monthlySalesData', 'jml_data', 'nominal_blmbayar', 'nominal_bayar', 'status_blmbayar', 'status_bayar', 't_bulanini', 't_hariini', 't_kemarin', 'date', 'tgl_awal', 'tgl_akhir'));
     }
 }
