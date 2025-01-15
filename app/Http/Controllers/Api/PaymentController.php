@@ -60,6 +60,8 @@ class PaymentController extends Controller
     public function update(Request $request, $id)
     {
         Log::info('PaymentController update REQUEST:', $request->all());
+
+        // Validasi data
         $validatedData = $request->validate([
             'id_invoice' => 'required|string|max:255',
             'user_id' => 'required|string|max:255',
@@ -72,12 +74,23 @@ class PaymentController extends Controller
             'tanggal_invoice' => 'nullable|date',
         ]);
 
+        // Temukan data tagihan pembayaran
         $tagihanPembayaran = TagihanPembayaran::findOrFail($id);
+
+        // Ubah status_pembayaran menjadi angka jika diperlukan
+        if ($validatedData['status_pembayaran'] === 'SUKSES') {
+            $validatedData['status_pembayaran'] = 1; // Anggap 1 sebagai "SUKSES"
+        } elseif ($validatedData['status_pembayaran'] === 'PENDING') {
+            $validatedData['status_pembayaran'] = 0; // Anggap 0 sebagai "PENDING"
+        }
+
+        // Update data tagihan pembayaran
         $tagihanPembayaran->update($validatedData);
 
+        // Berikan respons sukses
         return response()->json([
             'message' => 'Tagihan Pembayaran berhasil diupdate',
-            'data' => $tagihanPembayaran
+            'data' => $tagihanPembayaran,
         ], 200);
     }
 
