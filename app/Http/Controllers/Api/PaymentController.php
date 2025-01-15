@@ -31,7 +31,7 @@ class PaymentController extends Controller
             'nama_agen' => 'required|string|max:255',
             'nominal_tagihan' => 'required|numeric',
             'informasi' => 'nullable|string',
-            'status_pembayaran' => 'nullable|in:NULL',
+            'status_pembayaran' => 'nullable',
             'channel_pembayaran' => 'nullable|string',
             'waktu_transaksi' => 'nullable|date',
             'tanggal_invoice' => 'nullable|date',
