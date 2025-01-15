@@ -21,8 +21,8 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         Log::info('PaymentController store REQUEST:', $request->all());
-
-        Log::info('Store method accessed in PaymentController');
+        
+        // Mengubah nilai status_pembayaran menjadi 0 jika null dan validasi data
         $validatedData = $request->validate([
             'id_invoice' => 'required|int',
             'user_id' => 'required|int',
@@ -37,6 +37,10 @@ class PaymentController extends Controller
             'tanggal_invoice' => 'nullable|date',
         ]);
 
+        // Mengubah null pada status_pembayaran menjadi 0
+        $validatedData['status_pembayaran'] = $validatedData['status_pembayaran'] ?? 0;
+
+        // Membuat tagihan pembayaran baru
         $tagihanPembayaran = TagihanPembayaran::create($validatedData);
 
         return response()->json([
@@ -44,6 +48,7 @@ class PaymentController extends Controller
             'data' => $tagihanPembayaran
         ], 201);
     }
+
 
 
     public function show($id)
@@ -68,7 +73,7 @@ class PaymentController extends Controller
             'nama_jamaah' => 'required|string|max:255',
             'nominal_tagihan' => 'required|numeric',
             'informasi' => 'nullable|string',
-            'status_pembayaran' => 'required|in:PENDING,SUKSES',
+            'status_pembayaran' => 'required',
             'channel_pembayaran' => 'nullable|string',
             'waktu_transaksi' => 'nullable|date',
             'tanggal_invoice' => 'nullable|date',
