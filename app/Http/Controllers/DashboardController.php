@@ -40,6 +40,8 @@ class DashboardController extends Controller
         $date = Carbon::now()->locale('id');
         $jml_data = TagihanPembayaran::count();
         $nominal_bayar = TagihanPembayaran::where([['status_pembayaran', '1']], [['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
+        $nominal_pandding = TagihanPembayaran::where([['status_pembayaran', '0']], [['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
+        $nominal_expired = TagihanPembayaran::where([['status_pembayaran', '2']], [['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
         $status_bayar = TagihanPembayaran::where('status_pembayaran', '1')->count('id_invoice');
         $nominal_blmbayar = TagihanPembayaran::where('status_pembayaran', '0')->where([['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
         $status_pandding = TagihanPembayaran::where('status_pembayaran', '0')->count('id_invoice');
@@ -51,6 +53,6 @@ class DashboardController extends Controller
         $t_bulanini = TagihanPembayaran::where([['status_pembayaran', '=', '1']])->whereBetween('waktu_transaksi', [$tgl_awal_f, $tgl_akhir__f])->sum('nominal_tagihan');
         $t_hariini = TagihanPembayaran::where([['waktu_transaksi', 'like', $tgl_awal . '%'], ['status_pembayaran', '=', '1']])->sum('nominal_tagihan');
         $t_kemarin = TagihanPembayaran::where([['waktu_transaksi', 'like', $tgl_akhir . '%'], ['status_pembayaran', '=', '1']])->sum('nominal_tagihan');
-        return view('dashboard', compact('monthlyFailedData', 'monthlySalesData', 'jml_data', 'nominal_blmbayar', 'nominal_bayar', 'status_expired','status_pandding', 'status_bayar', 't_bulanini', 't_hariini', 't_kemarin', 'date', 'tgl_awal', 'tgl_akhir'));
+        return view('dashboard', compact('monthlyFailedData', 'monthlySalesData', 'jml_data', 'nominal_blmbayar', 'nominal_bayar', 'nominal_expired', 'nominal_pandding', 'status_expired','status_pandding', 'status_bayar', 't_bulanini', 't_hariini', 't_kemarin', 'date', 'tgl_awal', 'tgl_akhir'));
     }
 }
