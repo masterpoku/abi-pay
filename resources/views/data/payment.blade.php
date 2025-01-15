@@ -59,11 +59,11 @@
                         <td>{{ $payment->channel_pembayaran }}</td> <!-- Menampilkan Channel Pembayaran -->
                         <td>{{ $payment->updated_at ? $payment->updated_at : '' }}</td> <!-- Menampilkan Tanggal Invoice jika tidak kosong -->
                         <td>
-                            @if($payment->status_pembayaran === 0)
+                            @if($payment->status_pembayaran === "0")
                             <span class="badge bg-warning">Pending</span>
-                            @elseif($payment->status_pembayaran === 1)
+                            @elseif($payment->status_pembayaran === "1")
                             <span class="badge bg-success">Sukses</span>
-                            @elseif($payment->status_pembayaran === 2)
+                            @elseif($payment->status_pembayaran === "2")
                             <span class="badge bg-danger">Expired</span>
                             @endif
                         </td>
