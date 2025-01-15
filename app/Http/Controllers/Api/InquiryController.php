@@ -79,7 +79,7 @@ class InquiryController extends Controller
         if ($createdAt->diffInDays(Carbon::now()) > 2) {
             DB::table('tagihan_pembayaran')
                 ->where('id_invoice', $nomorPembayaran)
-                ->update(['status_pembayaran' => 3]);
+                ->update(['status_pembayaran' => 2]);
 
             return response()->json([
                 'rc' => 'ERR-EXPIRED',
