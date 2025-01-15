@@ -69,23 +69,30 @@ class InquiryController extends Controller
         }
 
         $invoice_data = DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $nomorPembayaran)
+        ->first(); // Pastikan Anda menggunakan `first()` untuk mendapatkan data pertama
+    
+    if (!$invoice_data) {
+        return response()->json([
+            'rc' => 'ERR-NOT-FOUND',
+            'msg' => 'Nomor Pembayaran tidak ditemukan'
+        ], 404); // Return error jika data tidak ditemukan
+    }
+    
+    $createdAt = Carbon::parse($invoice_data->created_at);
+    
+    // Cek jika lebih dari 2 hari
+    if ($createdAt->diffInDays(Carbon::now()) > 2) {
+        DB::table('tagihan_pembayaran')
             ->where('id_invoice', $nomorPembayaran)
-            ->where('status_pembayaran')
-            ->orderByDesc('tanggal_invoice')
-            ->first();
-
-        $createdAt = Carbon::parse($invoice_data->created_at);
-
-        if ($createdAt->diffInDays(Carbon::now()) > 2) {
-            DB::table('tagihan_pembayaran')
-                ->where('id_invoice', $nomorPembayaran)
-                ->update(['status_pembayaran' => 2]);
-
-            return response()->json([
-                'rc' => 'ERR-EXPIRED',
-                'msg' => 'Tagihan sudah expired'
-            ], 400);
-        }
+            ->update(['status_pembayaran' => 2]);
+    
+        return response()->json([
+            'rc' => 'ERR-EXPIRED',
+            'msg' => 'Tagihan sudah expired'
+        ], 400); // Return expired message jika lebih dari 2 hari
+    }
+    
     
         if ($invoice_data->status_pembayaran == 1) {
             return response()->json(['rc' => 'ERR-ALREADY-PAID', 'msg' => 'Sudah Terbayar']);
