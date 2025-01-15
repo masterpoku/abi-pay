@@ -62,7 +62,14 @@ class PaymentBCAController extends Controller
                 'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
             ], 400);
         }
-
+        $grantType = $request->input('grantType');
+        
+        if (!$grantType || $grantType !== 'client_credentials') {
+            return response()->json([
+                'responseCode' => '4007301',
+                'responseMessage' => 'Invalid field format [clientId/clientSecret/grantType]'
+            ], 400);
+        }
         // Public key (ambil dari .env untuk keamanan)
         $publicKey = env('BCA_PUBLIC_KEY');
         if (!$publicKey) {
