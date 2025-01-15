@@ -11,61 +11,80 @@ class PaymentBCAController extends Controller
     /**
      * Validasi signature dan lanjutkan ke proses permintaan access token.
      */
-    public function validateAndRequestToken(Request $request)
-    {
-        try {
-            // Ambil header dari request
-            $clientId = $request->header('X-CLIENT-KEY');
-            $signature = $request->header('X-SIGNATURE');
-            $timeStamp = $request->header('X-TIMESTAMP');
-            $clientKey = env('BCA_CLIENT_KEY');
-    
-            // Validasi keberadaan header
-            if (!$clientId || !$signature || !$timeStamp) {
-                return response()->json(['message' => 'Missing required headers'], 400);
-            }
-    
-            // Validasi format timestamp (ISO 8601)
-            if (!$this->isValidIso8601($timeStamp)) {
-                return response()->json(['message' => 'Invalid timestamp format'], 400);
-            }
-    
-            // Konversi timestamp ke UNIX time
-            $requestTime = strtotime($timeStamp);
-            if ($requestTime === false) {
-                return response()->json(['message' => 'Invalid timestamp value'], 400);
-            }
-    
-            // Batasi waktu request untuk 10 menit
-            $now = time();
-            $timeDifference = $now - $requestTime;
-            // if ($timeDifference > 10 * 60) {
-            //     return response()->json(['message' => 'Timestamp expired'], 400);
-            // }
-    
-            // Validasi Client ID
-            if ($clientId !== $clientKey) {
-                return response()->json(['message' => 'Client key is not valid'], 401);
-            }
-    
-            // Public key (ambil dari .env untuk keamanan)
-            $publicKey = env('BCA_PUBLIC_KEY');
-            if (!$publicKey) {
-                return response()->json(['message' => 'Public key not configured'], 500);
-            }
-    
-            // Validasi signature
-            $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
-            if (!$isValid) {
-                return response()->json(['message' => 'Invalid signature'], 401);
-            }
-    
-            // Jika validasi berhasil, lanjutkan ke proses permintaan token
-            return $this->requestAccessToken($request);
-        } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+    public function RequestToken(Request $request)
+{
+    try {
+        // Ambil header dari request
+        $clientId = $request->header('X-CLIENT-KEY');
+        $signature = $request->header('X-SIGNATURE');
+        $timeStamp = $request->header('X-TIMESTAMP');
+        $clientKey = env('BCA_CLIENT_KEY');
+
+        // Validasi keberadaan header
+        if (!$clientId || !$signature || !$timeStamp) {
+            return response()->json([
+                'responseCode' => '4007301',
+                'responseMessage' => 'Invalid field format [clientId/clientSecret/grantType]'
+            ], 400);
         }
+
+        // Validasi Client ID
+        if ($clientId !== $clientKey) {
+            return response()->json([
+                'responseCode' => '4017300',
+                'responseMessage' => 'Unauthorized. [Unknown client]'
+            ], 401);
+        }
+
+        // Validasi format timestamp (ISO 8601)
+        if (!$this->isValidIso8601($timeStamp)) {
+            return response()->json([
+                'responseCode' => '4007301',
+                'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+            ], 400);
+        }
+
+        // Konversi timestamp ke UNIX time
+        $requestTime = strtotime($timeStamp);
+        if ($requestTime === false) {
+            return response()->json([
+                'responseCode' => '4007301',
+                'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+            ], 400);
+        }
+
+        // Batasi waktu request untuk 10 menit
+        $now = time();
+        $timeDifference = $now - $requestTime;
+        if ($timeDifference > 10 * 60 || $timeDifference < -10 * 60) {
+            return response()->json([
+                'responseCode' => '4007301',
+                'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+            ], 400);
+        }
+
+        // Public key (ambil dari .env untuk keamanan)
+        $publicKey = env('BCA_PUBLIC_KEY');
+        if (!$publicKey) {
+            return response()->json(['message' => 'Public key not configured'], 500);
+        }
+
+        // Validasi signature
+        $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
+        if (!$isValid) {
+            return response()->json([
+                'responseCode' => '4017300',
+                'responseMessage' => 'Unauthorized. [Signature]'
+            ], 401);
+        }
+
+        // Jika validasi berhasil, lanjutkan ke proses permintaan token
+        return $this->requestAccessToken($request);
+    } catch (Exception $e) {
+        return response()->json(['message' => $e->getMessage()], 500);
     }
+}
+
     
     /**
      * Validasi apakah string adalah format ISO 8601.
