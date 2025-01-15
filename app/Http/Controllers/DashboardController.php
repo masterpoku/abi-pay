@@ -39,7 +39,7 @@ class DashboardController extends Controller
 
         $date = Carbon::now()->locale('id');
         $jml_data = TagihanPembayaran::count();
-        $nominal_bayar = TagihanPembayaran::where([['status_pembayaran', 'SUKSES']], [['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
+        $nominal_bayar = TagihanPembayaran::where([['status_pembayaran', '1']], [['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
         $status_bayar = TagihanPembayaran::whereNotNull('status_pembayaran')->where([['tanggal_invoice', 'like', $tahun . '%']])->count('id_invoice');
         $nominal_blmbayar = TagihanPembayaran::whereNull('status_pembayaran')->where([['tanggal_invoice', 'like', $tahun . '%']])->sum('nominal_tagihan');
         $status_blmbayar = TagihanPembayaran::whereNull('status_pembayaran')->where([['tanggal_invoice', 'like', $tahun . '%']])->count('id_invoice');
