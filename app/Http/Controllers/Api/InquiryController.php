@@ -74,14 +74,18 @@ class InquiryController extends Controller
             ->orderByDesc('tanggal_invoice')
             ->first();
 
-            $createdAt = Carbon::parse($invoice_data->created_at);
-      
-            if ($createdAt->diffInDays(Carbon::now()) > 2) {
-                return response()->json([
-                    'rc' => 'ERR-EXPIRED',
-                    'msg' => 'Tagihan sudah expired'
-                ], 400);
-            }
+        $createdAt = Carbon::parse($invoice_data->created_at);
+
+        if ($createdAt->diffInDays(Carbon::now()) > 2) {
+            DB::table('tagihan_pembayaran')
+                ->where('id_invoice', $nomorPembayaran)
+                ->update(['status_pembayaran' => 3]);
+
+            return response()->json([
+                'rc' => 'ERR-EXPIRED',
+                'msg' => 'Tagihan sudah expired'
+            ], 400);
+        }
     
         if ($invoice_data->status_pembayaran == 1) {
             return response()->json(['rc' => 'ERR-ALREADY-PAID', 'msg' => 'Sudah Terbayar']);
