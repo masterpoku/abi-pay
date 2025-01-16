@@ -25,6 +25,12 @@ class InquiryController extends Controller
         $this->allowed_collecting_agents = ['BSM'];
         $this->allowed_channels = ['TELLER', 'IBANK', 'ATM', 'MBANK', 'FLAGGING'];
     }
+    public function index(Request $request)
+    {
+        Log::info('PaymentController index REQUEST:', $request->all());
+        return response()->json(['message' => 'Welcome to payment API'], 200);
+    }
+
 
     public function inquiry(Request $request)
     {
