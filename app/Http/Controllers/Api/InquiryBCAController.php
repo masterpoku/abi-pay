@@ -7,10 +7,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Api\PaymentBCAController;
+use Illuminate\Support\Facades\Log;
+
 class InquiryBCAController extends Controller
 {
+    public function index(Request $request)
+    {
+        Log::info('PaymentVController index REQUEST:', $request->all());
+        return response()->json(['message' => 'Welcome to payment API'], 200);
+    }
 
-    
+
     public function handleInquiry(Request $request)
     {
         $this->validateHeaders($request);
