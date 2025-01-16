@@ -20,6 +20,9 @@ class InquiryBCAController extends Controller
 
     public function handleInquiry(Request $request)
     {
+    Log::info('REQUEST Headers:', $request->headers->all());
+    Log::info('REQUEST Payload:', $request->all());
+
         $this->validateHeaders($request);
         // Validasi input
         $validated = $request->validate([
