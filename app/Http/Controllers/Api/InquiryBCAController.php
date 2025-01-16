@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Api\PaymentBCAController;
 class InquiryBCAController extends Controller
 {
+
+    
     public function handleInquiry(Request $request)
     {
         $this->validateHeaders($request);
