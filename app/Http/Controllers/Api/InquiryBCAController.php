@@ -28,15 +28,14 @@ class InquiryBCAController extends Controller
         $this->validateHeaders($request);
         $this->validateRequest($request);
 
-        
-        // Validasi input
-        $validated = $request->validate([
+
+      $validated = $request->validate([
             'partnerServiceId' => 'required|string',
-            'customerNo' => 'required|string',
-            'virtualAccountNo' => 'required|string',
-            'trxDateInit' => 'required|date',
+            'customerNo' => 'nullable|string',  // CustomerNo bisa kosong jika tidak diisi
+            'virtualAccountNo' => 'required|string',  // Validasi akun virtual, bisa menggunakan 'digits' jika diperlukan
+            'trxDateTime' => 'required|date_format:Y-m-d\TH:i:sP',  // Memastikan format tanggal sesuai
             'channelCode' => 'required|integer',
-            'additionalInfo' => 'nullable|array',
+            'additionalInfo' => 'nullable|array',  // Additional info bisa kosong jika tidak ada
             'inquiryRequestId' => 'required|string',
         ]);
 
