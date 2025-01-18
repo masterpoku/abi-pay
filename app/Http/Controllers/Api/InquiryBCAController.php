@@ -26,8 +26,7 @@ class InquiryBCAController extends Controller
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-        $paymentBCAController = new PaymentBCAController();
-        $paymentBCAController->RequestToken($request);
+        $this->validatedToken($request);
         $this->validateHeaders($request);
         $this->validateRequest($request);
 
@@ -358,6 +357,17 @@ EOF;
             'responseCode' => '2002400',
             'responseMessage' => 'Access Token Valid',
         ], 200);
+    }
+    public function  validatedToken(Request $request)
+    {
+        $headerValidation = $this->validateHeaders($request);
+        if ($headerValidation) {
+            return $headerValidation;
+        }
+        return response()->json([
+            'responseCode' => '4012401',
+            'responseMessage' => 'Invalid Token (B2B)',
+        ], 401);
     }
 }
 
