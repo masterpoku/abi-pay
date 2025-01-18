@@ -57,51 +57,50 @@ class InquiryBCAController extends Controller
     }
     
     public function validateRequest(Request $request)
-{
-    // Ambil X-EXTERNAL-ID dan paymentRequestId dari request
-    $externalId = $request->header('X-EXTERNAL-ID');
-    $paymentRequestId = $request->input('paymentRequestId');
+    {
+        // Ambil trxDateTime dari request payload
+        $trxDateTime = $request->input('trxDateTime');
+        $requestTimestamp = \Carbon\Carbon::parse($trxDateTime);
     
-    // Ambil trxDateTime dari request payload
-    $trxDateTime = $request->input('trxDateTime');
-    $requestTimestamp = \Carbon\Carbon::parse($trxDateTime);
-
-    // Cek apakah request ganda sudah ada di tabel request_logs
-    $existingRequest = DB::table('request_logs')
-        ->where('external_id', $externalId)
-        ->where('payment_request_id', $paymentRequestId)
-        ->first();
-
-    // Jika request sudah ada, cek apakah waktu request kurang dari 5 menit
-    if ($existingRequest) {
-        // Ambil timestamp request yang ada dari database
-        $existingTimestamp = \Carbon\Carbon::parse($existingRequest->timestamp);
-        
-        // Hitung selisih waktu antara request yang baru dan request yang ada
-        $timeDiff = $existingTimestamp->diffInMinutes($requestTimestamp);
-
-        // Jika selisih waktu kurang dari 5 menit, kembalikan error
-        if ($timeDiff < 5) {
+        // Ambil X-EXTERNAL-ID dan paymentRequestId dari request header atau payload
+        $externalId = $request->header('X-EXTERNAL-ID');
+        $paymentRequestId = $request->input('paymentRequestId');
+    
+        // Cek kondisi untuk menentukan query yang digunakan
+        if (is_null($externalId) || is_null($paymentRequestId)) {
+            // Jika externalId atau paymentRequestId null, gunakan trxDateTime untuk memeriksa request dalam 5 menit terakhir
+            $existingRequest = DB::table('request_logs')
+                ->where('timestamp', '>=', $requestTimestamp->subMinutes(5)) // Cek request dalam 5 menit terakhir
+                ->first();
+        } else {
+            // Jika externalId dan paymentRequestId ada, cek apakah sudah ada request dengan kombinasi tersebut
+            $existingRequest = DB::table('request_logs')
+                ->where('external_id', $externalId)
+                ->where('payment_request_id', $paymentRequestId)
+                ->first();
+        }
+    
+        // Jika request sudah ada, kembalikan response error
+        if ($existingRequest) {
             return response()->json([
                 'responseCode' => '4042518',
                 'responseMessage' => 'Inconsistent Request',
-                'paymentFlagStatus' => 'Duplicate request detected within 5 minutes'
+                'paymentFlagStatus' => 'Duplicate request detected'
             ], 400); // Menggunakan kode status HTTP 400 Bad Request
         }
+    
+        // Jika request belum ada, simpan ke dalam log dan lanjutkan
+        DB::table('request_logs')->insert([
+            'external_id' => $externalId ?? null, // Menyimpan X-EXTERNAL-ID jika ada
+            'payment_request_id' => $paymentRequestId ?? null, // Menyimpan paymentRequestId jika ada
+            'status' => 'pending', // Status awal, bisa diubah sesuai kebutuhan
+            'timestamp' => $requestTimestamp
+        ]);
+    
+        // Lanjutkan dengan proses normal jika request valid
+        return true;
     }
-
-    // Jika request belum ada atau lebih dari 5 menit, simpan ke dalam log dan lanjutkan
-    DB::table('request_logs')->insert([
-        'external_id' => $externalId,
-        'payment_request_id' => $paymentRequestId,
-        'status' => 'pending', // Status awal, bisa diubah sesuai kebutuhan
-        'timestamp' => $requestTimestamp
-    ]);
-
-    // Lanjutkan dengan proses normal jika request valid
-    return true;
-}
-
+    
 
     
     /**
