@@ -57,37 +57,46 @@ class InquiryBCAController extends Controller
     }
     
     public function validateRequest(Request $request)
-    {
-        // Ambil X-EXTERNAL-ID dan paymentRequestId dari request
-        $externalId = $request->header('X-EXTERNAL-ID');
-        $paymentRequestId = $request->input('paymentRequestId');
+{
+    // Ambil X-EXTERNAL-ID dan paymentRequestId dari request
+    $externalId = $request->header('X-EXTERNAL-ID');
+    $paymentRequestId = $request->input('paymentRequestId');
     
-        // Cek apakah request ganda sudah ada di tabel request_logs
-        $existingRequest = DB::table('request_logs')
-            ->where('external_id', $externalId)
-            ->where('payment_request_id', $paymentRequestId)
-            ->first();
-    
-        // Jika request sudah ada, kembalikan response error
-        if ($existingRequest) {
+    // Cek apakah request ganda sudah ada di tabel request_logs
+    $existingRequest = DB::table('request_logs')
+        ->where('external_id', $externalId)
+        ->where('payment_request_id', $paymentRequestId)
+        ->first();
+
+    // Jika request sudah ada, cek apakah waktu request kurang dari 5 menit
+    if ($existingRequest) {
+        // Hitung selisih waktu antara request yang baru dan request yang ada
+        $existingTimestamp = \Carbon\Carbon::parse($existingRequest->timestamp);
+        $currentTimestamp = \Carbon\Carbon::now();
+        $timeDiff = $existingTimestamp->diffInMinutes($currentTimestamp);
+
+        // Jika selisih waktu kurang dari 5 menit, kembalikan error
+        if ($timeDiff < 5) {
             return response()->json([
                 'responseCode' => '4042518',
                 'responseMessage' => 'Inconsistent Request',
-                'paymentFlagStatus' => 'Duplicate request detected'
+                'paymentFlagStatus' => 'Duplicate request detected within 5 minutes'
             ], 400); // Menggunakan kode status HTTP 400 Bad Request
         }
-    
-        // Jika request belum ada, simpan ke dalam log dan lanjutkan
-        DB::table('request_logs')->insert([
-            'external_id' => $externalId,
-            'payment_request_id' => $paymentRequestId,
-            'status' => 'pending', // Status awal, bisa diubah sesuai kebutuhan
-            'timestamp' => now()
-        ]);
-        
-        // Lanjutkan dengan proses normal jika request valid
-        return true;
     }
+
+    // Jika request belum ada atau lebih dari 5 menit, simpan ke dalam log dan lanjutkan
+    DB::table('request_logs')->insert([
+        'external_id' => $externalId,
+        'payment_request_id' => $paymentRequestId,
+        'status' => 'pending', // Status awal, bisa diubah sesuai kebutuhan
+        'timestamp' => now()
+    ]);
+
+    // Lanjutkan dengan proses normal jika request valid
+    return true;
+}
+
     
     /**
      * Membuat respons untuk data yang ditemukan.
