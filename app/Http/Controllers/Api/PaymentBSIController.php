@@ -99,7 +99,7 @@ class PaymentBSIController extends Controller
             ]);
         }
 
-        if ($tagihan->status_pembayaran === 'SUKSES') {
+        if ($tagihan->status_pembayaran === '1') {
 
             return response()->json([
                 'rc' => 'ERR-ALREADY-PAID',
@@ -123,7 +123,7 @@ class PaymentBSIController extends Controller
             DB::table('tagihan_pembayaran')
                 ->where('id_invoice', $tagihan->id_invoice)
                 ->update([
-                    'status_pembayaran' => 'SUKSES',
+                    'status_pembayaran' => '1',
                     'waktu_transaksi' => $now,
                     'channel_pembayaran' => $data['kodeChannel']
                 ]);

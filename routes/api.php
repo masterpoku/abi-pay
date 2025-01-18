@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\bca\requestAccessToken;
+use App\Http\Controllers\Api\bca\RequestToken;
 use App\Http\Controllers\Api\InquiryBCAController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\InquiryController;
@@ -62,10 +64,10 @@ Route::prefix('bca')->group(function () {
 });
 
 
-Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'RequestToken']);
+Route::post('v1.0/access-token/b2b', [RequestToken::class, 'RequestToken']);
 Route::get('v1.0/access-token/b2b', [InquiryController::class, 'index']);
 
-Route::post('v1.0/access-token/test', [PaymentBCAController::class, 'requestAccessToken']);
+Route::post('v1.0/access-token/test', [requestAccessToken::class, 'requestAccessToken']);
 Route::post('v1.0/transfer-va/payment', [InquiryBCAController::class, 'handleInquiry']);
 Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
 

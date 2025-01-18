@@ -26,7 +26,7 @@ class InquiryBCAController extends Controller
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-        $this->validatedToken($request);
+      
         $this->validateHeaders($request);
         $this->validateRequest($request);
 
@@ -62,6 +62,7 @@ class InquiryBCAController extends Controller
 
 public function validateRequest(Request $request)
 {
+    $this->validatedToken($request);
     // Ambil X-EXTERNAL-ID dan paymentRequestId dari request
     $externalId = $request->header('X-EXTERNAL-ID');
     $paymentRequestId = $request->input('paymentRequestId');
