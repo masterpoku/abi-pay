@@ -26,7 +26,8 @@ class InquiryBCAController extends Controller
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-        $this->requestAccessToken($request);
+        $paymentBCAController = new PaymentBCAController();
+        $paymentBCAController->RequestToken($request);
         $this->validateHeaders($request);
         $this->validateRequest($request);
 
