@@ -68,3 +68,5 @@ Route::get('v1.0/access-token/b2b', [InquiryController::class, 'index']);
 Route::post('v1.0/access-token/test', [PaymentBCAController::class, 'requestAccessToken']);
 Route::post('v1.0/transfer-va/payment', [InquiryBCAController::class, 'handleInquiry']);
 Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
+
+Route::post('v1.0/transfer-va/validate-request', [InquiryBCAController::class, 'validateRequest']);
