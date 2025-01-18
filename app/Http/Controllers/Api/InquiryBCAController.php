@@ -19,56 +19,77 @@ class InquiryBCAController extends Controller
 
 
     public function handleInquiry(Request $request)
-{
+    {
+
+
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-    $this->validateHeaders($request);
+        $this->validateHeaders($request);
+        $this->validateRequest($request);
 
-    // Validasi input
-    $validated = $request->validate([
-        'partnerServiceId' => 'required|string',
-        'customerNo' => 'required|string',
-        'virtualAccountNo' => 'required|string',
-        'trxDateInit' => 'required|date',
-        'channelCode' => 'required|integer',
-        'additionalInfo' => 'nullable|array',
-        'inquiryRequestId' => 'required|string',
-        'external_id' => 'required|string', // Tambahkan external_id pada validasi
-        'payment_request_id' => 'required|string', // Tambahkan payment_request_id pada validasi
-    ]);
+        
+        // Validasi input
+        $validated = $request->validate([
+            'partnerServiceId' => 'required|string',
+            'customerNo' => 'required|string',
+            'virtualAccountNo' => 'required|string',
+            'trxDateInit' => 'required|date',
+            'channelCode' => 'required|integer',
+            'additionalInfo' => 'nullable|array',
+            'inquiryRequestId' => 'required|string',
+        ]);
 
-    // Cek jika ada request yang duplikat dengan external_id dan payment_request_id yang sama
-    $existingRequest = DB::table('tagihan_pembayaran')
-        ->where('external_id', $validated['external_id'])
-        ->where('payment_request_id', $validated['payment_request_id'])
-        ->first();
+        // Ambil data dari database
+        $user_data = DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->orderByDesc('tanggal_invoice')
+            ->first();
 
-    if ($existingRequest) {
-        return response()->json([
-            'responseCode' => '4042518',
-            'responseMessage' => 'Inconsistent Request',
-            'paymentFlagStatus' => 'DUPLICATE'
-        ], 400);
+        // Jika data tidak ditemukan, kembalikan respons gagal
+        if (!$user_data) {
+            return response()->json($this->buildNotFoundResponse($validated));
+        }
+
+        // Membuat respons berhasil
+        $response = $this->buildSuccessResponse($validated, $user_data);
+
+        return response()->json($response);
     }
-
-    // Ambil data dari database
-    $user_data = DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $validated['virtualAccountNo'])
-        ->orderByDesc('tanggal_invoice')
-        ->first();
-
-    // Jika data tidak ditemukan, kembalikan respons gagal
-    if (!$user_data) {
-        return response()->json($this->buildNotFoundResponse($validated));
+    
+    public function validateRequest(Request $request)
+    {
+        // Ambil X-EXTERNAL-ID dan paymentRequestId dari request
+        $externalId = $request->header('X-EXTERNAL-ID');
+        $paymentRequestId = $request->input('paymentRequestId');
+    
+        // Cek apakah request ganda sudah ada di tabel request_logs
+        $existingRequest = DB::table('request_logs')
+            ->where('external_id', $externalId)
+            ->where('payment_request_id', $paymentRequestId)
+            ->first();
+    
+        // Jika request sudah ada, kembalikan response error
+        if ($existingRequest) {
+            return response()->json([
+                'responseCode' => '4042518',
+                'responseMessage' => 'Inconsistent Request',
+                'paymentFlagStatus' => 'Duplicate request detected'
+            ], 400); // Menggunakan kode status HTTP 400 Bad Request
+        }
+    
+        // Jika request belum ada, simpan ke dalam log dan lanjutkan
+        DB::table('request_logs')->insert([
+            'external_id' => $externalId,
+            'payment_request_id' => $paymentRequestId,
+            'status' => 'pending', // Status awal, bisa diubah sesuai kebutuhan
+            'timestamp' => now()
+        ]);
+        
+        // Lanjutkan dengan proses normal jika request valid
+        return true;
     }
-
-    // Membuat respons berhasil
-    $response = $this->buildSuccessResponse($validated, $user_data);
-
-    return response()->json($response);
-}
-
+    
     /**
      * Membuat respons untuk data yang ditemukan.
      */
