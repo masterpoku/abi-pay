@@ -19,38 +19,55 @@ class InquiryBCAController extends Controller
 
 
     public function handleInquiry(Request $request)
-    {
+{
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-        $this->validateHeaders($request);
-        // Validasi input
-        $validated = $request->validate([
-            'partnerServiceId' => 'required|string',
-            'customerNo' => 'required|string',
-            'virtualAccountNo' => 'required|string',
-            'trxDateInit' => 'required|date',
-            'channelCode' => 'required|integer',
-            'additionalInfo' => 'nullable|array',
-            'inquiryRequestId' => 'required|string',
-        ]);
+    $this->validateHeaders($request);
 
-        // Ambil data dari database
-        $user_data = DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->orderByDesc('tanggal_invoice')
-            ->first();
+    // Validasi input
+    $validated = $request->validate([
+        'partnerServiceId' => 'required|string',
+        'customerNo' => 'required|string',
+        'virtualAccountNo' => 'required|string',
+        'trxDateInit' => 'required|date',
+        'channelCode' => 'required|integer',
+        'additionalInfo' => 'nullable|array',
+        'inquiryRequestId' => 'required|string',
+        'external_id' => 'required|string', // Tambahkan external_id pada validasi
+        'payment_request_id' => 'required|string', // Tambahkan payment_request_id pada validasi
+    ]);
 
-        // Jika data tidak ditemukan, kembalikan respons gagal
-        if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated));
-        }
+    // Cek jika ada request yang duplikat dengan external_id dan payment_request_id yang sama
+    $existingRequest = DB::table('tagihan_pembayaran')
+        ->where('external_id', $validated['external_id'])
+        ->where('payment_request_id', $validated['payment_request_id'])
+        ->first();
 
-        // Membuat respons berhasil
-        $response = $this->buildSuccessResponse($validated, $user_data);
-
-        return response()->json($response);
+    if ($existingRequest) {
+        return response()->json([
+            'responseCode' => '4042518',
+            'responseMessage' => 'Inconsistent Request',
+            'paymentFlagStatus' => 'DUPLICATE'
+        ], 400);
     }
+
+    // Ambil data dari database
+    $user_data = DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $validated['virtualAccountNo'])
+        ->orderByDesc('tanggal_invoice')
+        ->first();
+
+    // Jika data tidak ditemukan, kembalikan respons gagal
+    if (!$user_data) {
+        return response()->json($this->buildNotFoundResponse($validated));
+    }
+
+    // Membuat respons berhasil
+    $response = $this->buildSuccessResponse($validated, $user_data);
+
+    return response()->json($response);
+}
 
     /**
      * Membuat respons untuk data yang ditemukan.
