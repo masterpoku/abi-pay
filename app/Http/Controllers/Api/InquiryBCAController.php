@@ -259,6 +259,8 @@ public function validateRequest(Request $request)
      */
     private function validateHeaders(Request $request)
     {
+        Log::info('validateHeaders REQUEST Headers:', $request->headers->all());
+        Log::info('validateHeaders REQUEST Payload:', $request->all());
         // Ambil header dari request
         $clientId = $request->header('X-CLIENT-KEY');
         $signature = $request->header('X-SIGNATURE');
