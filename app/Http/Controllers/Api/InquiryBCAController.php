@@ -26,6 +26,7 @@ class InquiryBCAController extends Controller
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
+        $this->requestAccessToken($request);
         $this->validateHeaders($request);
         $this->validateRequest($request);
 
