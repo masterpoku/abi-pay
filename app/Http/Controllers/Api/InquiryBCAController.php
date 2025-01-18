@@ -62,6 +62,10 @@ class InquiryBCAController extends Controller
     $externalId = $request->header('X-EXTERNAL-ID');
     $paymentRequestId = $request->input('paymentRequestId');
     
+    // Ambil trxDateTime dari request payload
+    $trxDateTime = $request->input('trxDateTime');
+    $requestTimestamp = \Carbon\Carbon::parse($trxDateTime);
+
     // Cek apakah request ganda sudah ada di tabel request_logs
     $existingRequest = DB::table('request_logs')
         ->where('external_id', $externalId)
@@ -70,10 +74,11 @@ class InquiryBCAController extends Controller
 
     // Jika request sudah ada, cek apakah waktu request kurang dari 5 menit
     if ($existingRequest) {
-        // Hitung selisih waktu antara request yang baru dan request yang ada
+        // Ambil timestamp request yang ada dari database
         $existingTimestamp = \Carbon\Carbon::parse($existingRequest->timestamp);
-        $currentTimestamp = \Carbon\Carbon::now();
-        $timeDiff = $existingTimestamp->diffInMinutes($currentTimestamp);
+        
+        // Hitung selisih waktu antara request yang baru dan request yang ada
+        $timeDiff = $existingTimestamp->diffInMinutes($requestTimestamp);
 
         // Jika selisih waktu kurang dari 5 menit, kembalikan error
         if ($timeDiff < 5) {
@@ -90,12 +95,13 @@ class InquiryBCAController extends Controller
         'external_id' => $externalId,
         'payment_request_id' => $paymentRequestId,
         'status' => 'pending', // Status awal, bisa diubah sesuai kebutuhan
-        'timestamp' => now()
+        'timestamp' => $requestTimestamp
     ]);
 
     // Lanjutkan dengan proses normal jika request valid
     return true;
 }
+
 
     
     /**
