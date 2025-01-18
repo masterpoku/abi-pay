@@ -84,7 +84,7 @@ public function validateRequest(Request $request)
                 'responseCode' => '4042518',
                 'responseMessage' => 'Inconsistent Request',
                 'paymentFlagStatus' => 'Duplicate request detected'
-            ], 404); // Menggunakan kode status HTTP 400 Bad Request
+            ], 200); // Menggunakan kode status HTTP 400 Bad Request
         }
 
         // Jika request belum ada atau sudah lebih dari 5 menit, simpan log
@@ -108,7 +108,7 @@ public function validateRequest(Request $request)
                 'responseCode' => '4042518',
                 'responseMessage' => 'Inconsistent Request',
                 'paymentFlagStatus' => 'Duplicate request detected'
-            ], 404); // Menggunakan kode status HTTP 400 Bad Request
+            ], 200); // Menggunakan kode status HTTP 400 Bad Request
         }
         
         // Jika request belum ada atau sudah lebih dari 5 menit, simpan log
