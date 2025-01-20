@@ -258,7 +258,7 @@ class InquiryBCAController extends Controller
         $publicKey = env('BCA_PUBLIC_KEY');
         if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
             return response()->json([
-                'responseCode' => '4012400',
+                'responseCode' => '4012501',
                 'responseMessage' => 'Unauthorized. Signature',
             ], 401);
         }
