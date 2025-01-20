@@ -312,82 +312,109 @@ EOF;
         ], 200);
     }
     public function BearerCheck(Request $request)
-    {
-        try {
+{
+    try {
+        // Ambil header dari request
+        $token = $request->header('Authorization');
+        $timeStamp = $request->header('X-TIMESTAMP');
+        $signature = $request->header('X-SIGNATURE');
+        $clientSecret = env('BCA_CLIENT_SECRET');
 
-            // Ambil header dari request
-            $token = $request->header('Authorization');
-            $token = str_replace('Bearer ', '', $token);
-            $client_secret = env('BCA_CLIENT_SECRET');
-            $method = $request->method();
-            $url = $request->url();
-            $time_stamp = $request->header('X-TIMESTAMP');
-            $body = $request->all();
-            $signature = $request->header('X-SIGNATURE');
-            $isValidSignatureApi = $this->validateServiceSignature($client_secret, $method, $url, $token,$time_stamp, $body,$signature);
-            // return $isValidSignatureApi;
-            if (!$isValidSignatureApi) {
-                return response()->json([
-                    'responseCode' => '4012601',
-                    'message' => 'Invalid Token (B2B)'
-                ], 401);
-            }
-            // return response()->json(['message' => 'Valid Token (B2B)'], 200);
-        } catch (\Exception $e) {
+        // Validasi keberadaan header
+        if (!$token || !$timeStamp || !$signature) {
             return response()->json([
-                'responseCode' => '5002601',
-                'message' => 'Internal Server Error'
-            ], 500);
-        }
-    }
-    private function getRelativeUrl($url)
-    {
-        $path = parse_url($url, PHP_URL_PATH);
-        if (empty($path)) {
-            $path = '/';
+                'responseCode' => '4002601',
+                'message' => 'Missing Mandatory Header [Authorization/X-TIMESTAMP/X-SIGNATURE]'
+            ], 400);
         }
 
-        $query = parse_url($url, PHP_URL_QUERY);
-        if ($query) {
-            parse_str($query, $parsed);
-            ksort($parsed);
-            $query = '?' . http_build_query($parsed);
+        // Cek format token Bearer
+        if (!str_starts_with($token, 'Bearer ')) {
+            return response()->json([
+                'responseCode' => '4012602',
+                'message' => 'Invalid Authorization Format. Bearer Token Required.'
+            ], 401);
         }
-        $formatedUrl = $path . $query;
-        return $formatedUrl;
+
+        // Hapus prefix "Bearer " pada token
+        $token = str_replace('Bearer ', '', $token);
+
+        // Validasi signature
+        $method = $request->method();
+        $url = $request->url();
+        $body = $request->all();
+        $isValidSignature = $this->validateServiceSignature(
+            $clientSecret,
+            $method,
+            $url,
+            $token,
+            $timeStamp,
+            $body,
+            $signature
+        );
+
+        if (!$isValidSignature) {
+            return response()->json([
+                'responseCode' => '4012603',
+                'message' => 'Unauthorized. Invalid Signature.'
+            ], 401);
+        }
+
+        // Validasi berhasil, lanjutkan proses
+        return null;
+    } catch (\Exception $e) {
+        // Log error untuk debugging
+        Log::error('BearerCheck Error: ' . $e->getMessage());
+        return response()->json([
+            'responseCode' => '5002601',
+            'message' => 'Internal Server Error'
+        ], 500);
+    }
+}
+public function validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)
+{
+    // Generate signature dari data yang diterima
+    $calculatedSignature = $this->generateServiceSignature(
+        $clientSecret,
+        $method,
+        $url,
+        $authToken,
+        $isoTime,
+        $bodyToHash
+    );
+
+    // Validasi apakah signature sama
+    return hash_equals($calculatedSignature, $signature);
+}
+private function hashbody($body)
+{
+    if (empty($body)) {
+        $body = '';
+    } else {
+        $body = json_encode($body, JSON_UNESCAPED_SLASHES);
+    }
+    return strtolower(hash('sha256', $body));
+}
+public function generateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash = [])
+{
+    $hash = $this->hashbody($bodyToHash);
+    $stringToSign = $method . ":" . $this->getRelativeUrl($url) . ":" . $authToken . ":" . $hash . ":" . $isoTime;
+
+    return base64_encode(hash_hmac('sha512', $stringToSign, $clientSecret, true));
+}
+private function getRelativeUrl($url)
+{
+    $path = parse_url($url, PHP_URL_PATH) ?? '/';
+    $query = parse_url($url, PHP_URL_QUERY);
+
+    if ($query) {
+        parse_str($query, $parsedQuery);
+        ksort($parsedQuery);
+        $query = '?' . http_build_query($parsedQuery);
     }
 
-    public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
-    {
-        $hash = hash("sha256", "");
-        if (is_array($bodyToHash)) {
-            $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
-            $hash = $this->hashbody($encoderData);
-        }
-        
-        $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
-        $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
-		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
-        return $signature;
-    }
+    return $path . $query;
+}
 
-    public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
-        $is_valid = false;
-        $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
-        if(strcmp($signatureStr, $signature) == 0){
-            $is_valid = true;
-        }
-        return $is_valid;
-    }
-    private function hashbody($body)
-    {
-        if (empty($body)) {
-            $body = '';
-        } else {
-            //$toStrip = [" ", "\r", "\n", "\t"];
-            //$body = str_replace($toStrip, '', $body);
-        }
-        return strtolower(hash('sha256', $body));
-    }
 }
 
