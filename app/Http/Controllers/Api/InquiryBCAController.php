@@ -267,14 +267,6 @@ class InquiryBCAController extends Controller
             ], 400);
         }
 
-        // Validasi signature (simulasi validasi di sini, gunakan metode asli di implementasi)
-        $publicKey = env('BCA_PUBLIC_KEY');
-        if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
-            return response()->json([
-                'responseCode' => '4012500',
-                'responseMessage' => 'Unauthorized. Signature',
-            ], 401);
-        }
 
         // Semua validasi berhasil
         return null; // Tidak ada error, lanjutkan proses
