@@ -20,45 +20,63 @@ class InquiryBCAController extends Controller
 
 
     public function handleInquiry(Request $request)
-    {
-        Log::info('REQUEST Headers:', $request->headers->all());
-        Log::info('REQUEST Payload:', $request->all());
-        
-        //  validateHeaders functions
-        $headerValidation = $this->requestAccessToken($request);
-        if ($headerValidation) {
-            return $headerValidation;
-        }
-
-        // Further processing of the request
+{
+    Log::info('REQUEST Headers:', $request->headers->all());
+    Log::info('REQUEST Payload:', $request->all());
     
-        // Validasi input
-        $validated = $request->validate([
-            'partnerServiceId' => 'required|string',
-            'customerNo' => 'required|string',
-            'virtualAccountNo' => 'required|string',
-            'trxDateInit' => 'required|date',
-            'channelCode' => 'required|integer',
-            'additionalInfo' => 'nullable|array',
-            'inquiryRequestId' => 'required|string',
-        ]);
-
-        // Ambil data dari database
-        $user_data = DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->orderByDesc('tanggal_invoice')
-            ->first();
-
-        // Jika data tidak ditemukan, kembalikan respons gagal
-        if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated));
-        }
-
-        // Membuat respons berhasil
-        $response = $this->buildSuccessResponse($validated, $user_data);
-
-        return response()->json($response);
+    // Validasi header (Access Token)
+    $headerValidation = $this->requestAccessToken($request);
+    if ($headerValidation) {
+        return $headerValidation;
     }
+
+    // Validasi input dari request
+    $validated = $request->validate([
+        'partnerServiceId' => 'required|string',
+        'customerNo' => 'required|string',
+        'virtualAccountNo' => 'required|string',
+        'trxDateInit' => 'required|date',
+        'channelCode' => 'required|integer',
+        'additionalInfo' => 'nullable|array',
+        'inquiryRequestId' => 'required|string',
+    ]);
+
+    // Ambil data dari database berdasarkan virtualAccountNo
+    $user_data = DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $validated['virtualAccountNo'])  // Mencocokkan berdasarkan virtualAccountNo
+        ->orderByDesc('tanggal_invoice')
+        ->first();
+
+    // Jika data tidak ditemukan, kembalikan respons gagal
+    if (!$user_data) {
+        return response()->json($this->buildNotFoundResponse($validated));
+    }
+
+    // Logika perbandingan data request dengan data dari database
+    // Pastikan customerNo sesuai dengan ID pelanggan di database
+    if ($validated['customerNo'] !== $user_data->id_invoice) {
+        return response()->json([
+            'responseCode' => '4012501',  // Kode error jika customerNo tidak sesuai
+            'responseMessage' => 'Customer ID does not match with Virtual Account',
+        ], 401);
+    }
+
+    // Pastikan partnerServiceId sesuai dengan data yang ada di database (misal, berdasarkan layanan)
+    if ($validated['partnerServiceId'] !== '14999') {  // Misalnya nilai partnerServiceId yang valid adalah 14999
+        return response()->json([
+            'responseCode' => '4012502',  // Kode error jika partnerServiceId tidak valid
+            'responseMessage' => 'Invalid Partner Service ID',
+        ], 401);
+    }
+
+    // Logika lain (misalnya pemeriksaan tanggal transaksi atau data lainnya) bisa ditambahkan di sini
+
+    // Jika semua data valid, buat respons sukses
+    $response = $this->buildSuccessResponse($validated, $user_data);
+
+    return response()->json($response);
+}
+
 
     /**
      * Membuat respons untuk data yang ditemukan.
