@@ -332,11 +332,21 @@ EOF;
         }
 
         // Hapus prefix "Bearer " pada token
-        $token = str_replace('Bearer ', '', $token);
+        $token = trim(str_replace('Bearer ', '', $token));
+
+        // Validasi Timestamp (misalnya harus kurang dari 5 menit dari waktu server)
+        $currentTime = new \DateTime();
+        $requestTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $timeStamp);
+        if (!$requestTime || abs($currentTime->getTimestamp() - $requestTime->getTimestamp()) > 300) {
+            return response()->json([
+                'responseCode' => '4012501',
+                'message' => 'Invalid Timestamp'
+            ], 401);
+        }
 
         // Generate dan validasi signature
         $method = $request->method();
-        $url = $request->url();
+        $url = $request->fullUrl();
         $body = $request->all();
         $calculatedSignature = $this->generateServiceSignature(
             $clientSecret,
@@ -347,14 +357,6 @@ EOF;
             $body
         );
 
-        if (!$calculatedSignature) {
-            return response()->json([
-                'responseCode' => '4012500',
-                'message' => 'Unauthorized. [Signature]'
-            ], 401);
-        }
-
-        // Validasi signature terhadap yang dikirimkan
         if (!hash_equals($calculatedSignature, $signature)) {
             return response()->json([
                 'responseCode' => '4012500',
@@ -367,7 +369,6 @@ EOF;
             'responseCode' => '200',
             'message' => 'Success'
         ], 200);
-
     } catch (\Exception $e) {
         // Log error untuk debugging
         Log::error('BearerCheck Error: ' . $e->getMessage());
@@ -393,22 +394,25 @@ public function validateServiceSignature($clientSecret, $method, $url, $authToke
     // Validasi apakah signature sama
     return hash_equals($calculatedSignature, $signature);
 }
-private function hashbody($body)
+
+private function hashBody($body)
 {
     if (empty($body)) {
         $body = '';
     } else {
-        $body = json_encode($body, JSON_UNESCAPED_SLASHES);
+        $body = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
     return strtolower(hash('sha256', $body));
 }
+
 public function generateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash = [])
 {
-    $hash = $this->hashbody($bodyToHash);
+    $hash = $this->hashBody($bodyToHash);
     $stringToSign = $method . ":" . $this->getRelativeUrl($url) . ":" . $authToken . ":" . $hash . ":" . $isoTime;
 
     return base64_encode(hash_hmac('sha512', $stringToSign, $clientSecret, true));
 }
+
 private function getRelativeUrl($url)
 {
     $path = parse_url($url, PHP_URL_PATH) ?? '/';
@@ -420,8 +424,9 @@ private function getRelativeUrl($url)
         $query = '?' . http_build_query($parsedQuery);
     }
 
-    return $path . $query;
+    return $path . ($query ?? '');
 }
+
 
 }
 
