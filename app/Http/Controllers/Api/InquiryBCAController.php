@@ -25,7 +25,7 @@ class InquiryBCAController extends Controller
         Log::info('REQUEST Payload:', $request->all());
         
         //  validateHeaders functions
-        $headerValidation = $this->validateHeaders2($request);
+        $headerValidation = $this->requestAccessToken($request);
         if ($headerValidation) {
             return $headerValidation;
         }
@@ -294,7 +294,7 @@ EOF;
     public function requestAccessToken(Request $request)
     {
         // Validasi header terlebih dahulu
-        $headerValidation = $this->validateHeaders($request);
+        $headerValidation = $this->validateHeaders2($request);
         if ($headerValidation) {
             // Jika ada error dalam validasi header, langsung return respons error
             return $headerValidation;
