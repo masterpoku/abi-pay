@@ -312,8 +312,8 @@ EOF;
 
         // Lanjutkan dengan logika akses token
         return response()->json([
-            'responseCode' => '2002400',
-            'responseMessage' => 'Access Token Valid',
+            'responseCode' => '4012500',
+            'responseMessage' => 'Unauthorized. [Signature]',
         ], 200);
     }
     public function BearerCheck(Request $request)
