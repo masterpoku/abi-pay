@@ -61,6 +61,7 @@ Route::prefix('bca')->group(function () {
     Route::post('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'handleInquiry']);
     Route::get('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'index']);
     
+    
 });
 
 

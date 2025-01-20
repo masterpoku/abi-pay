@@ -69,9 +69,9 @@ class InquiryBCAController extends Controller
                     "english" => "Success",
                     "indonesia" => "Sukses"
                 ],
-                "partnerServiceId" => $validated['partnerServiceId'],
+                "partnerServiceId" => " ".$validated['partnerServiceId'],
                 "customerNo" => $user_data->id_invoice,
-                "virtualAccountNo" => $user_data->id_invoice,
+                "virtualAccountNo" => " ".$user_data->id_invoice,
                 "virtualAccountName" => $user_data->nama_jamaah,
                 "inquiryRequestId" => $validated['inquiryRequestId'],
                 "totalAmount" => [
@@ -79,30 +79,12 @@ class InquiryBCAController extends Controller
                     "currency" => "IDR"
                 ],
                 "subCompany" => "00000",
-                "billDetails" => [
-                    [
-                        "billNo" => $user_data->id_invoice,
-                        "billDescription" => [
-                            "english" => "ABITOUR TRAVEL",
-                            "indonesia" => "ABITOUR TRAVEL"
-                        ],
-                        "billSubCompany" => "00000",
-                        "billAmount" => [
-                            "value" => $user_data->nominal_tagihan,
-                            "currency" => "IDR"
-                        ]
-                    ]
-                ],
+                "billDetails" => [],
                 "freeTexts" => [
                     [
                         "english" => $user_data->nama_paket,
                         "indonesia" => $user_data->nama_paket
                     ]
-                ],
-                "virtualAccountTrxType" => "C",
-                "feeAmount" => [
-                    "value" => "",
-                    "currency" => ""
                 ],
                 "additionalInfo" => [
                     "additionalInfo1" => [
