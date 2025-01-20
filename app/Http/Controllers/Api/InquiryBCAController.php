@@ -241,11 +241,6 @@ class InquiryBCAController extends Controller
                 'responseMessage' => 'Missing Mandatory Field [X-CLIENT-KEY/X-SIGNATURE/X-TIMESTAMP]',
             ], 400);
         }
-
-  
-
-
-
         // Validasi format timestamp (ISO 8601)
         if (!$this->isValidIso8601($timeStamp)) {
             return response()->json([
@@ -368,7 +363,11 @@ EOF;
         }
 
         // Validasi berhasil
-        return null;
+        return response()->json([
+            'responseCode' => '200',
+            'message' => 'Success'
+        ], 200);
+
     } catch (\Exception $e) {
         // Log error untuk debugging
         Log::error('BearerCheck Error: ' . $e->getMessage());
