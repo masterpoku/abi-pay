@@ -307,77 +307,86 @@ EOF;
         ], 200);
     }
     public function BearerCheck(Request $request)
-{
-    try {
-        // Ambil header dari request
-        $token = $request->header('Authorization');
-        $timeStamp = $request->header('X-TIMESTAMP');
-        $signature = $request->header('X-SIGNATURE');
-        $clientSecret = env('BCA_CLIENT_SECRET');
-
-        // Validasi keberadaan header wajib
-        if (!$token || !$timeStamp || !$signature) {
+    {
+        try {
+            // Ambil header dari request
+            $authorizationHeader = $request->header('Authorization');
+            $timeStamp = $request->header('X-TIMESTAMP');
+            $signature = $request->header('X-SIGNATURE');
+            $clientSecret = env('BCA_CLIENT_SECRET');
+    
+            // Validasi keberadaan header wajib
+            if (!$authorizationHeader || !$timeStamp || !$signature) {
+                return response()->json([
+                    'responseCode' => '4012501',
+                    'message' => 'Invalid Token (B2B)'
+                ], 401);
+            }
+    
+            // Validasi format Bearer Token
+            if (!str_starts_with($authorizationHeader, 'Bearer ')) {
+                return response()->json([
+                    'responseCode' => '4012501',
+                    'message' => 'Invalid Token (B2B)'
+                ], 401);
+            }
+    
+            // Ambil token setelah prefix "Bearer "
+            $token = trim(str_replace('Bearer ', '', $authorizationHeader));
+    
+            // Validasi format token (contoh: panjang token 43 karakter alfanumerik)
+            if (!preg_match('/^[a-zA-Z0-9]{43}$/', $token)) {
+                return response()->json([
+                    'responseCode' => '4012501',
+                    'message' => 'Invalid Token Format'
+                ], 401);
+            }
+    
+            // Validasi Timestamp
+            $currentTime = new \DateTime();
+            $requestTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $timeStamp);
+            if (!$requestTime || abs($currentTime->getTimestamp() - $requestTime->getTimestamp()) > 300) {
+                return response()->json([
+                    'responseCode' => '4012501',
+                    'message' => 'Invalid Timestamp'
+                ], 401);
+            }
+    
+            // Generate dan validasi signature
+            $method = $request->method();
+            $url = $request->fullUrl();
+            $body = $request->all();
+            $calculatedSignature = $this->generateServiceSignature(
+                $clientSecret,
+                $method,
+                $url,
+                $token,
+                $timeStamp,
+                $body
+            );
+    
+            if (!hash_equals($calculatedSignature, $signature)) {
+                return response()->json([
+                    'responseCode' => '4012500',
+                    'message' => 'Unauthorized. [Signature]'
+                ], 401);
+            }
+    
+            // Validasi berhasil
             return response()->json([
-                'responseCode' => '4012501',
-                'message' => 'Invalid Token (B2B)'
-            ], 401);
-        }
-
-        // Validasi format Bearer Token
-        if (!str_starts_with($token, 'Bearer ')) {
+                'responseCode' => '200',
+                'message' => 'Success'
+            ], 200);
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('BearerCheck Error: ' . $e->getMessage());
             return response()->json([
-                'responseCode' => '4012501',
-                'message' => 'Invalid Token (B2B)'
-            ], 401);
+                'responseCode' => '5002500',
+                'message' => 'Internal Server Error'
+            ], 500);
         }
-
-        // Hapus prefix "Bearer " pada token
-        $token = trim(str_replace('Bearer ', '', $token));
-
-        // Validasi Timestamp (misalnya harus kurang dari 5 menit dari waktu server)
-        $currentTime = new \DateTime();
-        $requestTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $timeStamp);
-        if (!$requestTime || abs($currentTime->getTimestamp() - $requestTime->getTimestamp()) > 300) {
-            return response()->json([
-                'responseCode' => '4012501',
-                'message' => 'Invalid Timestamp'
-            ], 401);
-        }
-
-        // Generate dan validasi signature
-        $method = $request->method();
-        $url = $request->fullUrl();
-        $body = $request->all();
-        $calculatedSignature = $this->generateServiceSignature(
-            $clientSecret,
-            $method,
-            $url,
-            $token,
-            $timeStamp,
-            $body
-        );
-
-        if (!hash_equals($calculatedSignature, $signature)) {
-            return response()->json([
-                'responseCode' => '4012500',
-                'message' => 'Unauthorized. [Signature]'
-            ], 401);
-        }
-
-        // Validasi berhasil
-        return response()->json([
-            'responseCode' => '200',
-            'message' => 'Success'
-        ], 200);
-    } catch (\Exception $e) {
-        // Log error untuk debugging
-        Log::error('BearerCheck Error: ' . $e->getMessage());
-        return response()->json([
-            'responseCode' => '5002500',
-            'message' => 'Internal Server Error'
-        ], 500);
     }
-}
+    
 
 public function validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)
 {
