@@ -288,7 +288,7 @@ EOF;
                     'message' => 'Invalid Token (B2B)'
                 ], 401);
             }
-            // return response()->json(['message' => 'Valid Token (B2B)'], 200);
+            return response()->json(['message' => 'Valid Token (B2B)'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'responseCode' => '5002601',
