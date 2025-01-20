@@ -92,9 +92,9 @@ class InquiryBCAController extends Controller
                     "english" => "Success",
                     "indonesia" => "Sukses"
                 ],
-                "partnerServiceId" => " ".$validated['partnerServiceId'],
+                "partnerServiceId" => $validated['partnerServiceId'],
                 "customerNo" => $user_data->id_invoice,
-                "virtualAccountNo" => " ".$user_data->id_invoice,
+                "virtualAccountNo" => $user_data->id_invoice,
                 "virtualAccountName" => $user_data->nama_jamaah,
                 "inquiryRequestId" => $validated['inquiryRequestId'],
                 "totalAmount" => [
