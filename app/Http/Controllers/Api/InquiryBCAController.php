@@ -228,7 +228,7 @@ class InquiryBCAController extends Controller
     private function validateHeaders2(Request $request)
     {
         // Ambil header dari request
-        return $this->BearerCheck($request);
+        $this->BearerCheck($request);
      
         $signature = $request->header('X-SIGNATURE');
         $timeStamp = $request->header('X-TIMESTAMP');
@@ -253,7 +253,7 @@ class InquiryBCAController extends Controller
         $publicKey = env('BCA_PUBLIC_KEY');
         if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
             return response()->json([
-                'responseCode' => '4012501',
+                'responseCode' => '4012500',
                 'responseMessage' => 'Unauthorized. Signature',
             ], 401);
         }
