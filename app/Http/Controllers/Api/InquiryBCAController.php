@@ -28,8 +28,8 @@ class InquiryBCAController extends Controller
         $headerValidation = $this->validateHeaders($request);
         $bearerValidation = $this->BearerCheck($request);
 
-        if ($headerValidation !== null || $bearerValidation !== null) {
-            return $headerValidation ?: $bearerValidation;
+        if ($bearerValidation !== null || $headerValidation !== null) {
+            return $bearerValidation ?: $headerValidation;
         }
 
         // Further processing of the request
