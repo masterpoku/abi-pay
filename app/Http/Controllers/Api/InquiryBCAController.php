@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Api\PaymentBCAController;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class InquiryBCAController extends Controller
@@ -21,23 +20,19 @@ class InquiryBCAController extends Controller
 
     public function handleInquiry(Request $request)
     {
-
-
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
+    // dd($request->all());
 
-      
         $this->validateHeaders($request);
-        $this->validateRequest($request);
-
-
-      $validated = $request->validate([
+        // Validasi input
+        $validated = $request->validate([
             'partnerServiceId' => 'required|string',
-            'customerNo' => 'nullable|string',  // CustomerNo bisa kosong jika tidak diisi
-            'virtualAccountNo' => 'required|string',  // Validasi akun virtual, bisa menggunakan 'digits' jika diperlukan
-            'trxDateTime' => 'required|date_format:Y-m-d\TH:i:sP',  // Memastikan format tanggal sesuai
+            'customerNo' => 'required|string',
+            'virtualAccountNo' => 'required|string',
+            'trxDateInit' => 'required|date',
             'channelCode' => 'required|integer',
-            'additionalInfo' => 'nullable|array',  // Additional info bisa kosong jika tidak ada
+            'additionalInfo' => 'nullable|array',
             'inquiryRequestId' => 'required|string',
         ]);
 
@@ -57,78 +52,7 @@ class InquiryBCAController extends Controller
 
         return response()->json($response);
     }
-    
 
-
-public function validateRequest(Request $request)
-{
-    $this->validatedToken($request);
-    // Ambil X-EXTERNAL-ID dan paymentRequestId dari request
-    $externalId = $request->header('X-EXTERNAL-ID');
-    $paymentRequestId = $request->input('paymentRequestId');
-    
-    // Ambil trxDateTime dari payload
-    $trxDateTime = $request->input('trxDateTime');
-    // dd($trxDateTime);
-    // Mengonversi format tanggal dari payload ke format yang sesuai dengan database
-    $formattedDate = Carbon::parse($trxDateTime)->format('Y-m-d H:i:s');
-    
-    // Jika external_id atau payment_request_id kosong, maka validasi berdasarkan tanggal (trxDateTime)
-    if (empty($externalId) || empty($paymentRequestId)) {
-        // Ambil data terakhir dari request_logs yang timestamp lebih dari 5 menit yang lalu
-        $lastRequest = DB::table('request_logs')
-            ->orderByDesc('timestamp') // Mengambil data terakhir
-            ->first();
-        // dd(Carbon::parse($lastRequest->timestamp)->diffInMinutes(Carbon::parse($formattedDate)));
-        // Jika data ada dan waktu kurang dari 5 menit dari request yang baru
-        if ($lastRequest && Carbon::parse($lastRequest->timestamp)->diffInMinutes(Carbon::parse($formattedDate)) < 5) {
-            return response()->json([
-                'responseCode' => '4042518',
-                'responseMessage' => 'Inconsistent Request',
-                'paymentFlagStatus' => 'Duplicate request detected'
-            ], 200); // Menggunakan kode status HTTP 400 Bad Request
-        }
-
-        // Jika request belum ada atau sudah lebih dari 5 menit, simpan log
-        DB::table('request_logs')->insert([
-            'external_id' => null, // Tidak ada external_id jika kosong
-            'payment_request_id' => null, // Tidak ada payment_request_id jika kosong
-            'status' => 'pending',
-            'timestamp' => $formattedDate
-        ]);
-    } else {
-        // Jika ada external_id dan payment_request_id, cek data terakhir
-        $lastRequest = DB::table('request_logs')
-            ->where('external_id', $externalId)
-            ->where('payment_request_id', $paymentRequestId)
-            ->orderByDesc('timestamp') // Mengambil data terakhir
-            ->first();
-        
-        // Jika data ada dan waktu kurang dari 5 menit dari request yang baru
-        if ($lastRequest && Carbon::parse($lastRequest->timestamp)->diffInMinutes(Carbon::parse($formattedDate)) < 5) {
-            return response()->json([
-                'responseCode' => '4042518',
-                'responseMessage' => 'Inconsistent Request',
-                'paymentFlagStatus' => 'Duplicate request detected'
-            ], 200); // Menggunakan kode status HTTP 400 Bad Request
-        }
-        
-        // Jika request belum ada atau sudah lebih dari 5 menit, simpan log
-        DB::table('request_logs')->insert([
-            'external_id' => $externalId,
-            'payment_request_id' => $paymentRequestId,
-            'status' => 'pending',
-            'timestamp' => $formattedDate
-        ]);
-    }
-    
-    // Lanjutkan dengan proses normal jika request valid
-    return true;
-}
-
-    
-
-    
     /**
      * Membuat respons untuk data yang ditemukan.
      */
@@ -261,8 +185,6 @@ public function validateRequest(Request $request)
      */
     private function validateHeaders(Request $request)
     {
-        Log::info('validateHeaders REQUEST Headers:', $request->headers->all());
-        Log::info('validateHeaders REQUEST Payload:', $request->all());
         // Ambil header dari request
         $clientId = $request->header('X-CLIENT-KEY');
         $signature = $request->header('X-SIGNATURE');
@@ -358,17 +280,6 @@ EOF;
             'responseCode' => '2002400',
             'responseMessage' => 'Access Token Valid',
         ], 200);
-    }
-    public function  validatedToken(Request $request)
-    {
-        $headerValidation = $this->validateHeaders($request);
-        if ($headerValidation) {
-            return $headerValidation;
-        }
-        return response()->json([
-            'responseCode' => '4012401',
-            'responseMessage' => 'Invalid Token (B2B)',
-        ], 401);
     }
 }
 
