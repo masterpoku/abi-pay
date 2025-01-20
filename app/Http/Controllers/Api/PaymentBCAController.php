@@ -67,7 +67,7 @@ class PaymentBCAController extends Controller
             if (isset($responseArray['error'])) {
                 return response()->json(['message' => $responseArray['error_description'] ?? 'Error occurred'], 500);
             }
-            DB::table('tokens')->insert([
+            DB::table('token')->insert([
                 'token' => $responseArray['access_token'],
                 'created_at' => DB::raw('CURRENT_TIMESTAMP')
             ]);

@@ -333,7 +333,7 @@ EOF;
     
             // Ambil token setelah prefix "Bearer "
             $token = trim(str_replace('Bearer ', '', $authorizationHeader));
-            $result = DB::select("SELECT tokens FROM token WHERE token = ? LIMIT 1", [$token]);
+            $result = DB::select("SELECT token FROM token WHERE token = ? LIMIT 1", [$token]);
             
             // Validasi format token (contoh: panjang token 43 karakter alfanumerik)
             if (!preg_match('/^[a-zA-Z0-9]{43}$/', $token)) {
