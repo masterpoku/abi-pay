@@ -320,57 +320,65 @@ EOF;
         $signature = $request->header('X-SIGNATURE');
         $clientSecret = env('BCA_CLIENT_SECRET');
 
-        // Validasi keberadaan header
+        // Validasi keberadaan header wajib
         if (!$token || !$timeStamp || !$signature) {
             return response()->json([
-                'responseCode' => '4002601',
-                'message' => 'Missing Mandatory Header [Authorization/X-TIMESTAMP/X-SIGNATURE]'
-            ], 400);
+                'responseCode' => '4012501',
+                'message' => 'Invalid Token (B2B)'
+            ], 401);
         }
 
-        // Cek format token Bearer
+        // Validasi format Bearer Token
         if (!str_starts_with($token, 'Bearer ')) {
             return response()->json([
-                'responseCode' => '4012602',
-                'message' => 'Invalid Authorization Format. Bearer Token Required.'
+                'responseCode' => '4012501',
+                'message' => 'Invalid Token (B2B)'
             ], 401);
         }
 
         // Hapus prefix "Bearer " pada token
         $token = str_replace('Bearer ', '', $token);
 
-        // Validasi signature
+        // Generate dan validasi signature
         $method = $request->method();
         $url = $request->url();
         $body = $request->all();
-        $isValidSignature = $this->validateServiceSignature(
+        $calculatedSignature = $this->generateServiceSignature(
             $clientSecret,
             $method,
             $url,
             $token,
             $timeStamp,
-            $body,
-            $signature
+            $body
         );
 
-        if (!$isValidSignature) {
+        if (!$calculatedSignature) {
             return response()->json([
-                'responseCode' => '4012603',
-                'message' => 'Unauthorized. Invalid Signature.'
+                'responseCode' => '4012500',
+                'message' => 'Unauthorized. [Signature]'
             ], 401);
         }
 
-        // Validasi berhasil, lanjutkan proses
+        // Validasi signature terhadap yang dikirimkan
+        if (!hash_equals($calculatedSignature, $signature)) {
+            return response()->json([
+                'responseCode' => '4012500',
+                'message' => 'Unauthorized. [Signature]'
+            ], 401);
+        }
+
+        // Validasi berhasil
         return null;
     } catch (\Exception $e) {
         // Log error untuk debugging
         Log::error('BearerCheck Error: ' . $e->getMessage());
         return response()->json([
-            'responseCode' => '5002601',
+            'responseCode' => '5002500',
             'message' => 'Internal Server Error'
         ], 500);
     }
 }
+
 public function validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)
 {
     // Generate signature dari data yang diterima
