@@ -194,10 +194,11 @@ EOF;
             $body = $request->all();
             $signature = $request->header('X-SIGNATURE');
             $isValidSignatureApi = $this->validateServiceSignature($client_secret, $method, $url, $token,$time_stamp, $body,$signature);
-            if($isValidSignatureApi){
-                return response()->json(['message' => 'Valid Token'], 200);
-            }else{
-                return response()->json(['message' => 'Invalid Token (B2B)'], 401);
+            if (!$isValidSignatureApi) {
+                return response()->json([
+                    'responseCode' => '4012601',
+                    'message' => 'Invalid Token (B2B)'
+                ], 401);
             }
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
