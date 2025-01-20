@@ -24,12 +24,10 @@ class InquiryBCAController extends Controller
         Log::info('REQUEST Headers:', $request->headers->all());
         Log::info('REQUEST Payload:', $request->all());
         
-        // Execute BearerCheck and validateHeaders functions
+        //  validateHeaders functions
         $headerValidation = $this->validateHeaders($request);
-        $bearerValidation = $this->BearerCheck($request);
-
-        if ($bearerValidation !== null || $headerValidation !== null) {
-            return $bearerValidation ?: $headerValidation;
+        if ($headerValidation) {
+            return $headerValidation;
         }
 
         // Further processing of the request
@@ -177,6 +175,7 @@ class InquiryBCAController extends Controller
     private function validateHeaders(Request $request)
     {
         // Ambil header dari request
+        $this->BearerCheck($request);
         $clientId = $request->header('X-CLIENT-KEY');
         $signature = $request->header('X-SIGNATURE');
         $timeStamp = $request->header('X-TIMESTAMP');
@@ -226,7 +225,47 @@ class InquiryBCAController extends Controller
         // Semua validasi berhasil
         return null; // Tidak ada error, lanjutkan proses
     }
+    private function validateHeaders2(Request $request)
+    {
+        // Ambil header dari request
+        $this->BearerCheck($request);
+     
+        $signature = $request->header('X-SIGNATURE');
+        $timeStamp = $request->header('X-TIMESTAMP');
+        $clientKey = env('BCA_CLIENT_KEY');
 
+        // Cek keberadaan header yang wajib
+        if ( !$signature || !$timeStamp) {
+            return response()->json([
+                'responseCode' => '4002402',
+                'responseMessage' => 'Missing Mandatory Field [X-CLIENT-KEY/X-SIGNATURE/X-TIMESTAMP]',
+            ], 400);
+        }
+
+  
+
+
+
+        // Validasi format timestamp (ISO 8601)
+        if (!$this->isValidIso8601($timeStamp)) {
+            return response()->json([
+                'responseCode' => '4002401',
+                'responseMessage' => 'Invalid Field Format [X-TIMESTAMP]',
+            ], 400);
+        }
+
+        // Validasi signature (simulasi validasi di sini, gunakan metode asli di implementasi)
+        $publicKey = env('BCA_PUBLIC_KEY');
+        if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
+            return response()->json([
+                'responseCode' => '4012400',
+                'responseMessage' => 'Unauthorized. Signature',
+            ], 401);
+        }
+
+        // Semua validasi berhasil
+        return null; // Tidak ada error, lanjutkan proses
+    }
     /**
      * Validasi apakah string adalah format ISO 8601.
      */
@@ -286,13 +325,14 @@ EOF;
             $body = $request->all();
             $signature = $request->header('X-SIGNATURE');
             $isValidSignatureApi = $this->validateServiceSignature($client_secret, $method, $url, $token,$time_stamp, $body,$signature);
+            // return $isValidSignatureApi;
             if (!$isValidSignatureApi) {
                 return response()->json([
                     'responseCode' => '4012601',
                     'message' => 'Invalid Token (B2B)'
                 ], 401);
             }
-            return response()->json(['message' => 'Valid Token (B2B)'], 200);
+            // return response()->json(['message' => 'Valid Token (B2B)'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'responseCode' => '5002601',
