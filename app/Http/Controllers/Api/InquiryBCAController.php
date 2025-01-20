@@ -228,7 +228,7 @@ class InquiryBCAController extends Controller
     private function validateHeaders2(Request $request)
     {
         // Ambil header dari request
-        $this->BearerCheck($request);
+        return $this->BearerCheck($request);
      
         $signature = $request->header('X-SIGNATURE');
         $timeStamp = $request->header('X-TIMESTAMP');
