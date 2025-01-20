@@ -25,8 +25,12 @@ class InquiryBCAController extends Controller
         Log::info('REQUEST Payload:', $request->all());
         
         // Execute BearerCheck and validateHeaders functions
-        $this->BearerCheck($request);
-        $this->validateHeaders($request);
+        $headerValidation = $this->validateHeaders($request);
+        $bearerValidation = $this->BearerCheck($request);
+
+        if ($headerValidation !== null || $bearerValidation !== null) {
+            return $headerValidation ?: $bearerValidation;
+        }
 
         // Further processing of the request
     
