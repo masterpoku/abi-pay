@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentBCAController extends Controller
 {
@@ -65,7 +66,8 @@ class PaymentBCAController extends Controller
             if (isset($responseArray['error'])) {
                 return response()->json(['message' => $responseArray['error_description'] ?? 'Error occurred'], 500);
             }
-    
+            Log::info("Access Token: " . $responseArray['access_token']);
+            
             // Kembalikan access token
             return response()->json([
                 'responseCode' => '2007300',
