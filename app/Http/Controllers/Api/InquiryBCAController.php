@@ -339,12 +339,14 @@ EOF;
             if (!preg_match('/^[a-zA-Z0-9]{43}$/', $token)) {
                 return response()->json([
                     'responseCode' => '4012501',
+                    'responseMessage' => 'Invalid Token Format',
                     'message' => 'Invalid Token Format'
                 ], 401);
             }
             if (empty($result)) {
                 return response()->json([
                     'responseCode' => '4012501',
+                    'responseMessage' => 'Invalid Token (B2B)',
                     'message' => 'Invalid Token (B2B)'
                 ], 401);
             }
