@@ -21,13 +21,15 @@ class InquiryBCAController extends Controller
 
     public function handleInquiry(Request $request)
     {
-
-    Log::info('REQUEST Headers:', $request->headers->all());
-    Log::info('REQUEST Payload:', $request->all());
-    // dd($request->all());
+        Log::info('REQUEST Headers:', $request->headers->all());
+        Log::info('REQUEST Payload:', $request->all());
         
+        // Execute BearerCheck and validateHeaders functions
+        $this->BearerCheck($request);
         $this->validateHeaders($request);
 
+        // Further processing of the request
+    
         // Validasi input
         $validated = $request->validate([
             'partnerServiceId' => 'required|string',
@@ -216,7 +218,7 @@ class InquiryBCAController extends Controller
                 'responseMessage' => 'Unauthorized. Signature',
             ], 401);
         }
-        $this->BearerCheck($request);
+
         // Semua validasi berhasil
         return null; // Tidak ada error, lanjutkan proses
     }
@@ -286,7 +288,7 @@ EOF;
                     'message' => 'Invalid Token (B2B)'
                 ], 401);
             }
-            return response()->json(['message' => 'Valid Token (B2B)'], 200);
+            // return response()->json(['message' => 'Valid Token (B2B)'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'responseCode' => '5002601',
