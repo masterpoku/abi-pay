@@ -25,7 +25,7 @@ class InquiryBCAController extends Controller
         Log::info('REQUEST Payload:', $request->all());
         
         //  validateHeaders functions
-        $headerValidation = $this->validateHeaders($request);
+        $headerValidation = $this->validateHeaders2($request);
         if ($headerValidation) {
             return $headerValidation;
         }
@@ -175,7 +175,7 @@ class InquiryBCAController extends Controller
     private function validateHeaders(Request $request)
     {
         // Ambil header dari request
-        $this->BearerCheck($request);
+        // $this->BearerCheck($request);
         $clientId = $request->header('X-CLIENT-KEY');
         $signature = $request->header('X-SIGNATURE');
         $timeStamp = $request->header('X-TIMESTAMP');
