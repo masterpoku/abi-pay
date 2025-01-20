@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Api\PaymentBCAController;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class InquiryBCAController extends Controller
@@ -20,10 +21,11 @@ class InquiryBCAController extends Controller
 
     public function handleInquiry(Request $request)
     {
+
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
     // dd($request->all());
-
+        $this->BearerCheck($request);
         $this->validateHeaders($request);
         // Validasi input
         $validated = $request->validate([
@@ -280,6 +282,83 @@ EOF;
             'responseCode' => '2002400',
             'responseMessage' => 'Access Token Valid',
         ], 200);
+    }
+    public function BearerCheck(Request $request)
+    {
+        try {
+
+            // Ambil header dari request
+            $token = $request->header('Authorization');
+            $token = str_replace('Bearer ', '', $token);
+            $client_secret = env('BCA_CLIENT_SECRET');
+            $method = $request->method();
+            $url = $request->url();
+            $time_stamp = $request->header('X-TIMESTAMP');
+            $body = $request->all();
+            $signature = $request->header('X-SIGNATURE');
+            $isValidSignatureApi = $this->validateServiceSignature($client_secret, $method, $url, $token,$time_stamp, $body,$signature);
+            if (!$isValidSignatureApi) {
+                return response()->json([
+                    'responseCode' => '4012601',
+                    'message' => 'Invalid Token (B2B)'
+                ], 401);
+            }
+            // return response()->json(['message' => 'Valid Token (B2B)'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'responseCode' => '5002601',
+                'message' => 'Internal Server Error'
+            ], 500);
+        }
+    }
+    private function getRelativeUrl($url)
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        if (empty($path)) {
+            $path = '/';
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+        if ($query) {
+            parse_str($query, $parsed);
+            ksort($parsed);
+            $query = '?' . http_build_query($parsed);
+        }
+        $formatedUrl = $path . $query;
+        return $formatedUrl;
+    }
+
+    public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
+    {
+        $hash = hash("sha256", "");
+        if (is_array($bodyToHash)) {
+            $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
+            $hash = $this->hashbody($encoderData);
+        }
+        
+        $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
+        $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
+		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
+        return $signature;
+    }
+
+    public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
+        $is_valid = false;
+        $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
+        if(strcmp($signatureStr, $signature) == 0){
+            $is_valid = true;
+        }
+        return $is_valid;
+    }
+    private function hashbody($body)
+    {
+        if (empty($body)) {
+            $body = '';
+        } else {
+            //$toStrip = [" ", "\r", "\n", "\t"];
+            //$body = str_replace($toStrip, '', $body);
+        }
+        return strtolower(hash('sha256', $body));
     }
 }
 
