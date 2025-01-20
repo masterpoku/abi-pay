@@ -333,7 +333,8 @@ EOF;
     
             // Ambil token setelah prefix "Bearer "
             $token = trim(str_replace('Bearer ', '', $authorizationHeader));
-    
+            $result = DB::select("SELECT tokens FROM token WHERE token = ? LIMIT 1", [$token]);
+            
             // Validasi format token (contoh: panjang token 43 karakter alfanumerik)
             if (!preg_match('/^[a-zA-Z0-9]{43}$/', $token)) {
                 return response()->json([
@@ -341,7 +342,12 @@ EOF;
                     'message' => 'Invalid Token Format'
                 ], 401);
             }
-    
+            if (empty($result)) {
+                return response()->json([
+                    'responseCode' => '4012501',
+                    'message' => 'Invalid Token (B2B)'
+                ], 401);
+            }
             // Validasi Timestamp
             $currentTime = new \DateTime();
             $requestTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $timeStamp);
@@ -373,10 +379,7 @@ EOF;
             }
     
             // Validasi berhasil
-            return response()->json([
-                'responseCode' => '200',
-                'message' => 'Success'
-            ], 200);
+     
         } catch (\Exception $e) {
             // Log error untuk debugging
             Log::error('BearerCheck Error: ' . $e->getMessage());
