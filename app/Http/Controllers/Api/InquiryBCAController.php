@@ -318,11 +318,7 @@ EOF;
 if (is_array($errorResponse) && isset($errorResponse['statusCode'])) {
     return response()->json($errorResponse, $errorResponse['statusCode']);
 } else {
-    // Handle the case where the response is invalid
-    return response()->json([
-        'statusCode' => 500,
-        'message' => 'Error response structure is invalid',
-    ], 500);
+    return null;
 }
 
 }
