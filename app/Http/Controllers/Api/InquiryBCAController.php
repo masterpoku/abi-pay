@@ -30,7 +30,51 @@ class InquiryBCAController extends Controller
         return $headerValidation;
     }
 
-    
+    // Validasi input dari request
+    $validated = $request->validate([
+        'partnerServiceId' => 'required|string',
+        'customerNo' => 'required|string',
+        'virtualAccountNo' => 'required|string',
+        'trxDateInit' => 'required|date',
+        'channelCode' => 'required|integer',
+        'additionalInfo' => 'nullable|array',
+        'inquiryRequestId' => 'required|string',
+    ]);
+
+    // Ambil data dari database berdasarkan virtualAccountNo
+    $user_data = DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $validated['virtualAccountNo'])  // Mencocokkan berdasarkan virtualAccountNo
+        ->orderByDesc('tanggal_invoice')
+        ->first();
+
+    // Jika data tidak ditemukan, kembalikan respons gagal
+    if (!$user_data) {
+        return response()->json($this->buildNotFoundResponse($validated), 400);
+    }
+
+    // Logika perbandingan data request dengan data dari database
+    // Pastikan customerNo sesuai dengan ID pelanggan di database
+    if ($validated['customerNo'] !== $user_data->id_invoice) {
+        return response()->json([
+            'responseCode' => '4012501',  // Kode error jika customerNo tidak sesuai
+            'responseMessage' => 'Customer ID does not match with Virtual Account',
+        ], 401);
+    }
+
+    // Pastikan partnerServiceId sesuai dengan data yang ada di database (misal, berdasarkan layanan)
+    if ($validated['partnerServiceId'] !== '14999') {  // Misalnya nilai partnerServiceId yang valid adalah 14999
+        return response()->json([
+            'responseCode' => '4012502',  // Kode error jika partnerServiceId tidak valid
+            'responseMessage' => 'Invalid Partner Service ID',
+        ], 401);
+    }
+
+    // Logika lain (misalnya pemeriksaan tanggal transaksi atau data lainnya) bisa ditambahkan di sini
+
+    // Jika semua data valid, buat respons sukses
+    $response = $this->buildSuccessResponse($validated, $user_data);
+
+    return response()->json($response);
 }
 
 
@@ -270,53 +314,6 @@ EOF;
         $errorResponse = $this->buildErrorResponse($request);
     
         // Return the JSON response with dynamic statusCode
-        if ($errorResponse === null) {
-           // Validasi input dari request
-    $validated = $request->validate([
-        'partnerServiceId' => 'required|string',
-        'customerNo' => 'required|string',
-        'virtualAccountNo' => 'required|string',
-        'trxDateInit' => 'required|date',
-        'channelCode' => 'required|integer',
-        'additionalInfo' => 'nullable|array',
-        'inquiryRequestId' => 'required|string',
-    ]);
-
-    // Ambil data dari database berdasarkan virtualAccountNo
-    $user_data = DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $validated['virtualAccountNo'])  // Mencocokkan berdasarkan virtualAccountNo
-        ->orderByDesc('tanggal_invoice')
-        ->first();
-
-    // Jika data tidak ditemukan, kembalikan respons gagal
-    if (!$user_data) {
-        return response()->json($this->buildNotFoundResponse($validated), 400);
-    }
-
-    // Logika perbandingan data request dengan data dari database
-    // Pastikan customerNo sesuai dengan ID pelanggan di database
-    if ($validated['customerNo'] !== $user_data->id_invoice) {
-        return response()->json([
-            'responseCode' => '4012501',  // Kode error jika customerNo tidak sesuai
-            'responseMessage' => 'Customer ID does not match with Virtual Account',
-        ], 401);
-    }
-
-    // Pastikan partnerServiceId sesuai dengan data yang ada di database (misal, berdasarkan layanan)
-    if ($validated['partnerServiceId'] !== '14999') {  // Misalnya nilai partnerServiceId yang valid adalah 14999
-        return response()->json([
-            'responseCode' => '4012502',  // Kode error jika partnerServiceId tidak valid
-            'responseMessage' => 'Invalid Partner Service ID',
-        ], 401);
-    }
-
-    // Logika lain (misalnya pemeriksaan tanggal transaksi atau data lainnya) bisa ditambahkan di sini
-
-    // Jika semua data valid, buat respons sukses
-    $response = $this->buildSuccessResponse($validated, $user_data);
-
-    return response()->json($response);
-        }
         return response()->json($errorResponse, $errorResponse['statusCode']);
     }
     
@@ -354,7 +351,7 @@ EOF;
         // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
-        $virtualaccount =  $validated['virtualAccountNo'] ?? null;
+        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
         $statusCode = 400; // HTTP Bad Request
     } elseif ($isFixedBillConflict) {
         // If there is a Fixed Bill conflict
@@ -363,7 +360,11 @@ EOF;
         $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
         $statusCode = 409; // HTTP Conflict
     } else {
-       return null;
+        // If valid virtualAccountNo
+        $responseCode = '4002502'; // Virtual Account not found
+        $responseMessage = "Unauthorized. Virtual Account not found.";
+        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
+        $statusCode = 400; // HTTP Bad Request
     }
 
     return [
