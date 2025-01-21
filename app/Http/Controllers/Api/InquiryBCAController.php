@@ -21,13 +21,13 @@ class InquiryBCAController extends Controller
 
     public function handleInquiry(Request $request)
 {
-// Log request data
-Log::info('Request Data:', $request->all());
+    // Log request data
+    Log::info('Request Data:', $request->all());
 
-// Log all headers
-foreach ($request->headers->all() as $key => $value) {
-    Log::info('Header: ' . $key, $value);
-}
+    // Log all headers
+    foreach ($request->headers->all() as $key => $value) {
+        Log::info('Header: ' . $key, $value);
+    }
 
     // Ambil token dari header Authorization dan hapus kata 'Bearer'
     $authorizationHeader = $request->header('Authorization');
