@@ -376,7 +376,7 @@ EOF;
             ],
             "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
             "customerNo" => $validated['customerNo'] ?? "040002",
-            "virtualAccountNo" => $validated['virtualAccountNo'] ?? null,
+            "virtualAccountNo" => "   " . $validated['virtualAccountNo'] ?? null,
             "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
         ]
     ];
