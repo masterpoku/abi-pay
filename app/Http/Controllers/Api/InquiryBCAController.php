@@ -361,10 +361,10 @@ EOF;
         $statusCode = 409; // HTTP Conflict
     } else {
         // If valid virtualAccountNo
-        $responseCode = '4002502'; // Virtual Account not found
-        $responseMessage = "Unauthorized. Virtual Account not found.";
+        $responseCode = '2002500'; // Virtual Account not found
+        $responseMessage = "Success";
         $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
-        $statusCode = 400; // HTTP Bad Request
+        $statusCode = 200; // HTTP Bad Request
     }
 
     return [
