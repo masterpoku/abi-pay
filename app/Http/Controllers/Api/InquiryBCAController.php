@@ -358,6 +358,7 @@ EOF;
         $responseCode = '4092500'; // Fixed Bill conflict error code
         $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
         $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
+        
         $statusCode = 409; // HTTP Conflict
     } else {
         // If valid virtualAccountNo
@@ -365,6 +366,7 @@ EOF;
         $responseMessage = "Success";
         $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
         $statusCode = 200; // HTTP Bad Request
+        $paymentFlagStatus = "00";
     }
 
     return [
@@ -372,7 +374,7 @@ EOF;
         "responseMessage" => $responseMessage,
         "statusCode" => $statusCode,
         "virtualAccountData" => [
-            "paymentFlagStatus" => "01",
+            "paymentFlagStatus" => $paymentFlagStatus??"01",
             "paymentFlagReason" => [
                 "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
                 "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
