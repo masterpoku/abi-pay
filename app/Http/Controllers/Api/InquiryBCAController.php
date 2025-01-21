@@ -302,22 +302,22 @@ EOF;
      * Contoh penggunaan fungsi validasi header.
      */
     public function requestAccessToken(Request $request)
-    {
-        // Validasi header terlebih dahulu
-        $headerValidation = $this->validateHeaders2($request);
-        if ($headerValidation) {
-            // Jika ada error dalam validasi header, langsung return respons error
-            return $headerValidation;
-        }
-    
-        // Call buildErrorResponse to get the response structure
-        $errorResponse = $this->buildErrorResponse($request);
-    
-        // Return the JSON response with dynamic statusCode
-        return response()->json($errorResponse, $errorResponse['statusCode']);
+{
+    // Validasi header terlebih dahulu
+    $headerValidation = $this->validateHeaders2($request);
+    if ($headerValidation) {
+        // Jika ada error dalam validasi header, langsung return respons error
+        return $headerValidation;
     }
-    
-    private function buildErrorResponse($validated)
+
+    // Call buildErrorResponse to get the response structure
+    $errorResponse = $this->buildErrorResponse($request->all());
+
+    // Return the JSON response with dynamic statusCode
+    return response()->json($errorResponse, $errorResponse['statusCode']);
+}
+
+private function buildErrorResponse($validated)
 {
     // Validasi virtualAccountNo tanpa preg_match
     $isValid = true;
@@ -351,16 +351,16 @@ EOF;
         // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
-        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
+        $virtualaccount = isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : null;
         $statusCode = 400; // HTTP Bad Request
     } elseif ($isFixedBillConflict) {
         // If there is a Fixed Bill conflict
         $responseCode = '4092500'; // Fixed Bill conflict error code
         $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
-        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
+        $virtualaccount = isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : null;
         $statusCode = 409; // HTTP Conflict
     } else {
-       return null;
+       return null; // No errors
     }
 
     return [
@@ -373,7 +373,7 @@ EOF;
                 "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
                 "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
             ],
-            "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
+            "partnerServiceId" => isset($validated['partnerServiceId']) ? "   " . $validated['partnerServiceId'] : "14999",
             "customerNo" => $validated['customerNo'] ?? "040002",
             "virtualAccountNo" => $virtualaccount,
             "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
