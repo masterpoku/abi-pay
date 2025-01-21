@@ -312,12 +312,8 @@ EOF;
     
         // Call buildErrorResponse to get the response structure
         $errorResponse = $this->buildErrorResponse($request);
-        
+    
         // Return the JSON response with dynamic statusCode
-        // Jika tidak ada error, maka return null
-        if ($errorResponse === null) {
-            return null;
-        }
         return response()->json($errorResponse, $errorResponse['statusCode']);
     }
     
@@ -351,10 +347,6 @@ EOF;
     }
 
     // Tentukan response berdasarkan validitas
-    if ($isValid && !$isFixedBillConflict) {
-        return null; // Jika semua sesuai, return null
-    }
-
     if (!$isValid) {
         // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
@@ -366,10 +358,7 @@ EOF;
         $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
         $statusCode = 409; // HTTP Conflict
     } else {
-        // If no other error, but still unauthorized
-        $responseCode = '4012502'; // Kesalahan umum lainnya
-        $responseMessage = "Unauthorized. [Signature]";
-        $statusCode = 401; // HTTP Unauthorized
+       return null;
     }
 
     return [
