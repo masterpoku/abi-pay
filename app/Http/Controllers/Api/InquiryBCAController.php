@@ -310,6 +310,7 @@ EOF;
             return $headerValidation;
         }
 
+        return null;
    
     }
     public function BearerCheck(Request $request)
