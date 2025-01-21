@@ -318,7 +318,7 @@ EOF;
 
         return response()->json([
             'responseCode' => '4012500',
-            'responseMessage' => 'Unauthorized. [Signature]',
+            'responseMessage' => 'Unauthorized. [dd]',
         ], 401);
     }
     public function BearerCheck(Request $request)
