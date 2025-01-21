@@ -19,13 +19,6 @@ class InquiryBCAController extends Controller
     {
         Log::info('REQUEST Headers:', $request->headers->all());
         Log::info('REQUEST Payload:', $request->all());
-
-        // Validasi token pertama
-        $headerValidation = $this->requestAccessToken($request);
-        if ($headerValidation) {
-            return $headerValidation;
-        }
-
         // Validasi input dari request
         $validated = $request->validate([
             'partnerServiceId' => 'required|string',
@@ -169,99 +162,4 @@ class InquiryBCAController extends Controller
         ];
     }
 
-    private function validateHeaders(Request $request)
-    {
-        $signature = $request->header('X-SIGNATURE');
-        $timeStamp = $request->header('X-TIMESTAMP');
-        $clientKey = env('BCA_CLIENT_KEY');
-
-        // Cek Token Akses dan Validasi Format Header
-        if (!$signature) {
-            return response()->json([
-                'responseCode' => '4012501',
-                'responseMessage' => 'Invalid signature (B2B)',
-            ], 401);
-        }
-
-        if (!$timeStamp) {
-            return response()->json([
-                'responseCode' => '4012501',
-                'responseMessage' => 'Invalid token (B2B)',
-            ], 401);
-        }
-
-       
-
-        // Cek Format Timestamp
-        if (!$this->isValidIso8601($timeStamp)) {
-            return response()->json([
-                'responseCode' => '4002401',
-                'responseMessage' => 'Invalid Field Format [X-TIMESTAMP]',
-            ], 400);
-        }
-
-        // Cek Signature
-        $publicKey = env('BCA_PUBLIC_KEY');
-        if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
-            return response()->json([
-                'responseCode' => '4012501',
-                'responseMessage' => 'Invalid token (B2B)',
-            ], 401);
-        }
-
-        return null;
-    }
-
-    private function isValidIso8601($timestamp)
-    {
-        return (bool) date_create($timestamp);
-    }
-
-    private function validateOauthSignature($public_key_str, $client_id, $iso_time, $signature)
-    {
-        $public_key = <<<EOF
------BEGIN PUBLIC KEY-----
-$public_key_str
------END PUBLIC KEY-----
-EOF;
-
-        $algo = "SHA256";
-        $dataToSign = $client_id . "|" . $iso_time;
-
-        return openssl_verify($dataToSign, base64_decode($signature), $public_key, $algo) === 1;
-    }
-
-    public function requestAccessToken(Request $request)
-    {
-        $headerValidation = $this->validateHeaders($request);
-        if ($headerValidation) {
-            return $headerValidation;
-        }
-
-        // Validasi Field Wajib untuk Fixed Bill
-        $errorResponse = $this->buildErrorResponse($request->all());
-        if (is_array($errorResponse) && isset($errorResponse['statusCode'])) {
-            return response()->json($errorResponse, $errorResponse['statusCode']);
-        }
-
-        // Cek Format Field yang Tidak Valid
-        return null;
-    }
-
-    private function buildErrorResponse($validated)
-    {
-        $isValid = true;
-        if (isset($validated['virtualAccountNo'])) {
-            $va = $validated['virtualAccountNo'];
-            if (!preg_match('/^\d{12}$/', $va)) {
-                return [
-                    'responseCode' => '4002503',
-                    'responseMessage' => 'Invalid Field Format [virtualAccountNo]',
-                    'statusCode' => 400
-                ];
-            }
-        }
-
-        return null;
-    }
 }
