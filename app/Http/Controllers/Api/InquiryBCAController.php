@@ -21,10 +21,22 @@ class InquiryBCAController extends Controller
 
     public function handleInquiry(Request $request)
 {
-    Log::info('REQUEST Headers:', $request->headers->all());
-    Log::info('REQUEST Payload:', $request->all());
+    // Ambil token dari header Authorization dan hapus kata 'Bearer'
+    $authorizationHeader = $request->header('Authorization');
+    $token = null;
 
-    $this->cektoken($request);
+    if ($authorizationHeader) {
+        // Ambil token setelah 'Bearer ' (memotong kata 'Bearer ' dari string)
+        $token = str_replace('Bearer ', '', $authorizationHeader);
+    }
+
+    // Cek apakah token ada dan valid
+    if (!$token || !DB::table('token')->where('token', $token)->exists()) {
+        return response()->json([
+            'responseCode' => '4012501',  // Kode error jika token tidak valid
+            'responseMessage' => 'Invalid token (B2B)',
+        ], 401);
+    }
 
     $validated = $request->validate([
         'partnerServiceId' => 'required|string',
@@ -71,6 +83,7 @@ class InquiryBCAController extends Controller
 
     return response()->json($response);
 }
+
 
 /**
  * Extracts token from the Authorization header and checks its existence in the database.
