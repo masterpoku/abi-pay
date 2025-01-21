@@ -317,18 +317,17 @@ EOF;
     }
     private function buildErrorResponse($validated)
 {
-
-    if (!preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
-        $responseCode = '4002502';
-       
+    // Validasi karakter terlarang pada virtualAccountNo
+    if (!isset($validated['virtualAccountNo']) || !preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
+        $responseCode = '4002502'; // Karakter tidak valid
     } else {
-        $responseCode = "4002501";
+        $responseCode = '4002501'; // Kesalahan umum lainnya
     }
 
     return [
         "responseCode" => $responseCode, // Invalid Value
         "responseMessage" => "Unauthorized. [Signature]",
-        "statusCode" => 400, // Unauthorized
+        "statusCode" => 400, // Bad Request
         "virtualAccountData" => [
             "paymentFlagStatus" => "01", // Mandatory field must be filled
             "paymentFlagReason" => [
@@ -337,11 +336,12 @@ EOF;
             ],
             "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"), // Default value if not provided
             "customerNo" => $validated['customerNo'] ?? "040002", // Default value
-            "virtualAccountNo" => $validated['virtualAccountNo'] ?? null, // Passed
+            "virtualAccountNo" => $validated['virtualAccountNo'] ?? null, // Passed or null
             "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
         ]
     ];
 }
+
 
     public function BearerCheck(Request $request)
     {
