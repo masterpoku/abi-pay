@@ -318,7 +318,7 @@ EOF;
     private function buildErrorResponse($validated)
 {
 
-    if (!preg_match('/^\d+$/', $validated['virtualAccountNo'])) {
+    if (!preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
         $responseCode = '4002502';
        
     } else {
