@@ -316,11 +316,28 @@ EOF;
 
 
 
-        return response()->json([
-            'responseCode' => '55555',
-            'responseMessage' => 'Unauthorized. [Signature]',
-        ], 401);
+        return response()->json($this->buildErrorResponse($request), 401);
     }
+    private function buildErrorResponse($validated)
+{
+    return [
+        "responseCode" => "55555", // Invalid Value
+        "responseMessage" => "Unauthorized. [Signature]",
+        "statusCode" => 401, // Unauthorized
+        "virtualAccountData" => [
+            "paymentFlagStatus" => "01", // Mandatory field must be filled
+            "paymentFlagReason" => [
+                "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
+                "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
+            ],
+            "partnerServiceId" => $validated['partnerServiceId'] ?? "14999", // Default value if not provided
+            "customerNo" => $validated['customerNo'] ?? "040002", // Default value
+            "virtualAccountNo" => $validated['virtualAccountNo'] ?? null, // Passed
+            "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
+        ]
+    ];
+}
+
     public function BearerCheck(Request $request)
     {
         try {
