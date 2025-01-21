@@ -336,10 +336,10 @@ EOF;
     }
 
     if (!$isValid) {
-        $responseCode = '4002502'; // Karakter tidak valid
+        $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
     } else {
-        $responseCode = '4002501'; // Kesalahan umum lainnya
+        $responseCode = '4002502'; // Kesalahan umum lainnya
         $responseMessage = "Unauthorized. [Signature]";
     }
 
