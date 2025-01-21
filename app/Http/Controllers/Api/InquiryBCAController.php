@@ -20,7 +20,7 @@ class InquiryBCAController extends Controller
         Log::info('REQUEST Headers:', $request->headers->all());
         Log::info('REQUEST Payload:', $request->all());
 
-        // Validasi header (Access Token)
+        // Validasi token pertama
         $headerValidation = $this->requestAccessToken($request);
         if ($headerValidation) {
             return $headerValidation;
@@ -176,6 +176,7 @@ class InquiryBCAController extends Controller
         $timeStamp = $request->header('X-TIMESTAMP');
         $clientKey = env('BCA_CLIENT_KEY');
 
+        // Cek Token Akses dan Validasi Format Header
         if (!$clientId || !$signature || !$timeStamp) {
             return response()->json([
                 'responseCode' => '4002402',
@@ -190,6 +191,7 @@ class InquiryBCAController extends Controller
             ], 400);
         }
 
+        // Cek apakah Client ID valid
         if ($clientId !== $clientKey) {
             return response()->json([
                 'responseCode' => '4012400',
@@ -197,6 +199,7 @@ class InquiryBCAController extends Controller
             ], 401);
         }
 
+        // Cek Format Timestamp
         if (!$this->isValidIso8601($timeStamp)) {
             return response()->json([
                 'responseCode' => '4002401',
@@ -204,6 +207,7 @@ class InquiryBCAController extends Controller
             ], 400);
         }
 
+        // Cek Signature
         $publicKey = env('BCA_PUBLIC_KEY');
         if (!$this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature)) {
             return response()->json([
@@ -241,11 +245,13 @@ EOF;
             return $headerValidation;
         }
 
+        // Validasi Field Wajib untuk Fixed Bill
         $errorResponse = $this->buildErrorResponse($request->all());
         if (is_array($errorResponse) && isset($errorResponse['statusCode'])) {
             return response()->json($errorResponse, $errorResponse['statusCode']);
         }
 
+        // Cek Format Field yang Tidak Valid
         return null;
     }
 
@@ -254,33 +260,13 @@ EOF;
         $isValid = true;
         if (isset($validated['virtualAccountNo'])) {
             $va = $validated['virtualAccountNo'];
-            if (strlen($va) > 20 || !is_numeric($va)) {
-                $isValid = false;
+            if (!preg_match('/^\d{12}$/', $va)) {
+                return [
+                    'responseCode' => '4002503',
+                    'responseMessage' => 'Invalid Field Format [virtualAccountNo]',
+                    'statusCode' => 400
+                ];
             }
-        } else {
-            $isValid = false;
-        }
-
-        $isFixedBillConflict = false;
-        if (isset($validated['billType']) && $validated['billType'] === 'fixed') {
-            if (isset($validated['paymentAmount']) && $validated['paymentAmount'] <= 0) {
-                $isFixedBillConflict = true;
-            }
-        }
-
-        if (!$isValid) {
-            return [
-                "responseCode" => '4002501',
-                "responseMessage" => "Unauthorized. Invalid virtualAccountNo.",
-                "statusCode" => 400,
-                "virtualAccountData" => ["paymentFlagStatus" => "01"]
-            ];
-        } elseif ($isFixedBillConflict) {
-            return [
-                "responseCode" => '4002502',
-                "responseMessage" => "Invalid billType for fixed bill",
-                "statusCode" => 400
-            ];
         }
 
         return null;
