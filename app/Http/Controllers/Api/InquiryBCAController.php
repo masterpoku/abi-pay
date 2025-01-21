@@ -171,33 +171,19 @@ class InquiryBCAController extends Controller
 
     private function validateHeaders(Request $request)
     {
-        $clientId = $request->header('X-CLIENT-KEY');
         $signature = $request->header('X-SIGNATURE');
         $timeStamp = $request->header('X-TIMESTAMP');
         $clientKey = env('BCA_CLIENT_KEY');
 
         // Cek Token Akses dan Validasi Format Header
-        if (!$clientId || !$signature || !$timeStamp) {
+        if (!$signature || !$timeStamp) {
             return response()->json([
                 'responseCode' => '4012501',
                 'responseMessage' => 'Invalid token (B2B)',
             ], 401);
         }
 
-        if (!preg_match('/^[a-zA-Z0-9\-]{8,32}$/', $clientId)) {
-            return response()->json([
-                'responseCode' => '4002401',
-                'responseMessage' => 'Invalid Field Format [X-CLIENT-KEY]',
-            ], 400);
-        }
-
-        // Cek apakah Client ID valid
-        if ($clientId !== $clientKey) {
-            return response()->json([
-                'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. Unknown Client',
-            ], 401);
-        }
+       
 
         // Cek Format Timestamp
         if (!$this->isValidIso8601($timeStamp)) {
@@ -209,7 +195,7 @@ class InquiryBCAController extends Controller
 
         // Cek Signature
         $publicKey = env('BCA_PUBLIC_KEY');
-        if (!$this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature)) {
+        if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
             return response()->json([
                 'responseCode' => '4012400',
                 'responseMessage' => 'Unauthorized. Signature',
