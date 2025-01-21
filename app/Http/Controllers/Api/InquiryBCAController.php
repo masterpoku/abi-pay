@@ -351,11 +351,13 @@ EOF;
         // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+        $virtualaccount =  $validated['virtualAccountNo'] ?? null;
         $statusCode = 400; // HTTP Bad Request
     } elseif ($isFixedBillConflict) {
         // If there is a Fixed Bill conflict
         $responseCode = '4092500'; // Fixed Bill conflict error code
         $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
+        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
         $statusCode = 409; // HTTP Conflict
     } else {
        return null;
@@ -373,7 +375,7 @@ EOF;
             ],
             "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
             "customerNo" => $validated['customerNo'] ?? "040002",
-            "virtualAccountNo" => "   " . $validated['virtualAccountNo'] ?? null,
+            "virtualAccountNo" => $virtualaccount,
             "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
         ]
     ];
