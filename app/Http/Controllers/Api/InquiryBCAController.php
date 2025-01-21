@@ -314,6 +314,9 @@ EOF;
         $errorResponse = $this->buildErrorResponse($request);
     
         // Return the JSON response with dynamic statusCode
+        if ($errorResponse === null) {
+            return null;
+        }
         return response()->json($errorResponse, $errorResponse['statusCode']);
     }
     
