@@ -330,7 +330,7 @@ EOF;
                 "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
                 "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
             ],
-            "partnerServiceId" => " " . ($validated['partnerServiceId'] ?? "14999"), // Default value if not provided
+            "partnerServiceId" => "  " . ($validated['partnerServiceId'] ?? "14999"), // Default value if not provided
             "customerNo" => $validated['customerNo'] ?? "040002", // Default value
             "virtualAccountNo" => $validated['virtualAccountNo'] ?? null, // Passed
             "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
