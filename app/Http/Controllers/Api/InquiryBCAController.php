@@ -317,17 +317,18 @@ EOF;
     }
     private function buildErrorResponse($validated)
 {
-    // Validasi karakter terlarang pada virtualAccountNo
+    // Validasi virtualAccountNo
     if (!isset($validated['virtualAccountNo']) || !preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
-       
-        $responseCode = '4002501'; // Kesalahan umum lainnya
-    } else {
         $responseCode = '4002502'; // Karakter tidak valid
+        $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+    } else {
+        $responseCode = '4002501'; // Kesalahan umum lainnya
+        $responseMessage = "Unauthorized. [Signature]";
     }
 
     return [
         "responseCode" => $responseCode, // Invalid Value
-        "responseMessage" => "Unauthorized. [Signature]",
+        "responseMessage" => $responseMessage,
         "statusCode" => 400, // Bad Request
         "virtualAccountData" => [
             "paymentFlagStatus" => "01", // Mandatory field must be filled
@@ -342,6 +343,7 @@ EOF;
         ]
     ];
 }
+
 
 
     public function BearerCheck(Request $request)
