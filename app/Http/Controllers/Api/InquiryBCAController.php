@@ -312,8 +312,12 @@ EOF;
     
         // Call buildErrorResponse to get the response structure
         $errorResponse = $this->buildErrorResponse($request);
-    
+        
         // Return the JSON response with dynamic statusCode
+        // Jika tidak ada error, maka return null
+        if ($errorResponse === null) {
+            return null;
+        }
         return response()->json($errorResponse, $errorResponse['statusCode']);
     }
     
@@ -347,6 +351,10 @@ EOF;
     }
 
     // Tentukan response berdasarkan validitas
+    if ($isValid && !$isFixedBillConflict) {
+        return null; // Jika semua sesuai, return null
+    }
+
     if (!$isValid) {
         // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
