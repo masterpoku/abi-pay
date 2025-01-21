@@ -361,12 +361,12 @@ EOF;
         
         $statusCode = 409; // HTTP Conflict
     } else {
+        $user_data = DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $validated['virtualAccountNo'])  // Mencocokkan berdasarkan virtualAccountNo
+        ->orderByDesc('tanggal_invoice')
+        ->first();
         // If valid virtualAccountNo
-        $responseCode = '2002500'; // Virtual Account not found
-        $responseMessage = "Success";
-        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
-        $statusCode = 200; // HTTP Bad Request
-        $paymentFlagStatus = "00";
+        return $this->buildSuccessResponse($validated, $user_data);
     }
 
     return [
@@ -376,8 +376,8 @@ EOF;
         "virtualAccountData" => [
             "paymentFlagStatus" => $paymentFlagStatus??"01",
             "paymentFlagReason" => [
-                "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
-                "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
+                "english" => $paymentFlagReasonEN ?? "Mandatory. Field must be filled",
+                "indonesia" => $paymentFlagReasonID ?? "Mandatory. Field must be filled"
             ],
             "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
             "customerNo" => $validated['customerNo'] ?? "040002",
