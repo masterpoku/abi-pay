@@ -24,7 +24,7 @@ class InquiryBCAController extends Controller
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-
+    $this->BearerCheck($request);
     // Validasi input dari request
     $validated = $request->validate([
         'partnerServiceId' => 'required|string',
