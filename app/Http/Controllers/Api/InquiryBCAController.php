@@ -317,7 +317,7 @@ EOF;
 
 
         return response()->json([
-            'responseCode' => '4012500',
+            'responseCode' => '55555',
             'responseMessage' => 'Unauthorized. [Signature]',
         ], 401);
     }
