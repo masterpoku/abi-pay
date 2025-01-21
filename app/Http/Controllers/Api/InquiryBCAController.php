@@ -316,33 +316,51 @@ EOF;
         return response()->json($this->buildErrorResponse($request), 400);
     }
     private function buildErrorResponse($validated)
-    {
-        // Validasi virtualAccountNo tanpa preg_match
-        if (!isset($validated['virtualAccountNo']) || !ctype_digit($validated['virtualAccountNo']) ) {
-            $responseCode = '4002501'; // Karakter tidak valid
-            $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+{
+    // Validasi virtualAccountNo tanpa preg_match
+    $isValid = true;
+    if (isset($validated['virtualAccountNo'])) {
+        $va = $validated['virtualAccountNo'];
+        if (strlen($va) > 20) {
+            $isValid = false; // Panjang lebih dari 20
         } else {
-            $responseCode = '4002502'; // Kesalahan umum lainnya
-            $responseMessage = "Unauthorized. [Signature]";
+            for ($i = 0; $i < strlen($va); $i++) {
+                if (!is_numeric($va[$i])) {
+                    $isValid = false; // Karakter bukan angka
+                    break;
+                }
+            }
         }
-    
-        return [
-            "responseCode" => $responseCode,
-            "responseMessage" => $responseMessage,
-            "statusCode" => 400,
-            "virtualAccountData" => [
-                "paymentFlagStatus" => "01",
-                "paymentFlagReason" => [
-                    "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
-                    "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
-                ],
-                "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
-                "customerNo" => $validated['customerNo'] ?? "040002",
-                "virtualAccountNo" => $validated['virtualAccountNo'] ?? null,
-                "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
-            ]
-        ];
+    } else {
+        $isValid = false; // virtualAccountNo tidak ada
     }
+
+    if (!$isValid) {
+        $responseCode = '4002502'; // Karakter tidak valid
+        $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+    } else {
+        $responseCode = '4002501'; // Kesalahan umum lainnya
+        $responseMessage = "Unauthorized. [Signature]";
+    }
+
+    return [
+        "responseCode" => $responseCode,
+        "responseMessage" => $responseMessage,
+        "statusCode" => 400,
+        "virtualAccountData" => [
+            "paymentFlagStatus" => "01",
+            "paymentFlagReason" => [
+                "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
+                "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
+            ],
+            "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
+            "customerNo" => $validated['customerNo'] ?? "040002",
+            "virtualAccountNo" => $validated['virtualAccountNo'] ?? null,
+            "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
+        ]
+    ];
+}
+
     
 
 
