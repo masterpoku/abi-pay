@@ -179,9 +179,9 @@ class InquiryBCAController extends Controller
         // Cek Token Akses dan Validasi Format Header
         if (!$clientId || !$signature || !$timeStamp) {
             return response()->json([
-                'responseCode' => '4002402',
-                'responseMessage' => 'Missing Mandatory Field [X-CLIENT-KEY/X-SIGNATURE/X-TIMESTAMP]',
-            ], 400);
+                'responseCode' => '4012501',
+                'responseMessage' => 'Invalid token (B2B)',
+            ], 401);
         }
 
         if (!preg_match('/^[a-zA-Z0-9\-]{8,32}$/', $clientId)) {
