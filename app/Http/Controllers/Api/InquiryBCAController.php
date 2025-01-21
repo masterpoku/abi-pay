@@ -319,9 +319,10 @@ EOF;
 {
     // Validasi karakter terlarang pada virtualAccountNo
     if (!isset($validated['virtualAccountNo']) || !preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
-        $responseCode = '4002502'; // Karakter tidak valid
-    } else {
+       
         $responseCode = '4002501'; // Kesalahan umum lainnya
+    } else {
+        $responseCode = '4002502'; // Karakter tidak valid
     }
 
     return [
