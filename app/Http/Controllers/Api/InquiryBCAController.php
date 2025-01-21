@@ -20,45 +20,8 @@ class InquiryBCAController extends Controller
         Log::info('REQUEST Headers:', $request->headers->all());
         Log::info('REQUEST Payload:', $request->all());
         // Validasi input dari request
-        $validated = $request->validate([
-            'partnerServiceId' => 'required|string',
-            'customerNo' => 'required|string',
-            'virtualAccountNo' => 'required|string',
-            'trxDateInit' => 'required|date',
-            'channelCode' => 'required|integer',
-            'additionalInfo' => 'nullable|array',
-            'inquiryRequestId' => 'required|string',
-        ]);
-
-        // Ambil data dari database berdasarkan virtualAccountNo
-        $user_data = DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->orderByDesc('tanggal_invoice')
-            ->first();
-
-        if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated), 400);
-        }
-
-        // Logika perbandingan data request dengan data dari database
-        if ($validated['customerNo'] !== $user_data->id_invoice) {
-            return response()->json([
-                'responseCode' => '4012501',
-                'responseMessage' => 'Customer ID does not match with Virtual Account',
-            ], 401);
-        }
-
-        if ($validated['partnerServiceId'] !== '14999') {
-            return response()->json([
-                'responseCode' => '4012502',
-                'responseMessage' => 'Invalid Partner Service ID',
-            ], 401);
-        }
-
-        // Jika semua data valid, buat respons sukses
-        $response = $this->buildSuccessResponse($validated, $user_data);
-
-        return response()->json($response);
+        
+        
     }
 
     private function buildSuccessResponse($validated, $user_data)
