@@ -351,33 +351,35 @@ EOF;
         // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
-        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
+        $virtualaccount = isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : null;
         $statusCode = 400; // HTTP Bad Request
     } elseif ($isFixedBillConflict) {
         // If there is a Fixed Bill conflict
         $responseCode = '4092500'; // Fixed Bill conflict error code
         $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
-        $virtualaccount =  "   " . $validated['virtualAccountNo'] ?? null;
-        
+        $virtualaccount = isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : null;
         $statusCode = 409; // HTTP Conflict
     } else {
+        // If valid virtualAccountNo, look up the data in the database
         $user_data = DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $validated['virtualAccountNo'])  // Mencocokkan berdasarkan virtualAccountNo
-        ->orderByDesc('tanggal_invoice')
-        ->first();
-        // If valid virtualAccountNo
+            ->where('id_invoice', $validated['virtualAccountNo'])  // Mencocokkan berdasarkan virtualAccountNo
+            ->orderByDesc('tanggal_invoice')
+            ->first();
+
+        // Return the success response
         return $this->buildSuccessResponse($validated, $user_data);
     }
 
+    // Return the error response
     return [
         "responseCode" => $responseCode,
         "responseMessage" => $responseMessage,
         "statusCode" => $statusCode,
         "virtualAccountData" => [
-            "paymentFlagStatus" => $paymentFlagStatus??"01",
+            "paymentFlagStatus" => $validated['paymentFlagStatus'] ?? "01", // default "01"
             "paymentFlagReason" => [
-                "english" => $paymentFlagReasonEN ?? "Mandatory. Field must be filled",
-                "indonesia" => $paymentFlagReasonID ?? "Mandatory. Field must be filled"
+                "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
+                "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
             ],
             "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
             "customerNo" => $validated['customerNo'] ?? "040002",
@@ -386,6 +388,7 @@ EOF;
         ]
     ];
 }
+
 
 
     public function BearerCheck(Request $request)
