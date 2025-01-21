@@ -176,10 +176,17 @@ class InquiryBCAController extends Controller
         $clientKey = env('BCA_CLIENT_KEY');
 
         // Cek Token Akses dan Validasi Format Header
-        if (!$signature || !$timeStamp) {
+        if (!$signature) {
             return response()->json([
                 'responseCode' => '4012501',
-                'responseMessage' => 'Invalid token (B2B)',
+                'responseMessage' => 'Invalid signature (B2B)',
+            ], 401);
+        }
+
+        if (!$timeStamp) {
+            return response()->json([
+                'responseCode' => '4012501',
+                'responseMessage' => 'Invalid timeStamp (B2B)',
             ], 401);
         }
 
