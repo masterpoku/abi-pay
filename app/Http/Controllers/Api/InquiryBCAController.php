@@ -24,8 +24,8 @@ class InquiryBCAController extends Controller
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
 
-    $this->BearerCheck($request);
-    // Validasi input dari request
+    $this->cektoken($request->headers->all());
+
     $validated = $request->validate([
         'partnerServiceId' => 'required|string',
         'customerNo' => 'required|string',
@@ -70,6 +70,32 @@ class InquiryBCAController extends Controller
     $response = $this->buildSuccessResponse($validated, $user_data);
 
     return response()->json($response);
+}
+
+/**
+ * Extracts token from the Authorization header and checks its existence in the database.
+ *
+ * @param string $authorizationHeader
+ * @return bool
+ */
+private function cektoken($authorizationHeader)
+{
+    // Ambil token setelah prefix "Bearer "
+    $token = trim(str_replace('Bearer ', '', $authorizationHeader));
+    
+    // Query to check if token exists in the database
+    $result = DB::select("SELECT token FROM token WHERE token = ? LIMIT 1", [$token]);
+
+    // Return true if token exists, otherwise false
+    if (empty($result)) {
+        return response()->json([
+            'responseCode' => '4012501',
+            'message' => 'Invalid Token (B2B)'
+        ], 401);
+    }
+
+    return true;
+
 }
 
 
