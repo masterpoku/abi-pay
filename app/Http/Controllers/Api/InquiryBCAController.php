@@ -318,7 +318,7 @@ EOF;
     private function buildErrorResponse($validated)
 {
     // Validasi virtualAccountNo
-    if (!isset($validated['virtualAccountNo']) || !preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
+    if (!isset($validated['virtualAccountNo']) || preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
         $responseCode = '4002502'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
     } else {
