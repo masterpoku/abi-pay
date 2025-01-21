@@ -78,26 +78,43 @@ class InquiryBCAController extends Controller
  * @param string $authorizationHeader
  * @return bool
  */
-private function cektoken($authorizationHeader)
-{
-    // Ambil token setelah prefix "Bearer "
-    $token = trim(str_replace('Bearer ', '', $authorizationHeader));
-    
-    // Query to check if token exists in the database
-    $result = DB::select("SELECT token FROM token WHERE token = ? LIMIT 1", [$token]);
 
-    // Return true if token exists, otherwise false
-    if (empty($result)) {
-        return response()->json([
-            'responseCode' => '4012501',
-            'message' => 'Invalid Token (B2B)'
-        ], 401);
-    }
-
-    return true;
-
-}
-
+ private function cektoken($authorizationHeader)
+ {
+     // Cek apakah header authorization ada dan tidak kosong
+     if (empty($authorizationHeader['Authorization'])) {
+         return response()->json([
+             'responseCode' => '4012501',
+             'message' => 'Authorization header not found'
+         ], 401);
+     }
+ 
+     // Ambil token setelah prefix "Bearer "
+     $token = trim(str_replace('Bearer ', '', $authorizationHeader['Authorization']));
+     
+     // Validasi token
+     if (empty($token)) {
+         return response()->json([
+             'responseCode' => '4012501',
+             'message' => 'Token is missing'
+         ], 401);
+     }
+ 
+     // Query untuk mengecek apakah token ada dalam database
+     $result = DB::select("SELECT token FROM token WHERE token = ? LIMIT 1", [$token]);
+ 
+     // Cek apakah token ada
+     if (empty($result)) {
+         return response()->json([
+             'responseCode' => '4012501',
+             'message' => 'Invalid Token (B2B)'
+         ], 401);
+     }
+ 
+     // Jika token valid
+     return true;
+ }
+ 
 
     /**
      * Membuat respons untuk data yang ditemukan.
