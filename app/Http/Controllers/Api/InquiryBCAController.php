@@ -319,9 +319,10 @@ EOF;
 {
 
     if (!preg_match('/^\d+$/', $validated['virtualAccountNo'])) {
-        $responseCode = "4002501";
-    } else {
         $responseCode = '4002502';
+       
+    } else {
+        $responseCode = "4002501";
     }
 
     return [
