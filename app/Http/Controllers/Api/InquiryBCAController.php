@@ -310,9 +310,6 @@ EOF;
             return $headerValidation;
         }
 
-        // Lanjutkan dengan logika akses token
-/// SAMPEEEEK SINI BUAT LOGIK MENDATORY ANJAYAYAYAYA
-
 
 
 
@@ -320,8 +317,18 @@ EOF;
     }
     private function buildErrorResponse($validated)
 {
+
+    if(!preg_match('/^\d+$/', $validated['virtualAccountNo'])){
+        $responseCode = "4002502";
+    }else{
+        $responseCode = '4002501';
+    }
+       
+    
+
+
     return [
-        "responseCode" => "4002502", // Invalid Value
+        "responseCode" => $responseCode, // Invalid Value
         "responseMessage" => "Unauthorized. [Signature]",
         "statusCode" => 400, // Unauthorized
         "virtualAccountData" => [
