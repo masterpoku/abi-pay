@@ -314,7 +314,17 @@ EOF;
     $errorResponse = $this->buildErrorResponse($request->all());
 
     // Return the JSON response with dynamic statusCode
+   // Check if the response is valid before accessing statusCode
+if (is_array($errorResponse) && isset($errorResponse['statusCode'])) {
     return response()->json($errorResponse, $errorResponse['statusCode']);
+} else {
+    // Handle the case where the response is invalid
+    return response()->json([
+        'statusCode' => 500,
+        'message' => 'Error response structure is invalid',
+    ], 500);
+}
+
 }
 
 private function buildErrorResponse($validated)
