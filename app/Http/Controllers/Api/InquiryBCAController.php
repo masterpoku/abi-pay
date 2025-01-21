@@ -318,14 +318,11 @@ EOF;
     private function buildErrorResponse($validated)
 {
 
-    if(!preg_match('/^\d+$/', $validated['virtualAccountNo'])){
-        $responseCode = "4002502";
-    }else{
-        $responseCode = '4002501';
+    if (!preg_match('/^\d+$/', $validated['virtualAccountNo'])) {
+        $responseCode = "4002501";
+    } else {
+        $responseCode = '4002502';
     }
-       
-    
-
 
     return [
         "responseCode" => $responseCode, // Invalid Value
