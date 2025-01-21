@@ -316,33 +316,34 @@ EOF;
         return response()->json($this->buildErrorResponse($request), 400);
     }
     private function buildErrorResponse($validated)
-{
-    // Validasi virtualAccountNo
-    if (!isset($validated['virtualAccountNo']) || preg_match('/^[0-9]{1,20}$/', $validated['virtualAccountNo'])) {
-        $responseCode = '4002502'; // Karakter tidak valid
-        $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
-    } else {
-        $responseCode = '4002501'; // Kesalahan umum lainnya
-        $responseMessage = "Unauthorized. [Signature]";
+    {
+        // Validasi virtualAccountNo tanpa preg_match
+        if (!isset($validated['virtualAccountNo']) || !ctype_digit($validated['virtualAccountNo']) || strlen($validated['virtualAccountNo']) > 20) {
+            $responseCode = '4002501'; // Karakter tidak valid
+            $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+        } else {
+            $responseCode = '4002502'; // Kesalahan umum lainnya
+            $responseMessage = "Unauthorized. [Signature]";
+        }
+    
+        return [
+            "responseCode" => $responseCode,
+            "responseMessage" => $responseMessage,
+            "statusCode" => 400,
+            "virtualAccountData" => [
+                "paymentFlagStatus" => "01",
+                "paymentFlagReason" => [
+                    "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
+                    "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
+                ],
+                "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"),
+                "customerNo" => $validated['customerNo'] ?? "040002",
+                "virtualAccountNo" => $validated['virtualAccountNo'] ?? null,
+                "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
+            ]
+        ];
     }
-
-    return [
-        "responseCode" => $responseCode, // Invalid Value
-        "responseMessage" => $responseMessage,
-        "statusCode" => 400, // Bad Request
-        "virtualAccountData" => [
-            "paymentFlagStatus" => "01", // Mandatory field must be filled
-            "paymentFlagReason" => [
-                "english" => $validated['paymentFlagReason']['english'] ?? "Mandatory. Field must be filled",
-                "indonesia" => $validated['paymentFlagReason']['indonesia'] ?? "Mandatory. Field must be filled"
-            ],
-            "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? "14999"), // Default value if not provided
-            "customerNo" => $validated['customerNo'] ?? "040002", // Default value
-            "virtualAccountNo" => $validated['virtualAccountNo'] ?? null, // Passed or null
-            "paymentRequestId" => $validated['paymentRequestId'] ?? "Mandatory. Field must be filled"
-        ]
-    ];
-}
+    
 
 
 
