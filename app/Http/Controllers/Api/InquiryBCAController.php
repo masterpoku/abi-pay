@@ -335,9 +335,22 @@ EOF;
         $isValid = false; // virtualAccountNo tidak ada
     }
 
+    // Logic untuk Fixed Bill - Conflict
+    $isFixedBillConflict = false;
+    if (isset($validated['billType']) && $validated['billType'] === 'fixed') {
+        // Tambahkan kondisi untuk mengecek apakah ada konflik dalam fixed bill
+        if (isset($validated['paymentAmount']) && $validated['paymentAmount'] <= 0) {
+            $isFixedBillConflict = true; // Konflik terjadi jika jumlah pembayaran tidak valid
+        }
+    }
+
+    // Tentukan response berdasarkan validitas
     if (!$isValid) {
         $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+    } elseif ($isFixedBillConflict) {
+        $responseCode = '4092500'; // Fixed Bill conflict error code
+        $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
     } else {
         $responseCode = '4002502'; // Kesalahan umum lainnya
         $responseMessage = "Unauthorized. [Signature]";
