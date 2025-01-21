@@ -310,16 +310,7 @@ EOF;
             return $headerValidation;
         }
 
-        // Lanjutkan dengan logika akses token
-/// SAMPEEEEK SINI BUAT LOGIK MENDATORY ANJAYAYAYAYA
-
-
-
-
-        return response()->json([
-            'responseCode' => '4012500',
-            'responseMessage' => 'Unauthorized. [dd]',
-        ], 401);
+   
     }
     public function BearerCheck(Request $request)
     {
