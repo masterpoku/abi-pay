@@ -23,12 +23,7 @@ class InquiryBCAController extends Controller
 {
     Log::info('REQUEST Headers:', $request->headers->all());
     Log::info('REQUEST Payload:', $request->all());
-    
-    // Validasi header (Access Token)
-    $headerValidation = $this->requestAccessToken($request);
-    if ($headerValidation) {
-        return $headerValidation;
-    }
+
 
     // Validasi input dari request
     $validated = $request->validate([
@@ -298,21 +293,6 @@ EOF;
         return $is_valid === 1;
     }
 
-    /**
-     * Contoh penggunaan fungsi validasi header.
-     */
-    public function requestAccessToken(Request $request)
-    {
-        // Validasi header terlebih dahulu
-        $headerValidation = $this->validateHeaders2($request);
-        if ($headerValidation) {
-            // Jika ada error dalam validasi header, langsung return respons error
-            return $headerValidation;
-        }
-
-        return null;
-   
-    }
     public function BearerCheck(Request $request)
     {
         try {
