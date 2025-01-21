@@ -49,7 +49,7 @@ class InquiryBCAController extends Controller
 
     // Jika data tidak ditemukan, kembalikan respons gagal
     if (!$user_data) {
-        return response()->json($this->buildNotFoundResponse($validated));
+        return response()->json($this->buildNotFoundResponse($validated), 400);
     }
 
     // Logika perbandingan data request dengan data dari database
@@ -141,7 +141,7 @@ class InquiryBCAController extends Controller
     private function buildNotFoundResponse($validated)
     {
         return [
-            "responseCode" => "4042412",
+            "responseCode" => "4002502",
             "responseMessage" => "Bill not found",
             "virtualAccountData" => [
                 "inquiryStatus" => "01",
@@ -311,6 +311,11 @@ EOF;
         }
 
         // Lanjutkan dengan logika akses token
+/// SAMPEEEEK SINI BUAT LOGIK MENDATORY ANJAYAYAYAYA
+
+
+
+
         return response()->json([
             'responseCode' => '4012500',
             'responseMessage' => 'Unauthorized. [Signature]',
