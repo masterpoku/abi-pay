@@ -186,7 +186,7 @@ class InquiryBCAController extends Controller
         if (!$timeStamp) {
             return response()->json([
                 'responseCode' => '4012501',
-                'responseMessage' => 'Invalid timeStamp (B2B)',
+                'responseMessage' => 'Invalid token (B2B)',
             ], 401);
         }
 
@@ -204,8 +204,8 @@ class InquiryBCAController extends Controller
         $publicKey = env('BCA_PUBLIC_KEY');
         if (!$this->validateOauthSignature($publicKey, $clientKey, $timeStamp, $signature)) {
             return response()->json([
-                'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. Signature',
+                'responseCode' => '4012501',
+                'responseMessage' => 'Invalid token (B2B)',
             ], 401);
         }
 
