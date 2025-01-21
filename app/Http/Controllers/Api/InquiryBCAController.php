@@ -309,12 +309,14 @@ EOF;
             // Jika ada error dalam validasi header, langsung return respons error
             return $headerValidation;
         }
-
-
-
-
-        return response()->json($this->buildErrorResponse($request), 400);
+    
+        // Call buildErrorResponse to get the response structure
+        $errorResponse = $this->buildErrorResponse($request);
+    
+        // Return the JSON response with dynamic statusCode
+        return response()->json($errorResponse, $errorResponse['statusCode']);
     }
+    
     private function buildErrorResponse($validated)
 {
     // Validasi virtualAccountNo tanpa preg_match
@@ -346,20 +348,26 @@ EOF;
 
     // Tentukan response berdasarkan validitas
     if (!$isValid) {
+        // If invalid virtualAccountNo
         $responseCode = '4002501'; // Karakter tidak valid
         $responseMessage = "Unauthorized. Invalid virtualAccountNo. Contains prohibited characters.";
+        $statusCode = 400; // HTTP Bad Request
     } elseif ($isFixedBillConflict) {
+        // If there is a Fixed Bill conflict
         $responseCode = '4092500'; // Fixed Bill conflict error code
         $responseMessage = "Unauthorized. Fixed Bill conflict detected. Invalid payment amount.";
+        $statusCode = 409; // HTTP Conflict
     } else {
-        $responseCode = '4002502'; // Kesalahan umum lainnya
+        // If no other error, but still unauthorized
+        $responseCode = '4012502'; // Kesalahan umum lainnya
         $responseMessage = "Unauthorized. [Signature]";
+        $statusCode = 401; // HTTP Unauthorized
     }
 
     return [
         "responseCode" => $responseCode,
         "responseMessage" => $responseMessage,
-        "statusCode" => 400,
+        "statusCode" => $statusCode,
         "virtualAccountData" => [
             "paymentFlagStatus" => "01",
             "paymentFlagReason" => [
@@ -373,9 +381,6 @@ EOF;
         ]
     ];
 }
-
-    
-
 
 
     public function BearerCheck(Request $request)
