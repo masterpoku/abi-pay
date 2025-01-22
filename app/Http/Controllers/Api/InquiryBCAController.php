@@ -134,7 +134,7 @@ class InquiryBCAController extends Controller
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
     {
         return response()->json([
-            'responseCode' => '4002503', // Kode untuk Invalid Field Format
+            'responseCode' => '4002501', // Kode untuk Invalid Field Format
             'responseMessage' => 'Invalid Field Format',
             'statusCode' => 400,
             'virtualAccountData' => [
@@ -143,7 +143,7 @@ class InquiryBCAController extends Controller
                     'english' => 'Any Value',
                     'indonesia' => 'Any Value'
                 ],
-                'partnerServiceId' => '14999',
+                'partnerServiceId' => '   14999',
                 'customerNo' => '040002',
                 'virtualAccountNo' => $fieldValue, // Mengembalikan nilai field yang bermasalah
                 'paymentRequestId' => 'Any Value'
