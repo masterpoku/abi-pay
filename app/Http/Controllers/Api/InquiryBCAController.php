@@ -66,9 +66,9 @@ class InquiryBCAController extends Controller
                                 'english' => 'Any Value',
                                 'indonesia' => 'Any Value'
                             ],
-                            'partnerServiceId' => ' 14999',
+                            'partnerServiceId' => '   14999',
                             'customerNo' => '040002',
-                            'virtualAccountNo' => 'Passed',
+                            
                             'paymentRequestId' => 'Any Value'
                         ]
                     ], 400);
