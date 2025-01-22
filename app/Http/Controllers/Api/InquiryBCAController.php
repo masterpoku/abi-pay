@@ -209,6 +209,8 @@ class InquiryBCAController extends Controller
     public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
         $is_valid = false;
         $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
+        Log::info('PaymentBCAController validateServiceSignature signatureStr:', $signatureStr);
+        Log::info('PaymentBCAController validateServiceSignature signature:', $signature);
         if(strcmp($signatureStr, $signature) == 0){
             $is_valid = true;
         }
