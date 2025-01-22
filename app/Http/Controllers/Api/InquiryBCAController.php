@@ -36,13 +36,25 @@ class InquiryBCAController extends Controller
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
 
-        if (!$channelId || !$partnerId) {
+        if($channelId == '95231'){
             return response()->json([
-                'responseCode' => '4002501',
-                'responseMessage' => 'Invalid field format [CHANNEL-ID/X-PARTNER-ID]'
+                'responseCode' => '4012400',
+                'responseMessage' => 'Unauthorized. [Unknown client]'
             ], 400);
         }
-
+        if($partnerId == '14999'){
+            return response()->json([
+                'responseCode' => '4012400',
+                'responseMessage' => 'Unauthorized. [Unknown client]'
+            ], 400);
+        }
+        if (!$channelId || !$partnerId) {
+            return response()->json([
+                'responseCode' => '4012400',
+                'responseMessage' => 'Unauthorized. [Unknown client]'
+            ], 400);
+        }
+       
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
         if (now()->diffInMinutes($requestTime) > 5) {
@@ -54,7 +66,7 @@ class InquiryBCAController extends Controller
        // Validasi token
        if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
         return response()->json([
-            'responseCode' => '4012501', // Kode error jika token tidak valid
+            'responseCode' => '4012401', // Kode error jika token tidak valid
             'responseMessage' => 'Invalid token (B2B)',
         ], 401);
     }
@@ -65,8 +77,8 @@ class InquiryBCAController extends Controller
 
             
                 return response()->json([
-                    'responseCode' => '4012500',
-                    'responseMessage' => 'Invalid signature',
+                    'responseCode' => '4012400',
+                    'responseMessage' => 'Unauthorized. [Signature]',
                 ], 401);
         }
     
@@ -238,9 +250,9 @@ class InquiryBCAController extends Controller
                     "english" => "Success",
                     "indonesia" => "Sukses"
                 ],
-                "partnerServiceId" => $validated['partnerServiceId'],
+                "partnerServiceId" => "   ".$validated['partnerServiceId'],
                 "customerNo" => $user_data->id_invoice,
-                "virtualAccountNo" => $user_data->id_invoice,
+                "virtualAccountNo" => "   ".$user_data->id_invoice,
                 "virtualAccountName" => $user_data->nama_jamaah,
                 "inquiryRequestId" => $validated['inquiryRequestId'],
                 "totalAmount" => [
@@ -288,18 +300,18 @@ class InquiryBCAController extends Controller
     {
         return [
             "responseCode" => "4042412",
-            "responseMessage" => "Bill not found",
+            "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
             "virtualAccountData" => [
                 "inquiryStatus" => "01",
                 "inquiryReason" => [
-                    "english" => "Bill not found",
-                    "indonesia" => "Tagihan tidak ditemukan"
+                    "english" => "Virtual Account Not Found",
+                    "indonesia" => "Virtual Account Tidak Ditemukan"
                 ],
-                "partnerServiceId" => $validated['partnerServiceId'],
-                "customerNo" => "",
-                "virtualAccountNo" => "",
+                "partnerServiceId" => "   ".$validated['partnerServiceId'],
+                "customerNo" => $validated['virtualAccountNo'],
+                "virtualAccountNo" => "   ".$validated['virtualAccountNo'],
                 "virtualAccountName" => "",
-                "inquiryRequestId" => "",
+                "inquiryRequestId" => $validated['inquiryRequestId'],
                 "totalAmount" => [
                     "value" => "",
                     "currency" => ""
