@@ -191,20 +191,24 @@ class InquiryBCAController extends Controller
         $formatedUrl = $path . $query;
         return $formatedUrl;
     }
-
-    public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
+    public function generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash = [])
     {
         $hash = hash("sha256", "");
         if (is_array($bodyToHash)) {
             $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
+            Log::info('Generated Encoder Data:', ['encoderData' => $encoderData]);
             $hash = $this->hashbody($encoderData);
         }
-        
+    
         $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
+        Log::info('Generated String to Sign:', ['stringToSign' => $stringToSign]);
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
-		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
+    
+        Log::info('Generated Signature:', ['signature' => $signature]);
+    
         return $signature;
     }
+    
     public function validateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash, $signature){
         $is_valid = false;
         $signatureStr = $this->generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash);
