@@ -190,7 +190,7 @@ class InquiryBCAController extends Controller
         return $formatedUrl;
     }
 
-    public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
+    public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash)
     {
       
 
