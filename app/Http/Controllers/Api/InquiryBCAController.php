@@ -74,6 +74,13 @@ class InquiryBCAController extends Controller
                     ], 400);
                 }
             }
+                $virtualAccountNo = $request->input('virtualAccountNo');
+
+                // Contoh aturan validasi format: hanya angka (digit)
+                if (!preg_match('/^\d+$/', $virtualAccountNo)) {
+                    return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
+                }
+
             
             return response()->json([
                 'responseCode' => '4012500',
@@ -124,7 +131,26 @@ class InquiryBCAController extends Controller
     
         return response()->json($response);
     }
-
+    public function handleInvalidFieldFormat($fieldName, $fieldValue)
+    {
+        return response()->json([
+            'responseCode' => '4002503', // Kode untuk Invalid Field Format
+            'responseMessage' => 'Invalid Field Format',
+            'statusCode' => 400,
+            'virtualAccountData' => [
+                'paymentFlagStatus' => '01',
+                'paymentFlagReason' => [
+                    'english' => 'Any Value',
+                    'indonesia' => 'Any Value'
+                ],
+                'partnerServiceId' => '14999',
+                'customerNo' => '040002',
+                'virtualAccountNo' => $fieldValue, // Mengembalikan nilai field yang bermasalah
+                'paymentRequestId' => 'Any Value'
+            ]
+        ], 400);
+    }
+    
     private function mandatoryFields()
     {
         return [
