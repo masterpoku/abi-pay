@@ -201,6 +201,7 @@ class InquiryBCAController extends Controller
         }
         
         $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
+        Log::info('String to sign: '.$stringToSign);
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
 		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
         return $signature;
