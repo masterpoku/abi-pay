@@ -192,8 +192,7 @@ class InquiryBCAController extends Controller
 
     public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
     {
-
-        Log::info('Body to Hash:', json_encode($bodyToHash, JSON_PRETTY_PRINT));
+        Log::info('Body to Hash:', json_encode($bodyToHash));
 
         $hash = hash("sha256", "");
         if (is_array($bodyToHash)) {
