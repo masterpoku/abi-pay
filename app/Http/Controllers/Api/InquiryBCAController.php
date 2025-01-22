@@ -197,7 +197,7 @@ class InquiryBCAController extends Controller
         }
 
         // Membuat string untuk signature
-        $stringToSign = $method . ":/api/bca/v1.0/transfer-va/inquiry:" . $auth_token . ":" . strtolower(bin2hex(hex2bin($hash))) . ":" . $isoTime;
+        $stringToSign = $method . ":" . $this->getRelativeUrl($url) . ":" . $auth_token . ":" . strtolower(bin2hex(hex2bin($hash))) . ":" . $isoTime;
 
         // HMAC dengan SHA-512 menggunakan client secret
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
