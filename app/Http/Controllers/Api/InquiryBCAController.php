@@ -26,7 +26,7 @@ class InquiryBCAController extends Controller
         Log::info('Request Header:', $request->headers->all());
     
         // Ambil data header untuk validasi
-        $clientSecret = env('CLIENT_SECRET'); // Client Secret dari konfigurasi
+        $clientSecret = env('BCA_CLIENT_SECRET'); // Client Secret dari konfigurasi
         $method = strtoupper($request->method()); // HTTP Method (GET, POST, dll)
         $url = $request->fullUrl(); // Full URL termasuk query string
         $authToken = $request->header('Authorization') ? str_replace('Bearer ', '', $request->header('Authorization')) : null; // Access token
