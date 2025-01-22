@@ -199,7 +199,7 @@ class InquiryBCAController extends Controller
         // Membuat string untuk signature
         Log::info('Generating String to Sign', [
             'method' => $method,
-            'relativeUrl' => $this->getRelativeUrl($url),
+            'relativeUrl' => '/api/bca/v1.0/transfer-va/inquiry',
             'authToken' => $auth_token,
             'hash' => strtolower(bin2hex(hex2bin($hash))),
             'isoTime' => $isoTime,
