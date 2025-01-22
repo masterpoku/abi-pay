@@ -74,7 +74,7 @@ class InquiryBCAController extends Controller
                     ], 400);
                 }
             }
-                $virtualAccountNo = $request->input('virtualAccountNo');
+            $virtualAccountNo = $request->virtualAccountNo;
             Log::info('Virtual Account No:', [$virtualAccountNo]);
                 // Contoh aturan validasi format: hanya angka (digit)
                 if (is_null($virtualAccountNo)) {
