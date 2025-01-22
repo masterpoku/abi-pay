@@ -197,7 +197,14 @@ class InquiryBCAController extends Controller
         }
 
         // Membuat string untuk signature
-        $stringToSign = $method . ":" . $this->getRelativeUrl($url) . ":" . $auth_token . ":" . strtolower(bin2hex(hex2bin($hash))) . ":" . $isoTime;
+        Log::info('Generating String to Sign', [
+            'method' => $method,
+            'relativeUrl' => $this->getRelativeUrl($url),
+            'authToken' => $auth_token,
+            'hash' => strtolower(bin2hex(hex2bin($hash))),
+            'isoTime' => $isoTime,
+        ]);
+        $stringToSign = sprintf('%s:%s:%s:%s:%s', $method, $this->getRelativeUrl($url), $auth_token, strtolower(bin2hex(hex2bin($hash))), $isoTime);
 
         // HMAC dengan SHA-512 menggunakan client secret
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
