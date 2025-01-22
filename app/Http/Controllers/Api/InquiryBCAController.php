@@ -51,6 +51,30 @@ class InquiryBCAController extends Controller
     }
         // Validasi Signature
         if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+            
+            
+            // Cek apakah ada field mandatory yang kosong
+            foreach ($request->all() as $key => $value) {
+                if (empty($value) && in_array($key, $this->mandatoryFields())) {
+                    return response()->json([
+                        'responseCode' => '4002502',
+                        'responseMessage' => 'Invalid Mandatory Field',
+                        'statusCode' => 400,
+                        'virtualAccountData' => [
+                            'paymentFlagStatus' => '01',
+                            'paymentFlagReason' => [
+                                'english' => 'Any Value',
+                                'indonesia' => 'Any Value'
+                            ],
+                            'partnerServiceId' => ' 14999',
+                            'customerNo' => '040002',
+                            'virtualAccountNo' => 'Passed',
+                            'paymentRequestId' => 'Any Value'
+                        ]
+                    ], 400);
+                }
+            }
+            
             return response()->json([
                 'responseCode' => '4012500',
                 'responseMessage' => 'Invalid signature',
@@ -101,7 +125,18 @@ class InquiryBCAController extends Controller
         return response()->json($response);
     }
 
-
+    private function mandatoryFields()
+    {
+        return [
+            'partnerServiceId',
+            'customerNo',
+            'virtualAccountNo',
+            'trxDateInit',
+            'channelCode',
+            'inquiryRequestId',
+        ];
+    }
+    
  
     private function hashbody($body)
     {
