@@ -110,13 +110,7 @@ class InquiryBCAController extends Controller
             return response()->json($this->buildNotFoundResponse($validated));
         }
     
-        // Validasi data lainnya (customerNo, partnerServiceId, dll.)
-        if ($validated['customerNo'] !== $user_data->id_invoice) {
-            return response()->json([
-                'responseCode' => '4012501',
-                'responseMessage' => 'Customer ID does not match with Virtual Account',
-            ], 401);
-        }
+
     
         if ($validated['partnerServiceId'] !== '14999') {
             return response()->json([
