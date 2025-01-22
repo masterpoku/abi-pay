@@ -90,21 +90,16 @@ class InquiryBCAController extends Controller
      
     
         // Validasi request body
-
-        $validated = [
-            'partnerServiceId' => '   ' . $request->partnerServiceId,
-            'customerNo' => $request->customerNo,
-            'virtualAccountNo' => '   ' . $request->virtualAccountNo,
-            'trxDateInit' => $request->trxDateInit,
-            'channelCode' => $request->channelCode,
-            'language' => '',
-            'amount' => null,
-            'hashedSourceAccountNo' => '',
-            'sourceBankCode' => '014',
-            'additionalInfo' => $request->additionalInfo,
-            'passApp' => '',
-            'inquiryRequestId' => $request->inquiryRequestId,
-        ];
+        $validated = $request->validate([
+            'partnerServiceId' => 'required',
+            'customerNo' => 'required',
+            'virtualAccountNo' => 'required',
+            'trxDateInit' => 'required',
+            'channelCode' => 'required',
+            'additionalInfo' => 'nullable',
+            'inquiryRequestId' => 'required',
+        ]);
+    
         // Ambil data dari database berdasarkan virtualAccountNo
         $user_data = DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo']) // Mencocokkan berdasarkan virtualAccountNo
@@ -197,6 +192,9 @@ class InquiryBCAController extends Controller
 
     public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
     {
+
+Log::info('Body to Hash:', $bodyToHash);
+
         $hash = hash("sha256", "");
         if (is_array($bodyToHash)) {
             $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
