@@ -42,7 +42,13 @@ class InquiryBCAController extends Controller
                 'responseMessage' => 'Request timestamp is invalid or expired',
             ], 401);
         }
-    
+       // Validasi token
+       if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
+        return response()->json([
+            'responseCode' => '4012501', // Kode error jika token tidak valid
+            'responseMessage' => 'Invalid token (B2B)',
+        ], 401);
+    }
         // Validasi Signature
         if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
             return response()->json([
@@ -51,13 +57,7 @@ class InquiryBCAController extends Controller
             ], 401);
         }
     
-        // Validasi token
-        if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
-            return response()->json([
-                'responseCode' => '4012501', // Kode error jika token tidak valid
-                'responseMessage' => 'Invalid token (B2B)',
-            ], 401);
-        }
+     
     
         // Validasi request body
         $validated = $request->validate([
