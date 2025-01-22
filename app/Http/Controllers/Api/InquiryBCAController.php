@@ -194,9 +194,9 @@ class InquiryBCAController extends Controller
     {
       
 
-        $hash = hash("sha256", "");
+            $cok = '{"partnerServiceId":"   14999","customerNo":"040001","virtualAccountNo":"   14999040001","trxDateInit":"2025-01-22T13:43:08+07:00","channelCode":6011,"language":"","amount":null,"hashedSourceAccountNo":"","sourceBankCode":"014","additionalInfo":{},"passApp":"","inquiryRequestId":"202501221343081499900000000038"}';
 
-            $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
+            $encoderData = json_encode($cok, JSON_UNESCAPED_SLASHES);
             $hash = $this->hashbody($encoderData);
         
         
