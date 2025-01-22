@@ -169,16 +169,19 @@ class InquiryBCAController extends Controller
         ];
     }
     
-    
-        private function hashbody($body)
+    private function hashbody($body)
     {
-        // Menghasilkan hash SHA-256 dari body request
-        return hash('sha256', $body);
+        if (empty($body)) {
+            $body = '';
+        } else {
+            //$toStrip = [" ", "\r", "\n", "\t"];
+            //$body = str_replace($toStrip, '', $body);
+        }
+        return strtolower(hash('sha256', $body));
     }
 
     private function getRelativeUrl($url)
     {
-        // Ambil path dan query string yang diformat sesuai dengan spesifikasi
         $path = parse_url($url, PHP_URL_PATH);
         if (empty($path)) {
             $path = '/';
@@ -190,50 +193,33 @@ class InquiryBCAController extends Controller
             ksort($parsed);
             $query = '?' . http_build_query($parsed);
         }
-        return $path . $query;
+        $formatedUrl = $path . $query;
+        return $formatedUrl;
     }
 
-    public function generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash = [])
+    public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
     {
-        // Menghitung hash SHA-256 dari body
-        $hash = "";
+        $hash = hash("sha256", "");
         if (is_array($bodyToHash)) {
             $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
             $hash = $this->hashbody($encoderData);
         }
-
-        // Membuat string untuk signature
-        Log::info('Generating String to Sign', [
-            'method' => $method,
-            'relativeUrl' => $url,
-            'authToken' => $auth_token,
-            'hash' => strtolower(bin2hex(hex2bin($hash))),
-            'isoTime' => $isoTime,
-        ]);
-        $stringToSign = sprintf('%s:%s:%s:%s:%s', strtoupper($method), $this->getRelativeUrl($url), $auth_token, strtolower(bin2hex(hex2bin($hash))), $isoTime);
-
-        // HMAC dengan SHA-512 menggunakan client secret
+        
+        $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
-
+		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
         return $signature;
     }
 
-    public function validateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash, $signature)
-    {
-        // Membuat signature yang diharapkan
-        $signatureStr = $this->generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash);
-
-        // Debugging: Log signature yang dihasilkan dan signature yang diterima
-        Log::info('Generated Signature:', ['generated_signature' => $signatureStr]);
-        Log::info('Received Signature:', ['received_signature' => $signature]);
-
-        // Bandingkan signature yang dihasilkan dengan yang diterima
-        if (strcmp($signatureStr, $signature) == 0) {
-            return true;
+    public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
+        $is_valid = false;
+        $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
+        if(strcmp($signatureStr, $signature) == 0){
+            $is_valid = true;
         }
-
-        return false;
+        return $is_valid;
     }
+
 
     
 
