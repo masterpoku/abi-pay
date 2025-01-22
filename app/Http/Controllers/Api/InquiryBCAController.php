@@ -33,7 +33,16 @@ class InquiryBCAController extends Controller
         $isoTime = $request->header('X-TIMESTAMP'); // ISO8601 timestamp dari header
         $signature = $request->header('X-SIGNATURE'); // Signature dari header
         $bodyToHash = $request->getContent(); // Body request untuk hashing
-    
+        $channelId = $request->header('CHANNEL-ID');
+        $partnerId = $request->header('X-PARTNER-ID');
+
+        if (!$channelId || !$partnerId) {
+            return response()->json([
+                'responseCode' => '4002501',
+                'responseMessage' => 'Invalid field format [CHANNEL-ID/X-PARTNER-ID]'
+            ], 400);
+        }
+
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
         if (now()->diffInMinutes($requestTime) > 5) {
