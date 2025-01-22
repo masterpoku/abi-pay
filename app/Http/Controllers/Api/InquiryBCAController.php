@@ -53,6 +53,14 @@ class InquiryBCAController extends Controller
         if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
             
             
+
+            
+                return response()->json([
+                    'responseCode' => '4012500',
+                    'responseMessage' => 'Invalid signature',
+                ], 401);
+        }
+    
             // Cek apakah ada field mandatory yang kosong
             foreach ($request->all() as $key => $value) {
                 if (empty($value) && in_array($key, $this->mandatoryFields())) {
@@ -76,24 +84,9 @@ class InquiryBCAController extends Controller
             }
             $virtualAccountNo = $request->virtualAccountNo;
             Log::info('Virtual Account No:', [$virtualAccountNo]);
-                // Contoh aturan validasi format: hanya angka (digit)
-                if (is_null($virtualAccountNo)) {
-                   
-                    return response()->json([
-                        'responseCode' => '4012500',
-                        'responseMessage' => 'Invalid signature',
-                    ], 401);
-                } elseif (!preg_match('/^\d+$/', $virtualAccountNo)) {
+              if(!preg_match('/^\d+$/', $virtualAccountNo)) {
                     return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
                 }
-
-            
-                return response()->json([
-                    'responseCode' => '4012500',
-                    'responseMessage' => 'Invalid signature',
-                ], 401);
-        }
-    
      
     
         // Validasi request body
