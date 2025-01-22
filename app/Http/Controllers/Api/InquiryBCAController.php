@@ -75,7 +75,7 @@ class InquiryBCAController extends Controller
                 }
             }
                 $virtualAccountNo = $request->input('virtualAccountNo');
-
+            Log::info('Virtual Account No:', [$virtualAccountNo]);
                 // Contoh aturan validasi format: hanya angka (digit)
                 if (is_null($virtualAccountNo)) {
                    
@@ -88,6 +88,10 @@ class InquiryBCAController extends Controller
                 }
 
             
+                return response()->json([
+                    'responseCode' => '4012500',
+                    'responseMessage' => 'Invalid signature',
+                ], 401);
         }
     
      
