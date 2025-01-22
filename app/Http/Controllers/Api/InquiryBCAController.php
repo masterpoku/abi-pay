@@ -94,8 +94,8 @@ class InquiryBCAController extends Controller
             'partnerServiceId' => 'required|string',
             'customerNo' => 'required|string',
             'virtualAccountNo' => 'required|string',
-            'trxDateInit' => 'required|date',
-            'channelCode' => 'required|integer',
+            'trxDateInit' => 'required|string',
+            'channelCode' => 'required|string',
             'additionalInfo' => 'nullable|array',
             'inquiryRequestId' => 'required|string',
         ]);
