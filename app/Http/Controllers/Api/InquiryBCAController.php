@@ -192,7 +192,7 @@ class InquiryBCAController extends Controller
 
     public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash = [])
     {
-        Log::info('Body to Hash:', json_encode($bodyToHash));
+      
 
         $hash = hash("sha256", "");
         if (is_array($bodyToHash)) {
@@ -208,7 +208,7 @@ class InquiryBCAController extends Controller
 
     public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
         $is_valid = false;
-
+        Log::info('Body anjay: '.$bodyToHash);
         $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
         Log::info('SignatureStr: '.$signatureStr);
         Log::info('Signature: '.$signature);
