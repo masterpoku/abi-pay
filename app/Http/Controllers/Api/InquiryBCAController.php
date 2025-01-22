@@ -196,11 +196,8 @@ class InquiryBCAController extends Controller
 
             $cok = '{"partnerServiceId":"   14999","customerNo":"040001","virtualAccountNo":"   14999040001","trxDateInit":"2025-01-22T13:43:08+07:00","channelCode":6011,"language":"","amount":null,"hashedSourceAccountNo":"","sourceBankCode":"014","additionalInfo":{},"passApp":"","inquiryRequestId":"202501221343081499900000000038"}';
 
-            $encoderData = json_encode($cok, JSON_UNESCAPED_SLASHES);
-            $hash = $this->hashbody($encoderData);
         
-        
-        $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
+        $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $cok . ":" . $isoTime;
         Log::info('String to sign: '.$stringToSign);
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
 		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
