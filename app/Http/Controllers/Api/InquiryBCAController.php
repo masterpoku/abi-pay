@@ -90,7 +90,15 @@ class InquiryBCAController extends Controller
      
     
         // Validasi request body
-        $validated = $request->all();
+        $validated = $request->validate([
+            'partnerServiceId' => 'required',
+            'customerNo' => 'required',
+            'virtualAccountNo' => 'required',
+            'trxDateInit' => 'required',
+            'channelCode' => 'required',
+            'additionalInfo' => 'nullable',
+            'inquiryRequestId' => 'required',
+        ]);
     
         // Ambil data dari database berdasarkan virtualAccountNo
         $user_data = DB::table('tagihan_pembayaran')
