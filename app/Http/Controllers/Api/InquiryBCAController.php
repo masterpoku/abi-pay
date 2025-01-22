@@ -200,7 +200,7 @@ class InquiryBCAController extends Controller
             $hash = $this->hashbody($encoderData);
         }
     
-        $stringToSign = $method.":/api/bca/v1.0/transfer-va/inquiry:" . $auth_token . ":" . $hash . ":" . $isoTime;
+        $stringToSign = $method.":/api/bca/v1.0/transfer-va/inquiry:" . $auth_token . ":e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855:" . $isoTime;
         Log::info('Generated String to Sign:', ['stringToSign' => $stringToSign]);
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
     
