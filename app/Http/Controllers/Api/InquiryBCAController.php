@@ -194,8 +194,7 @@ class InquiryBCAController extends Controller
     {
       
 
-            $coks = '{"partnerServiceId":"   14999","customerNo":"040001","virtualAccountNo":"   14999040001","trxDateInit":"2025-01-22T13:43:08+07:00","channelCode":6011,"language":"","amount":null,"hashedSourceAccountNo":"","sourceBankCode":"014","additionalInfo":{},"passApp":"","inquiryRequestId":"202501221343081499900000000038"}';
-            $cok = hash('sha256', $coks);
+        $cok = hash('sha256', $bodyToHash);
         
         $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $cok . ":" . $isoTime;
         Log::info('String to sign: '.$stringToSign);
@@ -206,7 +205,7 @@ class InquiryBCAController extends Controller
 
     public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
         $is_valid = false;
-        Log::info('Body anjay: '.$bodyToHash);
+        // Log::info('Body anjay: '.$bodyToHash);
         $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
         Log::info('SignatureStr: '.$signatureStr);
         Log::info('Signature: '.$signature);
