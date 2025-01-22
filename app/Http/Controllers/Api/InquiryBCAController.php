@@ -195,10 +195,10 @@ class InquiryBCAController extends Controller
       
 
         $hash = hash("sha256", "");
-        if (is_array($bodyToHash)) {
+
             $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
             $hash = $this->hashbody($encoderData);
-        }
+        
         
         $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $hash . ":" . $isoTime;
         Log::info('String to sign: '.$stringToSign);
