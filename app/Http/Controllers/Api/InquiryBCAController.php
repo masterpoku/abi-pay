@@ -26,8 +26,7 @@ class InquiryBCAController extends Controller
         Log::info('Request Header:', $request->headers->all());
     
         // Ambil data header untuk validasi
-        $clientid = env('BCA_CLIENT_KEY'); // Client Secret dari konfigurasi
-        $public_key_str = env('BCA_PUBLIC_KEY'); // Public Key dari konfigurasi
+        $clientSecret = env('BCA_CLIENT_SECRET'); // Client Secret dari konfigurasi
         $method = strtoupper($request->method()); // HTTP Method (GET, POST, dll)
         $url = $request->fullUrl(); // Full URL termasuk query string
         $authToken = $request->header('Authorization') ? str_replace('Bearer ', '', $request->header('Authorization')) : null; // Access token
@@ -51,8 +50,7 @@ class InquiryBCAController extends Controller
         ], 401);
     }
         // Validasi Signature
-
-        if (!$this->validateServiceSignature($public_key_str, $clientid, $isoTime, $signature)) {
+        if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
             
             
             // Cek apakah ada field mandatory yang kosong
@@ -166,12 +164,12 @@ class InquiryBCAController extends Controller
     }
     
     
-    private function hashbody($body)
+        private function hashbody($body)
     {
         // Menghasilkan hash SHA-256 dari body request
         return hash('sha256', $body);
     }
-    
+
     private function getRelativeUrl($url)
     {
         // Ambil path dan query string yang diformat sesuai dengan spesifikasi
@@ -179,7 +177,7 @@ class InquiryBCAController extends Controller
         if (empty($path)) {
             $path = '/';
         }
-    
+
         $query = parse_url($url, PHP_URL_QUERY);
         if ($query) {
             parse_str($query, $parsed);
@@ -188,7 +186,7 @@ class InquiryBCAController extends Controller
         }
         return $path . $query;
     }
-    
+
     public function generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash = [])
     {
         // Menghitung hash SHA-256 dari body
@@ -197,44 +195,32 @@ class InquiryBCAController extends Controller
             $encoderData = json_encode($bodyToHash, JSON_UNESCAPED_SLASHES);
             $hash = $this->hashbody($encoderData);
         }
-    
+
         // Membuat string untuk signature
         $stringToSign = $method . ":" . $this->getRelativeUrl($url) . ":" . $auth_token . ":" . strtolower(bin2hex(hex2bin($hash))) . ":" . $isoTime;
-    
+
         // HMAC dengan SHA-512 menggunakan client secret
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
-    
+
         return $signature;
     }
-    
-    public function validateServiceSignature($public_key_str, $client_id, $iso_time, $signature)
+
+    public function validateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash, $signature)
     {
-        $is_valid = false;
-    
-        // Menyusun public key dengan format yang tepat
-        $public_key = <<<EOF
-        -----BEGIN PUBLIC KEY-----
-        $public_key_str
-        -----END PUBLIC KEY-----
-        EOF;
-    
-        // Algoritma yang digunakan untuk signature
-        $algo = "SHA256";
-    
-        // Membuat data yang akan ditandatangani
-        $dataToSign = $client_id . "|" . $iso_time;
-    
-        // Memverifikasi signature menggunakan openssl_verify
-        $is_valid = openssl_verify($dataToSign, base64_decode($signature), $public_key, $algo);
-    
-        // Jika signature valid (mengembalikan 1), set is_valid ke true
-        if ($is_valid == 1) {
-            $is_valid = true;
+        // Membuat signature yang diharapkan
+        $signatureStr = $this->generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash);
+
+        // Debugging: Log signature yang dihasilkan dan signature yang diterima
+        Log::info('Generated Signature:', ['generated_signature' => $signatureStr]);
+        Log::info('Received Signature:', ['received_signature' => $signature]);
+
+        // Bandingkan signature yang dihasilkan dengan yang diterima
+        if (strcmp($signatureStr, $signature) == 0) {
+            return true;
         }
-    
-        return $is_valid;
+
+        return false;
     }
-    
 
     
 
