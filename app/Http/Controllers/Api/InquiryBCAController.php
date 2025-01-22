@@ -205,17 +205,22 @@ class InquiryBCAController extends Controller
 		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
         return $signature;
     }
-
-    public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
+    public function validateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash, $signature){
         $is_valid = false;
-        $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
-        Log::info('PaymentBCAController validateServiceSignature signatureStr:', $signatureStr);
-        Log::info('PaymentBCAController validateServiceSignature signature:', $signature);
-        if(strcmp($signatureStr, $signature) == 0){
+        $signatureStr = $this->generateServiceSignature($client_secret, $method, $url, $auth_token, $isoTime, $bodyToHash);
+    
+        // Ubah log berikut dengan menambahkan konteks sebagai array
+        Log::info('PaymentBCAController validateServiceSignature signatureStr:', ['signatureStr' => $signatureStr]);
+        Log::info('PaymentBCAController validateServiceSignature signature:', ['signature' => $signature]);
+    
+        if (strcmp($signatureStr, $signature) == 0) {
             $is_valid = true;
         }
+    
         return $is_valid;
     }
+    
+
 
 
     /**
