@@ -77,15 +77,17 @@ class InquiryBCAController extends Controller
                 $virtualAccountNo = $request->input('virtualAccountNo');
 
                 // Contoh aturan validasi format: hanya angka (digit)
-                if (!preg_match('/^\d+$/', $virtualAccountNo)) {
+                if (is_null($virtualAccountNo)) {
+                   
+                    return response()->json([
+                        'responseCode' => '4012500',
+                        'responseMessage' => 'Invalid signature',
+                    ], 401);
+                } elseif (!preg_match('/^\d+$/', $virtualAccountNo)) {
                     return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
                 }
 
             
-            return response()->json([
-                'responseCode' => '4012500',
-                'responseMessage' => 'Invalid signature',
-            ], 401);
         }
     
      
