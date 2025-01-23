@@ -41,21 +41,16 @@ class InquiryBCAController extends Controller
         Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
 
-        // Check if the headers match the conditions
-        if ($channelId === 95231) {
-            return response()->json([
-                'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. [Unknown client]'
-            ], 400);
+       
+        // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
+        if ($channelId && $partnerId) {
+            if ($channelId !== 95231 || $partnerId !== 14999) {
+                return response()->json([
+                    'responseCode' => '4012400',
+                    'responseMessage' => 'Unauthorized. [Unknown client]'
+                ], 400);
+            }
         }
-
-        if ($partnerId === 14999) {
-            return response()->json([
-                'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. [Unknown client]'
-            ], 400);
-        }
-
        
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
@@ -269,28 +264,7 @@ class InquiryBCAController extends Controller
                         "indonesia" => $user_data->nama_paket
                     ]
                 ],
-                "additionalInfo" => [
-                    "additionalInfo1" => [
-                        "label" => [
-                            "indonesia" => "Unit",
-                            "english" => "Unit"
-                        ],
-                        "value" => [
-                            "indonesia" => "10C",
-                            "english" => "10C"
-                        ]
-                    ],
-                    "additionalInfo2" => [
-                        "label" => [
-                            "indonesia" => "Bulan",
-                            "english" => "Month"
-                        ],
-                        "value" => [
-                            "indonesia" => date('F', strtotime(date('Y-m-d'))),
-                            "english" => date('F', strtotime(date('Y-m-d')))
-                        ]
-                    ]
-                ]
+                "additionalInfo" => []
             ]
         ];
     }
