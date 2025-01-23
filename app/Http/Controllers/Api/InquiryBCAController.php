@@ -293,21 +293,7 @@ class InquiryBCAController extends Controller
                     "currency" => ""
                 ],
                 "subCompany" => "",
-                "billDetails" => [
-                    [
-                        "billNo" => "",
-                        "billDescription" => [
-                            "english" => "",
-                            "indonesia" => ""
-                        ],
-                        "billSubCompany" => "",
-                        "billAmount" => [
-                            "value" => "",
-                            "currency" => "IDR"
-                        ],
-                        "additionalInfo" => []
-                    ]
-                ],
+                "billDetails" => [],
                 "freeTexts" => [
                     [
                         "english" => "",
