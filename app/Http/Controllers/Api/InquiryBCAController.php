@@ -62,8 +62,8 @@ class InquiryBCAController extends Controller
                     ],
                     "partnerServiceId" => "   ".$request->input('partnerServiceId'),
                     "customerNo" => '',
-                    "virtualAccountNo" => '',
-                    "virtualAccountName" => "   ".$request->input('virtualAccountName'),
+                    "virtualAccountNo" => "   ".$request->input('virtualAccountNo'),
+                    "virtualAccountName" => '',
                     "inquiryRequestId" => $request->input('inquiryRequestId'),
                     'totalAmount' => [
                         'value' => '',
