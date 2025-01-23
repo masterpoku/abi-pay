@@ -50,7 +50,7 @@ class InquiryBCAController extends Controller
         
         if ($existing) {
             // Jika sudah ada, beri respons 409 Conflict
-            $customerNo = substr($request->input('virtualAccountNo'), 0, 5);
+            $customerNo = substr($request->input('virtualAccountNo'), 5);
             return response()->json([
                 'responseCode' => '4092400',
                 'responseMessage' => 'Conflict',
