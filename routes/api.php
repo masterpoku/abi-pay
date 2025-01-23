@@ -72,4 +72,4 @@ Route::post('v1.0/access-token/test', [PaymentBCAController::class, 'requestAcce
 Route::post('v1.0/transfer-va/payment', [InquiryBCAController::class, 'handleInquiry']);
 Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
 
-Route::post('v1.0/validate-bearer', [InquiryBCAController::class, 'BearerCheck']);
+Route::post('v1.0/validate-bearer', [InquiryBCAController::class, 'validateAndInsertExternalId']);

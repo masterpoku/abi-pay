@@ -193,6 +193,7 @@ class InquiryBCAController extends Controller
         // Jika tidak ada duplikasi, lakukan insert ke database
         DB::table('external_ids')->insert([
             'external_id' => $externalId,
+            'date' => $today,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
