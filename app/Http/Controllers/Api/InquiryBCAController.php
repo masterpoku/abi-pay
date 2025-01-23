@@ -33,10 +33,11 @@ class InquiryBCAController extends Controller
         $isoTime = $request->header('X-TIMESTAMP'); // ISO8601 timestamp dari header
         $signature = $request->header('X-SIGNATURE'); // Signature dari header
         $bodyToHash = $request->getContent(); // Body request untuk hashing
+        
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
-        Log::info('CHANNEL-ID:', $channelId);
-        Log::info('X-PARTNER-ID:', $partnerId);
+        Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
+        Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
         if($channelId == 95231){
             return response()->json([
                 'responseCode' => '4012400',
