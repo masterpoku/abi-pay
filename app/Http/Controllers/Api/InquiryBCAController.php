@@ -306,7 +306,7 @@ class InquiryBCAController extends Controller
                     "indonesia" => "Sukses"
                 ],
                 "partnerServiceId" => "   ".$validated['partnerServiceId'],
-                "customerNo" => $user_data->id_invoice,
+                "customerNo" => $number,
                 "virtualAccountNo" => "   ".$user_data->id_invoice,
                 "virtualAccountName" => $user_data->nama_jamaah,
                 "inquiryRequestId" => $validated['inquiryRequestId'],
