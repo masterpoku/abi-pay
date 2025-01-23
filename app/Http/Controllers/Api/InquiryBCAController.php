@@ -198,7 +198,7 @@ class InquiryBCAController extends Controller
             'updated_at' => Carbon::now(),
         ]);
 
-     return true;
+  
     }
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
     {
