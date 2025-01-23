@@ -37,7 +37,59 @@ class InquiryBCAController extends Controller
         
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
+        $externalId = $request->header('X-EXTERNAL-ID');
         
+        // Mengambil tanggal hari ini
+        $today = Carbon::today()->toDateString();
+
+        // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
+        $existing = DB::table('external_ids')
+                      ->where('external_id', $externalId)
+                      ->whereDate('created_at', $today)
+                      ->exists();
+        
+        if ($existing) {
+            // Jika sudah ada, beri respons 409 Conflict
+            return response()->json([
+                'responseCode' => '4092400',
+                'responseMessage' => 'Conflict',
+                'virtualAccountData' => [
+                    'inquiryStatus' => '01',
+                    'inquiryReason' => [
+                        'english' => 'Cannot use the same X-EXTERNAL-ID',
+                        'indonesia' => 'Tidak bisa menggunakan X-EXTERNAL-ID yang sama',
+                    ],
+                    "partnerServiceId" => "   ".$request->input('partnerServiceId'),
+                    "customerNo" => '',
+                    "virtualAccountNo" => '',
+                    "virtualAccountName" => "   ".$request->input('virtualAccountName'),
+                    "inquiryRequestId" => $request->input('inquiryRequestId'),
+                    'totalAmount' => [
+                        'value' => '',
+                        'currency' => '',
+                    ],
+                    'subCompany' => '00000',
+                    'billDetails' => [],
+                    'freeTexts' => [
+                        [
+                            'english' => '',
+                            'indonesia' => '',
+                        ],
+                    ],
+                ],
+                'additionalInfo' => (object) [],
+            ], 409);
+        }
+
+        // Jika tidak ada duplikasi, lakukan insert ke database
+        DB::table('external_ids')->insert([
+            'external_id' => $externalId,
+            'date' => $today,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+  
         // Log the headers for debugging
         Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
@@ -52,7 +104,7 @@ class InquiryBCAController extends Controller
                 ], 401);
             }
         }
-        $this->validateAndInsertExternalId($request);
+       
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
         if (now()->diffInMinutes($requestTime) > 5) {
@@ -143,63 +195,7 @@ class InquiryBCAController extends Controller
     
         return response()->json($response);
     }
-    public function validateAndInsertExternalId(Request $request)
-    {
-        // Mendapatkan X-EXTERNAL-ID dari request
-        $externalId = $request->header('X-EXTERNAL-ID');
-        
-        // Mengambil tanggal hari ini
-        $today = Carbon::today()->toDateString();
 
-        // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
-        $existing = DB::table('external_ids')
-                      ->where('external_id', $externalId)
-                      ->whereDate('created_at', $today)
-                      ->exists();
-        
-        if ($existing) {
-            // Jika sudah ada, beri respons 409 Conflict
-            return response()->json([
-                'responseCode' => '4092400',
-                'responseMessage' => 'Conflict',
-                'virtualAccountData' => [
-                    'inquiryStatus' => '01',
-                    'inquiryReason' => [
-                        'english' => 'Cannot use the same X-EXTERNAL-ID',
-                        'indonesia' => 'Tidak bisa menggunakan X-EXTERNAL-ID yang sama',
-                    ],
-                    "partnerServiceId" => "   ".$request->input('partnerServiceId'),
-                    "customerNo" => '',
-                    "virtualAccountNo" => '',
-                    "virtualAccountName" => "   ".$request->input('virtualAccountName'),
-                    "inquiryRequestId" => $request->input('inquiryRequestId'),
-                    'totalAmount' => [
-                        'value' => '',
-                        'currency' => '',
-                    ],
-                    'subCompany' => '00000',
-                    'billDetails' => [],
-                    'freeTexts' => [
-                        [
-                            'english' => '',
-                            'indonesia' => '',
-                        ],
-                    ],
-                ],
-                'additionalInfo' => (object) [],
-            ], 409);
-        }
-
-        // Jika tidak ada duplikasi, lakukan insert ke database
-        DB::table('external_ids')->insert([
-            'external_id' => $externalId,
-            'date' => $today,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
-
-  
-    }
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
     {
         return response()->json([
