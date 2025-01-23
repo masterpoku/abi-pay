@@ -42,14 +42,14 @@ class InquiryBCAController extends Controller
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
 
         // Check if the headers match the conditions
-        if ($channelId === "95231") {
+        if ($channelId === 95231) {
             return response()->json([
                 'responseCode' => '4012400',
                 'responseMessage' => 'Unauthorized. [Unknown client - Invalid CHANNEL-ID]'
             ], 400);
         }
 
-        if ($partnerId === "14999") {
+        if ($partnerId === 14999) {
             return response()->json([
                 'responseCode' => '4012400',
                 'responseMessage' => 'Unauthorized. [Unknown client - Invalid PARTNER-ID]'
