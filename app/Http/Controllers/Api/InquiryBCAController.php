@@ -125,7 +125,7 @@ class InquiryBCAController extends Controller
             ->first();
     
         if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated));
+            return response()->json($this->buildNotFoundResponse($validated),404);
         }
     
 
