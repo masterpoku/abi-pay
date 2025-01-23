@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Api\PaymentBCAController;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class InquiryBCAController extends Controller
@@ -141,6 +142,39 @@ class InquiryBCAController extends Controller
         $response = $this->buildSuccessResponse($validated, $user_data);
     
         return response()->json($response);
+    }
+    public function validateAndInsertExternalId(Request $request)
+    {
+        // Mendapatkan X-EXTERNAL-ID dari request
+        $externalId = $request->header('X-EXTERNAL-ID');
+        
+        // Mengambil tanggal hari ini
+        $today = Carbon::today()->toDateString();
+
+        // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
+        $existing = DB::table('external_ids')
+                      ->where('external_id', $externalId)
+                      ->whereDate('created_at', $today)
+                      ->exists();
+        
+        if ($existing) {
+            // Jika sudah ada, beri respons 409 Conflict
+            return response()->json([
+                'message' => 'Conflict: X-EXTERNAL-ID sudah ada pada hari ini.'
+            ], 409);
+        }
+
+        // Jika tidak ada duplikasi, lakukan insert ke database
+        DB::table('external_ids')->insert([
+            'external_id' => $externalId,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        // Kembalikan respons setelah insert
+        return response()->json([
+            'message' => 'X-EXTERNAL-ID valid dan data berhasil disimpan.'
+        ], 201);
     }
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
     {
