@@ -44,7 +44,7 @@ class InquiryBCAController extends Controller
        
         // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
         if ($channelId && $partnerId) {
-            if ($channelId !== 95231 || $partnerId !== 14999) {
+            if ((int) $channelId !== 95231 || (int) $partnerId !== 14999) {
                 return response()->json([
                     'responseCode' => '4012400',
                     'responseMessage' => 'Unauthorized. [Unknown client]'
