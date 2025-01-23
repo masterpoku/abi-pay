@@ -294,8 +294,7 @@ class InquiryBCAController extends Controller
     private function buildSuccessResponse($validated, $user_data)
     {
     
-        $number = str_replace('', $validated['partnerServiceId'], $validated['virtualAccountNo']);
-        
+        $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
             "responseCode" => "2002400",
             "responseMessage" => "Successful",
@@ -306,7 +305,7 @@ class InquiryBCAController extends Controller
                     "indonesia" => "Sukses"
                 ],
                 "partnerServiceId" => "   ".$validated['partnerServiceId'],
-                "customerNo" => $number,
+                "customerNo" => $customerNo,
                 "virtualAccountNo" => "   ".$user_data->id_invoice,
                 "virtualAccountName" => $user_data->nama_jamaah,
                 "inquiryRequestId" => $validated['inquiryRequestId'],
@@ -333,12 +332,8 @@ class InquiryBCAController extends Controller
     private function buildNotFoundResponse($validated)
     {
 
-        function replace_string($separator, $partnerServiceId, $virtualAccountNo) {
-            return str_replace('', $separator, $partnerServiceId . $virtualAccountNo);
-        }
-        
-        $number = replace_string('$', $validated['partnerServiceId'], $validated['virtualAccountNo']);
-        
+    
+        $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
             "responseCode" => "4042412",
             "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
@@ -349,7 +344,7 @@ class InquiryBCAController extends Controller
                     "indonesia" => "Virtual Account Tidak Ditemukan"
                 ],
                 "partnerServiceId" => "   ".$validated['partnerServiceId'],
-                "customerNo" => $number,
+                "customerNo" => $customerNo,
                 "virtualAccountNo" => "   ".$validated['virtualAccountNo'],
                 "virtualAccountName" => "",
                 "inquiryRequestId" => $validated['inquiryRequestId'],
