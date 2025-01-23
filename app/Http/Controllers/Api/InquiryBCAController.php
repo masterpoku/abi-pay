@@ -48,7 +48,7 @@ class InquiryBCAController extends Controller
                 return response()->json([
                     'responseCode' => '4012400',
                     'responseMessage' => 'Unauthorized. [Unknown client]'
-                ], 400);
+                ], 401);
             }
         }
        
