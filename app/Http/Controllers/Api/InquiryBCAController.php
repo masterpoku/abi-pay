@@ -50,7 +50,7 @@ class InquiryBCAController extends Controller
         
         if ($existing) {
             // Jika sudah ada, beri respons 409 Conflict
-            
+            $customerNo = substr($request->input('virtualAccountNo'), 0, 5);
             return response()->json([
                 'responseCode' => '4092400',
                 'responseMessage' => 'Conflict',
@@ -61,7 +61,7 @@ class InquiryBCAController extends Controller
                         'indonesia' => 'Tidak bisa menggunakan X-EXTERNAL-ID yang sama',
                     ],
                     "partnerServiceId" => "   ".$request->input('partnerServiceId'),
-                    "customerNo" => '',
+                    "customerNo" => $customerNo,
                     "virtualAccountNo" => "   ".$request->input('virtualAccountNo'),
                     "virtualAccountName" => '',
                     "inquiryRequestId" => $request->input('inquiryRequestId'),
