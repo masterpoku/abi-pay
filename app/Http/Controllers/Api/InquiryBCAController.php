@@ -50,6 +50,7 @@ class InquiryBCAController extends Controller
         
         if ($existing) {
             // Jika sudah ada, beri respons 409 Conflict
+            
             return response()->json([
                 'responseCode' => '4092400',
                 'responseMessage' => 'Conflict',
@@ -292,6 +293,9 @@ class InquiryBCAController extends Controller
      */
     private function buildSuccessResponse($validated, $user_data)
     {
+    
+        $number = str_replace('', $validated['partnerServiceId'], $validated['virtualAccountNo']);
+        
         return [
             "responseCode" => "2002400",
             "responseMessage" => "Successful",
@@ -328,6 +332,13 @@ class InquiryBCAController extends Controller
      */
     private function buildNotFoundResponse($validated)
     {
+
+        function replace_string($separator, $partnerServiceId, $virtualAccountNo) {
+            return str_replace('', $separator, $partnerServiceId . $virtualAccountNo);
+        }
+        
+        $number = replace_string('$', $validated['partnerServiceId'], $validated['virtualAccountNo']);
+        
         return [
             "responseCode" => "4042412",
             "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
@@ -338,7 +349,7 @@ class InquiryBCAController extends Controller
                     "indonesia" => "Virtual Account Tidak Ditemukan"
                 ],
                 "partnerServiceId" => "   ".$validated['partnerServiceId'],
-                "customerNo" => $validated['virtualAccountNo'],
+                "customerNo" => $number,
                 "virtualAccountNo" => "   ".$validated['virtualAccountNo'],
                 "virtualAccountName" => "",
                 "inquiryRequestId" => $validated['inquiryRequestId'],
