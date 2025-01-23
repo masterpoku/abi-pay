@@ -36,21 +36,26 @@ class InquiryBCAController extends Controller
         
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
+
+        // Log the headers for debugging
         Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
-        if($channelId == "95231"){
+
+        // Check if the headers match the conditions
+        if ($channelId === "95231") {
             return response()->json([
                 'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. [Unknown client]'
+                'responseMessage' => 'Unauthorized. [Unknown client - Invalid CHANNEL-ID]'
             ], 400);
         }
-        if($partnerId == "14999"){
+
+        if ($partnerId === "14999") {
             return response()->json([
                 'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. [Unknown client]'
+                'responseMessage' => 'Unauthorized. [Unknown client - Invalid PARTNER-ID]'
             ], 400);
         }
- 
+
        
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
