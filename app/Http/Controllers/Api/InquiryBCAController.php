@@ -265,7 +265,7 @@ class InquiryBCAController extends Controller
                     ]
                 ]
             ],
-            "additionalInfo" => []
+           "additionalInfo" => (object) []
         ];
     }
 
@@ -315,7 +315,7 @@ class InquiryBCAController extends Controller
                     ]
                 ]
             ],
-            "additionalInfo" => []
+            "additionalInfo" => (object) []
         ];
     }
 
