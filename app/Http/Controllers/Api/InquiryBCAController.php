@@ -45,14 +45,14 @@ class InquiryBCAController extends Controller
         if ($channelId === 95231) {
             return response()->json([
                 'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. [Unknown client - Invalid CHANNEL-ID]'
+                'responseMessage' => 'Unauthorized. [Unknown client]'
             ], 400);
         }
 
         if ($partnerId === 14999) {
             return response()->json([
                 'responseCode' => '4012400',
-                'responseMessage' => 'Unauthorized. [Unknown client - Invalid PARTNER-ID]'
+                'responseMessage' => 'Unauthorized. [Unknown client]'
             ], 400);
         }
 
