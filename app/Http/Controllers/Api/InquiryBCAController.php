@@ -263,9 +263,9 @@ class InquiryBCAController extends Controller
                         "english" => $user_data->nama_paket,
                         "indonesia" => $user_data->nama_paket
                     ]
-                ],
-                "additionalInfo" => []
-            ]
+                ]
+            ],
+            "additionalInfo" => []
         ];
     }
 
