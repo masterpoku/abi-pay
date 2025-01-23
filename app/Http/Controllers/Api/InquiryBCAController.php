@@ -35,7 +35,8 @@ class InquiryBCAController extends Controller
         $bodyToHash = $request->getContent(); // Body request untuk hashing
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
-
+        Log::info('CHANNEL-ID:', $channelId);
+        Log::info('X-PARTNER-ID:', $partnerId);
         if($channelId == 95231){
             return response()->json([
                 'responseCode' => '4012400',
