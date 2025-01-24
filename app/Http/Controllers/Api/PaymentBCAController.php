@@ -349,6 +349,7 @@ EOF;
                 'customerNo' => 'required',
                 'virtualAccountNo' => 'required',
                 'channelCode' => 'required',
+                'trxDateTime' => 'required',
                 'paymentRequestId' => 'required',
             ]);
     
@@ -396,9 +397,9 @@ EOF;
             'partnerServiceId',
             'customerNo',
             'virtualAccountNo',
-            'trxDateInit',
             'channelCode',
-            'inquiryRequestId',
+            'trxDateTime',
+            'paymentRequestId',
         ];
     }
 
