@@ -192,7 +192,9 @@ EOF;
 // ----------------------------------------payment--------------------------//
     public function flagPayment(Request $request)
     {
-        Log::info('Flagging Payment Request:', $request->all());
+        // Log request data
+        Log::info('flagPayment Request Data:', $request->all());
+        Log::info('flagPayment Request Header:', $request->headers->all());
         
         try {
             // Ambil data header untuk validasi
