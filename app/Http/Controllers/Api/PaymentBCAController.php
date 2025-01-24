@@ -158,7 +158,7 @@ class PaymentBCAController extends Controller
             $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
             if (!$isValid) {
                 return response()->json([
-                    'responseCode' => '4017300',
+                    'responseCode' => '4012500',
                     'responseMessage' => 'Unauthorized. [Signature]'
                 ], 401);
             }
