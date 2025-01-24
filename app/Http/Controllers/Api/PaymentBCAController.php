@@ -209,7 +209,13 @@ EOF;
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
     
-            
+            if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+
+                return response()->json([
+                    'responseCode' => '4012400',
+                    'responseMessage' => 'Unauthorized. [Signature]',
+                ], 401);
+        }
     
             // Validasi header & security
             if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
@@ -218,6 +224,7 @@ EOF;
                     'responseMessage' => 'Invalid Token (B2B)',
                 ], 401);
             }
+
     
             $channelId = $request->header('CHANNEL-ID');
             $partnerId = $request->header('X-PARTNER-ID');
@@ -305,14 +312,7 @@ EOF;
                 'responseMessage' => 'Invalid token (B2B)',
             ], 401);
         }
-            // Validasi Signature
-            if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
-                Log::info('Signature tidak valid');
-                    return response()->json([
-                        'responseCode' => '4012500',
-                        'responseMessage' => 'Unauthorized. [Signature]',
-                    ], 401);
-            }
+
         
                 // Cek apakah ada field mandatory yang kosong
                 foreach ($request->all() as $key => $value) {
@@ -434,7 +434,7 @@ EOF;
         return false; // Timestamp kadaluarsa
     }
 
-    return $this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature);
+    return true;
 }
 private function hashbody($body)
 {
