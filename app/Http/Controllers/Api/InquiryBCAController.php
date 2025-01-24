@@ -298,16 +298,18 @@ class InquiryBCAController extends Controller
             $english = "Bill has been paid";
             $indonesia = "Tagihan telah dibayar";
             $inquiryStatus = "01";
-         
+            $responseCode = "4042414";
+        
          }else{
             $responstatus = "Successful";
             $english = "Success";
             $indonesia = "Sukses";
             $inquiryStatus = "00";
+            $responseCode = "2002400";
          }
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
-            "responseCode" => "2002400",
+            "responseCode" => $responseCode,
             "responseMessage" => $responstatus,
             "virtualAccountData" => [
                 "inquiryStatus" => $inquiryStatus,
