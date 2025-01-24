@@ -353,6 +353,7 @@ EOF;
                 'channelCode' => 'required',
                 'trxDateTime' => 'required',
                 'paymentRequestId' => 'required',
+                'referenceNo' => 'required',
             ]);
     
             // Simpan X-EXTERNAL-ID ke database
