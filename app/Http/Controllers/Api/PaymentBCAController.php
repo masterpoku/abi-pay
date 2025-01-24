@@ -307,10 +307,7 @@ EOF;
         }
             // Validasi Signature
             if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
-                
-                
-    
-                
+                Log::info('Signature tidak valid');
                     return response()->json([
                         'responseCode' => '4012500',
                         'responseMessage' => 'Unauthorized. [Signature]',
