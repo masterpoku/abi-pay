@@ -161,71 +161,102 @@ public function validateServiceSignature($client_secret, $method,$url, $auth_tok
 }
 private function buildSuccessResponse($validated, $user_data)
 {
-
-    $customerNo = substr($validated['virtualAccountNo'], 5);
+    $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
+    $trxDateTime = now()->toIso8601String(); // Mendapatkan waktu transaksi dalam format ISO8601
+    
     return [
-        "responseCode" => "2002400",
+        "responseCode" => "2002500",
         "responseMessage" => "Successful",
         "virtualAccountData" => [
-            "inquiryStatus" => "00",
-            "inquiryReason" => [
+            "paymentFlagReason" => [
                 "english" => "Success",
                 "indonesia" => "Sukses"
             ],
-            "partnerServiceId" => "   ".$validated['partnerServiceId'],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
             "customerNo" => $customerNo,
-            "virtualAccountNo" => "   ".$user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
-            "inquiryRequestId" => $validated['inquiryRequestId'],
-            "totalAmount" => [
-                "value" => $user_data->nominal_tagihan,
+            "virtualAccountNo" => "   " . $user_data->id_invoice,
+            "virtualAccountName" => $user_data->nama_jamaah, // Nama customer dari data
+            "paymentRequestId" => $validated['paymentRequestId'],
+            "paidAmount" => [
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
                 "currency" => "IDR"
             ],
-            "subCompany" => "00000",
-            "billDetails" => [],
+            "totalAmount" => [
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
+                "currency" => "IDR"
+            ],
+            "trxDateTime" => $trxDateTime,
+            "referenceNo" => "04148000101", // Nomor referensi statis atau di-generate
+            "paymentFlagStatus" => "00", // Status sukses
+            "billDetails" => [], // Detail tagihan kosong (bisa diisi jika diperlukan)
             "freeTexts" => [
                 [
-                    "english" => $user_data->nama_paket,
-                    "indonesia" => $user_data->nama_paket
+                    "english" => "Free text",
+                    "indonesia" => "Tulisan bebas"
                 ]
             ]
         ],
-       "additionalInfo" => (object) []
+        "additionalInfo" => (object) [] // Informasi tambahan kosong
     ];
 }
-private function buildNotFoundResponse($validated)
-    {
 
-    
-        $customerNo = substr($validated['virtualAccountNo'], 5);
-        return [
-            "responseCode" => "4042412",
-            "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
-            "virtualAccountData" => [
-                "inquiryStatus" => "01",
-                "inquiryReason" => [
-                    "english" => "Virtual Account Not Found",
-                    "indonesia" => "Virtual Account Tidak Ditemukan"
-                ],
-                "partnerServiceId" => "   ".$validated['partnerServiceId'],
-                "customerNo" => $customerNo,
-                "virtualAccountNo" => "   ".$validated['virtualAccountNo'],
-                "virtualAccountName" => "",
-                "inquiryRequestId" => $validated['inquiryRequestId'],
-                "totalAmount" => [
-                    "value" => "",
-                    "currency" => ""
-                ],
-                "subCompany" => "",
-                "billDetails" => [],
-                "freeTexts" => [
-                    [
+private function buildNotFoundResponse($validated)
+{
+    $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
+
+    return [
+        "responseCode" => "4042514",
+        "responseMessage" => "Bill has been paid",
+        "virtualAccountData" => [
+            "paymentFlagReason" => [
+                "english" => "",
+                "indonesia" => ""
+            ],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
+            "customerNo" => $customerNo,
+            "virtualAccountNo" => "   " . $validated['virtualAccountNo'],
+            "virtualAccountName" => "",
+            "paymentRequestId" => $validated['paymentRequestId'],
+            "paidAmount" => [
+                "value" => "",
+                "currency" => ""
+            ],
+            "totalAmount" => [
+                "value" => "",
+                "currency" => ""
+            ],
+            "trxDateTime" => "",
+            "referenceNo" => "",
+            "paymentFlagStatus" => "",
+            "billDetails" => [
+                [
+                    "billerReferenceId" => "",
+                    "billNo" => "",
+                    "billDescription" => [
+                        "english" => "",
+                        "indonesia" => ""
+                    ],
+                    "billSubCompany" => "",
+                    "billAmount" => [
+                        "value" => "",
+                        "currency" => ""
+                    ],
+                    "additionalInfo" => (object) [],
+                    "status" => "",
+                    "reason" => [
                         "english" => "",
                         "indonesia" => ""
                     ]
                 ]
             ],
-            "additionalInfo" => (object) []
-        ];
-    }
+            "freeTexts" => [
+                [
+                    "english" => "",
+                    "indonesia" => ""
+                ]
+            ]
+        ],
+        "additionalInfo" => (object) []
+    ];
+}
 }
