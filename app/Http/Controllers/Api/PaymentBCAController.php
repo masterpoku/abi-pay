@@ -207,18 +207,7 @@ EOF;
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
     
-            // Validasi X-EXTERNAL-ID
-            $existing = DB::table('external_ids')
-                          ->where('external_id', $externalId)
-                          ->whereDate('created_at', $today)
-                          ->exists();
-            if ($existing) {
-                return response()->json([
-                    'responseCode' => '4092400',
-                    'responseMessage' => 'Conflict',
-                    'details' => 'Duplicate X-EXTERNAL-ID',
-                ], 409);
-            }
+            
     
             // Validasi header & security
             if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
