@@ -293,7 +293,7 @@ class InquiryBCAController extends Controller
      */
     private function buildSuccessResponse($validated, $user_data)
     {
-        if($user_data->status_pembayaran == 1){
+        if($user_data->status_pembayaran == '1'){
             $responstatus = "Paid Bill";
          }else{
             $responstatus = "Successful";

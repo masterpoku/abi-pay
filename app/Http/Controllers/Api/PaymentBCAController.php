@@ -496,11 +496,15 @@ public function validateServiceSignature($client_secret, $method,$url, $auth_tok
 private function buildSuccessResponse($validated, $user_data)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
-
+    if($user_data->status_pembayaran == '1'){
+        $responstatus = "Paid Bill";
+     }else{
+        $responstatus = "Successful";
+     }
 
     return [
         "responseCode" => "2002500",
-        "responseMessage" => "Successful",
+        "responseMessage" => $responstatus,
         "virtualAccountData" => [
             "paymentFlagReason" => [
                 "english" => "Success",
