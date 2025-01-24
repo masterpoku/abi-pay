@@ -364,13 +364,16 @@ EOF;
             ]);
     
             // Simpan X-EXTERNAL-ID ke database
-            DB::table('external_ids')->insert([
-                'external_id' => $externalId,
-                'date' => $today,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-    
+            try {
+                DB::table('external_ids')->insert([
+                    'external_id' => $externalId,
+                    'date' => $today,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Jika duplikat maka biarkan saja
+            }
             // Proses payment flag (ambil data terkait)
             $user_data = DB::table('tagihan_pembayaran')
                 ->where('id_invoice', $validated['virtualAccountNo'])
