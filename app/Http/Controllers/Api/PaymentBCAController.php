@@ -466,7 +466,8 @@ private function getRelativeUrl($url)
 
 public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash)
 {
-  
+    Log::info('Body to hash: '.$bodyToHash);
+    
 
     $cok = hash('sha256', $bodyToHash);
     
