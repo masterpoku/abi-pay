@@ -295,8 +295,13 @@ class InquiryBCAController extends Controller
     {
         if($user_data->status_pembayaran == '1'){
             $responstatus = "Paid Bill";
+            $english = "Bill has been paid";
+            $indonesia = "Tagihan telah dibayar";
+         
          }else{
             $responstatus = "Successful";
+            $english = "Success";
+            $indonesia = "Sukses";
          }
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
@@ -305,8 +310,8 @@ class InquiryBCAController extends Controller
             "virtualAccountData" => [
                 "inquiryStatus" => "00",
                 "inquiryReason" => [
-                    "english" => "Success",
-                    "indonesia" => "Sukses"
+                    "english" => $english,
+                    "indonesia" => $indonesia
                 ],
                 "partnerServiceId" => "   ".$validated['partnerServiceId'],
                 "customerNo" => $customerNo,
