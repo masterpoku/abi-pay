@@ -232,7 +232,6 @@ EOF;
                 'partnerServiceId' => 'required',
                 'customerNo' => 'required',
                 'virtualAccountNo' => 'required',
-                'trxDateInit' => 'required',
                 'channelCode' => 'required',
                 'paymentRequestId' => 'required',
             ]);
