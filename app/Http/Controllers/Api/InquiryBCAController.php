@@ -293,11 +293,15 @@ class InquiryBCAController extends Controller
      */
     private function buildSuccessResponse($validated, $user_data)
     {
-    
+        if($user_data->status_pembayaran == 1){
+            $responstatus = "Paid Bill";
+         }else{
+            $responstatus = "Successful";
+         }
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
             "responseCode" => "2002400",
-            "responseMessage" => "Successful",
+            "responseMessage" => $responstatus,
             "virtualAccountData" => [
                 "inquiryStatus" => "00",
                 "inquiryReason" => [

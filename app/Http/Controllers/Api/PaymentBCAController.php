@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -227,6 +228,132 @@ EOF;
                 ], 401);
             }
     
+            $channelId = $request->header('CHANNEL-ID');
+            $partnerId = $request->header('X-PARTNER-ID');
+            $externalId = $request->header('X-EXTERNAL-ID');
+            
+            // Mengambil tanggal hari ini
+            $today = Carbon::today()->toDateString();
+    
+            // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
+            $existing = DB::table('external_ids')
+                          ->where('external_id', $externalId)
+                          ->whereDate('created_at', $today)
+                          ->exists();
+            
+            if ($existing) {
+                // Jika sudah ada, beri respons 409 Conflict
+                $customerNo = substr($request->input('virtualAccountNo'), 5);
+                return response()->json([
+                    'responseCode' => '4092400',
+                    'responseMessage' => 'Conflict',
+                    'virtualAccountData' => [
+                        'inquiryStatus' => '01',
+                        'inquiryReason' => [
+                            'english' => 'Cannot use the same X-EXTERNAL-ID',
+                            'indonesia' => 'Tidak bisa menggunakan X-EXTERNAL-ID yang sama',
+                        ],
+                        "partnerServiceId" => "   ".$request->input('partnerServiceId'),
+                        "customerNo" => $customerNo,
+                        "virtualAccountNo" => "   ".$request->input('virtualAccountNo'),
+                        "virtualAccountName" => '',
+                        "inquiryRequestId" => $request->input('inquiryRequestId'),
+                        'totalAmount' => [
+                            'value' => '',
+                            'currency' => '',
+                        ],
+                        'subCompany' => '00000',
+                        'billDetails' => [],
+                        'freeTexts' => [
+                            [
+                                'english' => '',
+                                'indonesia' => '',
+                            ],
+                        ],
+                    ],
+                    'additionalInfo' => (object) [],
+                ], 409);
+            }
+    
+            // Jika tidak ada duplikasi, lakukan insert ke database
+            DB::table('external_ids')->insert([
+                'external_id' => $externalId,
+                'date' => $today,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+    
+      
+            // Log the headers for debugging
+            Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
+            Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
+    
+           
+            // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
+            if ($channelId && $partnerId) {
+                if ((int) $channelId !== 95231 || (int) $partnerId !== 14999) {
+                    return response()->json([
+                        'responseCode' => '4012400',
+                        'responseMessage' => 'Unauthorized. [Unknown client]'
+                    ], 401);
+                }
+            }
+           
+            // Validasi timestamp (pastikan tidak lebih dari 5 menit)
+            $requestTime = \Carbon\Carbon::parse($isoTime);
+            if (now()->diffInMinutes($requestTime) > 5) {
+                return response()->json([
+                    'responseCode' => '4012503',
+                    'responseMessage' => 'Request timestamp is invalid or expired',
+                ], 401);
+            }
+           // Validasi token
+           if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
+            return response()->json([
+                'responseCode' => '4012401', // Kode error jika token tidak valid
+                'responseMessage' => 'Invalid token (B2B)',
+            ], 401);
+        }
+            // Validasi Signature
+            if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+                
+                
+    
+                
+                    return response()->json([
+                        'responseCode' => '4012400',
+                        'responseMessage' => 'Unauthorized. [Signature]',
+                    ], 401);
+            }
+        
+                // Cek apakah ada field mandatory yang kosong
+                foreach ($request->all() as $key => $value) {
+                    if (empty($value) && in_array($key, $this->mandatoryFields())) {
+                        return response()->json([
+                            'responseCode' => '4002502',
+                            'responseMessage' => 'Invalid Mandatory Field',
+                            'statusCode' => 400,
+                            'virtualAccountData' => [
+                                'paymentFlagStatus' => '01',
+                                'paymentFlagReason' => [
+                                    'english' => 'Any Value',
+                                    'indonesia' => 'Any Value'
+                                ],
+                                'partnerServiceId' => '   14999',
+                                'customerNo' => '040002',
+                                
+                                'paymentRequestId' => 'Any Value'
+                            ]
+                        ], 400);
+                    }
+                }
+                $virtualAccountNo = $request->virtualAccountNo;
+                Log::info('Virtual Account No:', [$virtualAccountNo]);
+                  if(!preg_match('/^\d+$/', $virtualAccountNo)) {
+                        return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
+                    }
+         
+        
             // Validasi body request
             $validated = $request->validate([
                 'partnerServiceId' => 'required',
@@ -271,6 +398,38 @@ EOF;
             ], 500);
         }
     }
+    private function mandatoryFields()
+    {
+        return [
+            'partnerServiceId',
+            'customerNo',
+            'virtualAccountNo',
+            'trxDateInit',
+            'channelCode',
+            'inquiryRequestId',
+        ];
+    }
+
+    public function handleInvalidFieldFormat($fieldName, $fieldValue)
+    {
+        return response()->json([
+            'responseCode' => '4002501', // Kode untuk Invalid Field Format
+            'responseMessage' => 'Invalid Field Format',
+            'statusCode' => 400,
+            'virtualAccountData' => [
+                'paymentFlagStatus' => '01',
+                'paymentFlagReason' => [
+                    'english' => 'Any Value',
+                    'indonesia' => 'Any Value'
+                ],
+                'partnerServiceId' => '   14999',
+                'customerNo' => '040002',
+                'virtualAccountNo' => $fieldValue, // Mengembalikan nilai field yang bermasalah
+                'paymentRequestId' => 'Any Value'
+            ]
+        ], 400);
+    }
+    
     private function validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)
 {
     if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
@@ -340,8 +499,8 @@ public function validateServiceSignature($client_secret, $method,$url, $auth_tok
 private function buildSuccessResponse($validated, $user_data)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
-    $trxDateTime = now()->toIso8601String(); // Mendapatkan waktu transaksi dalam format ISO8601
-    
+
+
     return [
         "responseCode" => "2002500",
         "responseMessage" => "Successful",
@@ -363,8 +522,8 @@ private function buildSuccessResponse($validated, $user_data)
                 "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
                 "currency" => "IDR"
             ],
-            "trxDateTime" => $trxDateTime,
-            "referenceNo" => "04148000101", // Nomor referensi statis atau di-generate
+            "trxDateTime" => $validated['trxDateTime'],
+            "referenceNo" => $validated['referenceNo'], // Nomor referensi statis atau di-generate
             "paymentFlagStatus" => "00", // Status sukses
             "billDetails" => [], // Detail tagihan kosong (bisa diisi jika diperlukan)
             "freeTexts" => [
