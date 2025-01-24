@@ -214,8 +214,8 @@ EOF;
             // Validasi header & security
             if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
                 return response()->json([
-                    'responseCode' => '4012500',
-                    'responseMessage' => 'Unauthorized. [Signature]',
+                    'responseCode' => '4012501',
+                    'responseMessage' => 'Invalid Token (B2B)',
                 ], 401);
             }
     
@@ -284,7 +284,7 @@ EOF;
             if ($channelId && $partnerId) {
                 if ((int) $channelId !== 95231 || (int) $partnerId !== 14999) {
                     return response()->json([
-                        'responseCode' => '4012400',
+                        'responseCode' => '4012500',
                         'responseMessage' => 'Unauthorized. [Unknown client]'
                     ], 401);
                 }
@@ -312,7 +312,7 @@ EOF;
     
                 
                     return response()->json([
-                        'responseCode' => '4012400',
+                        'responseCode' => '4012500',
                         'responseMessage' => 'Unauthorized. [Signature]',
                     ], 401);
             }
