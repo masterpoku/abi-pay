@@ -463,11 +463,9 @@ private function getRelativeUrl($url)
     $formatedUrl = $path . $query;
     return $formatedUrl;
 }
-
 public function generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash)
 {
-    Log::info('Body to hash: '.$bodyToHash);
-    
+  
 
     $cok = hash('sha256', $bodyToHash);
     
@@ -477,6 +475,7 @@ public function generateServiceSignature($client_secret, $method,$url, $auth_tok
     //$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
     return $signature;
 }
+
 
 public function validateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash, $signature){
     $is_valid = false;
@@ -490,6 +489,7 @@ public function validateServiceSignature($client_secret, $method,$url, $auth_tok
     }
     return $is_valid;
 }
+
 private function buildSuccessResponse($validated, $user_data)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
