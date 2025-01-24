@@ -223,7 +223,7 @@ EOF;
             // Validasi header & security
             if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
                 return response()->json([
-                    'responseCode' => '4012400',
+                    'responseCode' => '4012500',
                     'responseMessage' => 'Unauthorized. [Signature]',
                 ], 401);
             }
