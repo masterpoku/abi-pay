@@ -257,7 +257,7 @@ EOF;
             DB::table('tagihan_pembayaran')
                 ->where('id_invoice', $validated['virtualAccountNo'])
                 ->update([
-                    'status' => 'PAID',
+                    'status_pembayaran' => 1,
                     'updated_at' => now(),
                 ]);
     
