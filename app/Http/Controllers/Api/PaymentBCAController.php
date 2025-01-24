@@ -495,17 +495,25 @@ private function buildSuccessResponse($validated, $user_data)
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
     if($user_data->status_pembayaran == '1'){
         $responstatus = "Paid Bill";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+ 
+        $responseCode = "4042414";
      }else{
         $responstatus = "Successful";
+        $english = "Success";
+        $indonesia = "Sukses";
+
+        $responseCode = "2002400";
      }
 
     return [
-        "responseCode" => "2002500",
+        "responseCode" => $responseCode,
         "responseMessage" => $responstatus,
         "virtualAccountData" => [
             "paymentFlagReason" => [
-                "english" => "Success",
-                "indonesia" => "Sukses"
+                "english" => $english,
+                "indonesia" => $indonesia
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
             "customerNo" => $customerNo,
