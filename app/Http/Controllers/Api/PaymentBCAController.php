@@ -570,30 +570,10 @@ private function buildNotFoundResponse($validated)
                 "value" => "",
                 "currency" => ""
             ],
-            "trxDateTime" => "",
-            "referenceNo" => "",
-            "paymentFlagStatus" => "",
-            "billDetails" => [
-                [
-                    "billerReferenceId" => "",
-                    "billNo" => "",
-                    "billDescription" => [
-                        "english" => "",
-                        "indonesia" => ""
-                    ],
-                    "billSubCompany" => "",
-                    "billAmount" => [
-                        "value" => "",
-                        "currency" => ""
-                    ],
-                    "additionalInfo" => (object) [],
-                    "status" => "",
-                    "reason" => [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
+            "trxDateTime" => $validated['trxDateTime'],
+            "referenceNo" =>  $validated['referenceNo'],
+            "paymentFlagStatus" => "01",
+            "billDetails" => (object) [],
             "freeTexts" => [
                 [
                     "english" => "",
