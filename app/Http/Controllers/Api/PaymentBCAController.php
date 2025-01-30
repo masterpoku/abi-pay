@@ -552,8 +552,8 @@ private function buildNotFoundResponse($validated)
         "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
         "virtualAccountData" => [
             "paymentFlagReason" => [
-                "english" => "",
-                "indonesia" => ""
+                "english" => "Virtual Account Not Found",
+                "indonesia" => "Virtual Account Tidak Ditemukan"
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
             "customerNo" => $customerNo,
