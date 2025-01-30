@@ -498,7 +498,7 @@ private function buildSuccessResponse($validated, $user_data)
         $english = "Bill has been paid";
         $indonesia = "Tagihan telah dibayar";
  
-        $responseCode = "4042414";
+        $responseCode = "4042514";
      }else{
         $responstatus = "Successful";
         $english = "Success";
