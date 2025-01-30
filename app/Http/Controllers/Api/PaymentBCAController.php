@@ -573,7 +573,7 @@ private function buildNotFoundResponse($validated)
             "trxDateTime" => $validated['trxDateTime'],
             "referenceNo" =>  $validated['referenceNo'],
             "paymentFlagStatus" => "01",
-            "billDetails" => (object) [],
+            "billDetails" =>  [],
             "freeTexts" => [
                 [
                     "english" => "",
