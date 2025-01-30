@@ -353,14 +353,14 @@ private function handleInconsistentRequest($userdata,$previousPayment) {
                   "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
                 "customerNo" => $customerNo,
                 "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                "virtualAccountName" => $userdata['virtualAccountName'],
+                "virtualAccountName" => $userdata->nama_jamaah,
                 "paymentRequestId" => $previousPayment['paymentRequestId'],
                 "paidAmount" => [
-                    "value" => $userdata['paidAmount'],
+                    "value" => $userdata->nominal_tagihan,
                     "currency" => "IDR"
                 ],
                 "totalAmount" => [
-                    "value" =>$userdata['paidAmount'],
+                    "value" =>$userdata->nominal_tagihan,
                     "currency" => "IDR"
                 ],
                 "trxDateTime" => $previousPayment['trxDateTime'],
@@ -391,14 +391,14 @@ private function handleConflictRequest($userdata,$previousPayment) {
                 "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
                 "customerNo" => $customerNo,
                 "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                "virtualAccountName" => $userdata['virtualAccountName'],
+                "virtualAccountName" => $userdata->nama_jamaah,
                 "paymentRequestId" => $previousPayment['paymentRequestId'],
                 "paidAmount" => [
-                    "value" => $userdata['paidAmount'],
+                    "value" => $userdata->nominal_tagihan,
                     "currency" => "IDR"
                 ],
                 "totalAmount" => [
-                    "value" =>$userdata['paidAmount'],
+                    "value" =>$userdata->nominal_tagihan,
                     "currency" => "IDR"
                 ],
                 "trxDateTime" => $previousPayment['trxDateTime'],
