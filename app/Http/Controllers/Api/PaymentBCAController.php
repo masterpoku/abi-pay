@@ -550,7 +550,7 @@ private function buildNotFoundResponse($validated)
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
 
     return [
-        "responseCode" => "4042412",
+        "responseCode" => "4042512",
         "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
         "virtualAccountData" => [
             "paymentFlagReason" => [
