@@ -243,8 +243,8 @@ EOF;
                 // Jika sudah ada, beri respons 409 Conflict
                 $customerNo = substr($request->input('virtualAccountNo'), 5);
                 return response()->json([
-                    'responseCode' => '4092400',
-                    'responseMessage' => 'Conflict',
+                    'responseCode' => '4042518',
+                    'responseMessage' => 'Inconsistent Request',
                     'virtualAccountData' => [
                         'inquiryStatus' => '01',
                         'inquiryReason' => [
@@ -498,13 +498,15 @@ private function buildSuccessResponse($validated, $user_data)
         $english = "Bill has been paid";
         $indonesia = "Tagihan telah dibayar";
  
-        $responseCode = "4042514";
+        $responseCode = "4042514";  
+        $responflag = "01";
      }else{
         $responstatus = "Successful";
         $english = "Success";
         $indonesia = "Sukses";
 
         $responseCode = "2002500";
+        $responflag = "00";
      }
 
     return [
@@ -530,7 +532,7 @@ private function buildSuccessResponse($validated, $user_data)
             ],
             "trxDateTime" => $validated['trxDateTime'],
             "referenceNo" => $validated['referenceNo'], // Nomor referensi statis atau di-generate
-            "paymentFlagStatus" => "00", // Status sukses
+            "paymentFlagStatus" => $responflag, // Status sukses
             "billDetails" => [], // Detail tagihan kosong (bisa diisi jika diperlukan)
             "freeTexts" => [
                 [
