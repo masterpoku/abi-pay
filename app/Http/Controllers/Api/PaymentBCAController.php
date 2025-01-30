@@ -229,9 +229,7 @@ public function flagPayment(Request $request) {
                       ->whereDate('created_at', $today)
                       ->exists();
         
-        if ($existing) {
-            return $this->handleInconsistentRequest($request);
-        }
+        
 
    
 
@@ -296,7 +294,9 @@ public function flagPayment(Request $request) {
         $user_data = DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo'])
             ->first();
-        
+        if ($existing) {
+                return $this->handleInconsistentRequest($user_data,$request);
+        }
         if(!$externalId === $validated['paymentRequestId']) {
                 return $this->handleConflictRequest($user_data ,$request);
     
@@ -339,8 +339,9 @@ private function handleInvalidMandatoryField() {
     ];
 }
 
-private function handleInconsistentRequest($previousPayment) {
+private function handleInconsistentRequest($userdata,$previousPayment) {
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
+
         return [
             "responseCode" => "4042518",
             "responseMessage" => "Inconsistent Request",
@@ -349,22 +350,22 @@ private function handleInconsistentRequest($previousPayment) {
                     "english" => "SUKSES",
                     "indonesia" => "SUKSES"
                 ],
-                "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+                  "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
                 "customerNo" => $customerNo,
                 "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                "virtualAccountName" => "",
+                "virtualAccountName" => $userdata['virtualAccountName'],
                 "paymentRequestId" => $previousPayment['paymentRequestId'],
                 "paidAmount" => [
-                    "value" => "",
-                    "currency" => ""
+                    "value" => $userdata['paidAmount'],
+                    "currency" => "IDR"
                 ],
                 "totalAmount" => [
-                    "value" => "",
-                    "currency" => ""
+                    "value" =>$userdata['paidAmount'],
+                    "currency" => "IDR"
                 ],
                 "trxDateTime" => $previousPayment['trxDateTime'],
                 "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => "00",
+                "paymentFlagStatus" => "01",
                 "billDetails" =>  [],
                 "freeTexts" => [
                     [
