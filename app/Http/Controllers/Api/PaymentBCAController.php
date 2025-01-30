@@ -190,207 +190,196 @@ EOF;
     }
 
 // ----------------------------------------payment--------------------------//
-    public function flagPayment(Request $request)
-    {
-        // Log request data
-        Log::info('flagPayment Request Data:', $request->all());
-        Log::info('flagPayment Request Header:', $request->headers->all());
-        
-        try {
-            // Ambil data header untuk validasi
-            $clientSecret = env('BCA_CLIENT_SECRET');
-            $method = strtoupper($request->method());
-            $url = $request->fullUrl();
-            $authToken = $request->header('Authorization') ? str_replace('Bearer ', '', $request->header('Authorization')) : null;
-            $isoTime = $request->header('X-TIMESTAMP');
-            $signature = $request->header('X-SIGNATURE');
-            $bodyToHash = $request->getContent();
-            $externalId = $request->header('X-EXTERNAL-ID');
-            $partnerId = $request->header('X-PARTNER-ID');
-            $today = now()->toDateString();
+public function flagPayment(Request $request) {
+    Log::info('flagPayment Request Data:', $request->all());
+    Log::info('flagPayment Request Header:', $request->headers->all());
     
-            if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+    try {
+        $clientSecret = env('BCA_CLIENT_SECRET');
+        $method = strtoupper($request->method());
+        $url = $request->fullUrl();
+        $authToken = $request->header('Authorization') ? str_replace('Bearer ', '', $request->header('Authorization')) : null;
+        $isoTime = $request->header('X-TIMESTAMP');
+        $signature = $request->header('X-SIGNATURE');
+        $bodyToHash = $request->getContent();
+        $externalId = $request->header('X-EXTERNAL-ID');
+        $partnerId = $request->header('X-PARTNER-ID');
+        $today = now()->toDateString();
 
+        if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+            return response()->json([
+                'responseCode' => '4012500',
+                'responseMessage' => 'Unauthorized. [Signature]',
+            ], 401);
+        }
+
+        if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
+            return response()->json([
+                'responseCode' => '4012501',
+                'responseMessage' => 'Invalid Token (B2B)',
+            ], 401);
+        }
+
+        $channelId = $request->header('CHANNEL-ID');
+        $partnerId = $request->header('X-PARTNER-ID');
+        $externalId = $request->header('X-EXTERNAL-ID');
+        $today = Carbon::today()->toDateString();
+
+        $existing = DB::table('external_ids')
+                      ->where('external_id', $externalId)
+                      ->whereDate('created_at', $today)
+                      ->exists();
+        
+        if ($existing) {
+            return $this->handleInconsistentRequest($request);
+        }
+
+        DB::table('external_ids')->insert([
+            'external_id' => $externalId,
+            'date' => $today,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
+        Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
+
+        if ($channelId && $partnerId) {
+            if ((int) $channelId !== 95231 || (int) $partnerId !== 14999) {
                 return response()->json([
                     'responseCode' => '4012500',
-                    'responseMessage' => 'Unauthorized. [Signature]',
+                    'responseMessage' => 'Unauthorized. [Unknown client]'
                 ], 401);
+            }
         }
-    
-            // Validasi header & security
-            if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
-                return response()->json([
-                    'responseCode' => '4012501',
-                    'responseMessage' => 'Invalid Token (B2B)',
-                ], 401);
-            }
 
-    
-            $channelId = $request->header('CHANNEL-ID');
-            $partnerId = $request->header('X-PARTNER-ID');
-            $externalId = $request->header('X-EXTERNAL-ID');
-            
-            // Mengambil tanggal hari ini
-            $today = Carbon::today()->toDateString();
-    
-            // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
-            $existing = DB::table('external_ids')
-                          ->where('external_id', $externalId)
-                          ->whereDate('created_at', $today)
-                          ->exists();
-            
-            if ($existing) {
-                // Jika sudah ada, beri respons 409 Conflict
-                $customerNo = substr($request->input('virtualAccountNo'), 5);
-                return response()->json([
-                    'responseCode' => '4042518',
-                    'responseMessage' => 'Inconsistent Request',
-                    'virtualAccountData' => [
-                        'inquiryStatus' => '01',
-                        'inquiryReason' => [
-                            'english' => 'Cannot use the same X-EXTERNAL-ID',
-                            'indonesia' => 'Tidak bisa menggunakan X-EXTERNAL-ID yang sama',
-                        ],
-                        "partnerServiceId" => "   ".$request->input('partnerServiceId'),
-                        "customerNo" => $customerNo,
-                        "virtualAccountNo" => "   ".$request->input('virtualAccountNo'),
-                        "virtualAccountName" => '',
-                        "inquiryRequestId" => $request->input('inquiryRequestId'),
-                        'totalAmount' => [
-                            'value' => '',
-                            'currency' => '',
-                        ],
-                        'subCompany' => '00000',
-                        'billDetails' => [],
-                        'freeTexts' => [
-                            [
-                                'english' => '',
-                                'indonesia' => '',
-                            ],
-                        ],
-                    ],
-                    'additionalInfo' => (object) [],
-                ], 409);
-            }
-    
-            // Jika tidak ada duplikasi, lakukan insert ke database
-            DB::table('external_ids')->insert([
-                'external_id' => $externalId,
-                'date' => $today,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ]);
-    
-      
-            // Log the headers for debugging
-            Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
-            Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
-    
-           
-            // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
-            if ($channelId && $partnerId) {
-                if ((int) $channelId !== 95231 || (int) $partnerId !== 14999) {
-                    return response()->json([
-                        'responseCode' => '4012500',
-                        'responseMessage' => 'Unauthorized. [Unknown client]'
-                    ], 401);
-                }
-            }
-           
-            // Validasi timestamp (pastikan tidak lebih dari 5 menit)
-            $requestTime = \Carbon\Carbon::parse($isoTime);
-            if (now()->diffInMinutes($requestTime) > 5) {
-                return response()->json([
-                    'responseCode' => '4012503',
-                    'responseMessage' => 'Request timestamp is invalid or expired',
-                ], 401);
-            }
-           // Validasi token
-           if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
+        $requestTime = \Carbon\Carbon::parse($isoTime);
+        if (now()->diffInMinutes($requestTime) > 5) {
             return response()->json([
-                'responseCode' => '4012401', // Kode error jika token tidak valid
+                'responseCode' => '4012503',
+                'responseMessage' => 'Request timestamp is invalid or expired',
+            ], 401);
+        }
+       
+        if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
+            return response()->json([
+                'responseCode' => '4012401',
                 'responseMessage' => 'Invalid token (B2B)',
             ], 401);
         }
 
-        
-                // Cek apakah ada field mandatory yang kosong
-                foreach ($request->all() as $key => $value) {
-                    if (empty($value) && in_array($key, $this->mandatoryFields())) {
-                        return response()->json([
-                            'responseCode' => '4002502',
-                            'responseMessage' => 'Invalid Mandatory Field',
-                            'statusCode' => 400,
-                            'virtualAccountData' => [
-                                'paymentFlagStatus' => '01',
-                                'paymentFlagReason' => [
-                                    'english' => 'Any Value',
-                                    'indonesia' => 'Any Value'
-                                ],
-                                'partnerServiceId' => '   14999',
-                                'customerNo' => '040002',
-                                
-                                'paymentRequestId' => 'Any Value'
-                            ]
-                        ], 400);
-                    }
-                }
-                $virtualAccountNo = $request->virtualAccountNo;
-                Log::info('Virtual Account No:', [$virtualAccountNo]);
-                  if(!preg_match('/^\d+$/', $virtualAccountNo)) {
-                        return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
-                    }
-         
-        
-            // Validasi body request
-            $validated = $request->validate([
-                'partnerServiceId' => 'required',
-                'customerNo' => 'required',
-                'virtualAccountNo' => 'required',
-                'channelCode' => 'required',
-                'trxDateTime' => 'required',
-                'paymentRequestId' => 'required',
-                'referenceNo' => 'required',
-            ]);
-    
-            // Simpan X-EXTERNAL-ID ke database
-            try {
-                DB::table('external_ids')->insert([
-                    'external_id' => $externalId,
-                    'date' => $today,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            } catch (\Illuminate\Database\QueryException $e) {
-                // Jika duplikat maka biarkan saja
+        foreach ($request->all() as $key => $value) {
+            if (empty($value) && in_array($key, $this->mandatoryFields())) {
+                return $this->handleInvalidMandatoryField($request);
             }
-            // Proses payment flag (ambil data terkait)
-            $user_data = DB::table('tagihan_pembayaran')
-                ->where('id_invoice', $validated['virtualAccountNo'])
-                ->first();
-    
-            if (!$user_data) {
-                return response()->json($this->buildNotFoundResponse($validated), 404);
-            }
-    
-            // Update status pembayaran ke database
-            DB::table('tagihan_pembayaran')
-                ->where('id_invoice', $validated['virtualAccountNo'])
-                ->update([
-                    'status_pembayaran' => 1,
-                    'updated_at' => now(),
-                ]);
-    
-            // Kembalikan response sukses
-            return response()->json($this->buildSuccessResponse($validated, $user_data));
-        } catch (Exception $e) {
-            Log::error('Flag Payment Error:', ['error' => $e->getMessage()]);
-            return response()->json([
-                'responseCode' => '5002500',
-                'responseMessage' => 'Internal Server Error',
-            ], 500);
         }
+
+        $virtualAccountNo = $request->virtualAccountNo;
+        Log::info('Virtual Account No:', [$virtualAccountNo]);
+        if (!preg_match('/^\d+$/', $virtualAccountNo)) {
+            return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
+        }
+
+        $validated = $request->validate([
+            'partnerServiceId' => 'required',
+            'customerNo' => 'required',
+            'virtualAccountNo' => 'required',
+            'channelCode' => 'required',
+            'trxDateTime' => 'required',
+            'paymentRequestId' => 'required',
+            'referenceNo' => 'required',
+        ]);
+
+        try {
+            DB::table('external_ids')->insert([
+                'external_id' => $externalId,
+                'date' => $today,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {}
+
+        $user_data = DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->first();
+
+        if (!$user_data) {
+            return response()->json($this->buildNotFoundResponse($validated), 404);
+        }
+
+        DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->update([
+                'status_pembayaran' => 1,
+                'updated_at' => now(),
+            ]);
+
+        return response()->json($this->buildSuccessResponse($validated, $user_data));
+    } catch (Exception $e) {
+        Log::error('Flag Payment Error:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'responseCode' => '5002500',
+            'responseMessage' => 'Internal Server Error',
+        ], 500);
     }
+}
+private function handleInvalidMandatoryField() {
+    return [
+        'responseCode' => '4002502',
+        'responseMessage' => 'Invalid Mandatory Field',
+        'statusCode' => 400,
+        'virtualAccountData' => [
+            'paymentFlagStatus' => '01',
+            'paymentFlagReason' => [
+                'english' => 'Any Value',
+                'indonesia' => 'Any Value'
+            ],
+            'partnerServiceId' => '14999',
+            'customerNo' => '040002',
+            'paymentRequestId' => 'Any Value'
+        ]
+    ];
+}
+
+private function handleInconsistentRequest($previousPayment) {
+    $customerNo = substr($previousPayment['virtualAccountNo'], 5);
+        return [
+            "responseCode" => "4042518",
+            "responseMessage" => "Inconsistent Request",
+            "virtualAccountData" => [
+                "paymentFlagReason" => [
+                    "english" => "SUKSES",
+                    "indonesia" => "SUKSES"
+                ],
+                "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+                "customerNo" => $customerNo,
+                "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
+                "virtualAccountName" => "",
+                "paymentRequestId" => $previousPayment['paymentRequestId'],
+                "paidAmount" => [
+                    "value" => "",
+                    "currency" => ""
+                ],
+                "totalAmount" => [
+                    "value" => "",
+                    "currency" => ""
+                ],
+                "trxDateTime" => $previousPayment['trxDateTime'],
+                "referenceNo" =>  $previousPayment['referenceNo'],
+                "paymentFlagStatus" => "00",
+                "billDetails" =>  [],
+                "freeTexts" => [
+                    [
+                        "english" => "",
+                        "indonesia" => ""
+                    ]
+                ]
+            ],
+            "additionalInfo" => (object) []
+        ];
+
+}
+
     private function mandatoryFields()
     {
         return [
@@ -416,7 +405,7 @@ EOF;
                     'indonesia' => 'Any Value'
                 ],
                 'partnerServiceId' => '   14999',
-                'customerNo' => '040002',
+                'customerNo' => 'any value',
                 'virtualAccountNo' => $fieldValue, // Mengembalikan nilai field yang bermasalah
                 'paymentRequestId' => 'Any Value'
             ]
