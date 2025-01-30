@@ -341,7 +341,21 @@ private function handleInvalidMandatoryField() {
 
 private function handleInconsistentRequest($userdata,$previousPayment) {
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
+    if($userdata->status_pembayaran == '1'){
+        $responstatus = "Paid Bill";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+ 
+        $responseCode = "4042514";  
+        $responflag = "01";
+     }else{
+        $responstatus = "Successful";
+        $english = "Success";
+        $indonesia = "Sukses";
 
+        $responseCode = "2002500";
+        $responflag = "00";
+     }
         return [
             "responseCode" => "4042518",
             "responseMessage" => "Inconsistent Request",
@@ -365,7 +379,7 @@ private function handleInconsistentRequest($userdata,$previousPayment) {
                 ],
                 "trxDateTime" => $previousPayment['trxDateTime'],
                 "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => "01",
+                "paymentFlagStatus" => $responflag,
                 "billDetails" =>  [],
                 "freeTexts" => [
                     [
@@ -379,6 +393,21 @@ private function handleInconsistentRequest($userdata,$previousPayment) {
 
 }
 private function handleConflictRequest($userdata,$previousPayment) {
+    if($userdata->status_pembayaran == '1'){
+        $responstatus = "Paid Bill";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+ 
+        $responseCode = "4042514";  
+        $responflag = "01";
+     }else{
+        $responstatus = "Successful";
+        $english = "Success";
+        $indonesia = "Sukses";
+
+        $responseCode = "2002500";
+        $responflag = "00";
+     }
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
         return [
             "responseCode" => "4092500",
@@ -403,7 +432,7 @@ private function handleConflictRequest($userdata,$previousPayment) {
                 ],
                 "trxDateTime" => $previousPayment['trxDateTime'],
                 "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => "01",
+                "paymentFlagStatus" => $responflag,
                 "billDetails" =>  [],
                 "freeTexts" => [
                     [
