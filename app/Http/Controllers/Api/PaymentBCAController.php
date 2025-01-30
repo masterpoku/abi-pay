@@ -267,7 +267,7 @@ public function flagPayment(Request $request) {
                 return $this->handleInvalidMandatoryField($request);
             }
         }
-
+       
         $virtualAccountNo = $request->virtualAccountNo;
         Log::info('Virtual Account No:', [$virtualAccountNo]);
         if (!preg_match('/^\d+$/', $virtualAccountNo)) {
@@ -283,7 +283,10 @@ public function flagPayment(Request $request) {
             'paymentRequestId' => 'required',
             'referenceNo' => 'required',
         ]);
+        if(!$externalId === $validated['paymentRequestId']) {
+            return $this->handleConflictRequest($request);
 
+        }
         try {
             DB::table('external_ids')->insert([
                 'external_id' => $externalId,
@@ -361,6 +364,44 @@ private function handleInconsistentRequest($previousPayment) {
                 "trxDateTime" => $previousPayment['trxDateTime'],
                 "referenceNo" =>  $previousPayment['referenceNo'],
                 "paymentFlagStatus" => "00",
+                "billDetails" =>  [],
+                "freeTexts" => [
+                    [
+                        "english" => "",
+                        "indonesia" => ""
+                    ]
+                ]
+            ],
+            "additionalInfo" => (object) []
+        ];
+
+}
+private function handleConflictRequest($previousPayment) {
+    $customerNo = substr($previousPayment['virtualAccountNo'], 5);
+        return [
+            "responseCode" => "4092500",
+            "responseMessage" => "Conflict",
+            "virtualAccountData" => [
+                "paymentFlagReason" => [
+                    "english" => "Cannot use the same X-EXTERNAL-ID",
+                    "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama",
+                ],
+                "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+                "customerNo" => $customerNo,
+                "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
+                "virtualAccountName" => "",
+                "paymentRequestId" => $previousPayment['paymentRequestId'],
+                "paidAmount" => [
+                    "value" => "",
+                    "currency" => ""
+                ],
+                "totalAmount" => [
+                    "value" => "",
+                    "currency" => ""
+                ],
+                "trxDateTime" => $previousPayment['trxDateTime'],
+                "referenceNo" =>  $previousPayment['referenceNo'],
+                "paymentFlagStatus" => "01",
                 "billDetails" =>  [],
                 "freeTexts" => [
                     [
