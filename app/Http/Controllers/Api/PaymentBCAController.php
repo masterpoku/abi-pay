@@ -504,7 +504,7 @@ private function buildSuccessResponse($validated, $user_data)
         $english = "Success";
         $indonesia = "Sukses";
 
-        $responseCode = "2002400";
+        $responseCode = "2002500";
      }
 
     return [
