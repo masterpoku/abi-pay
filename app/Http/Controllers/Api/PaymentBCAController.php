@@ -222,7 +222,6 @@ public function flagPayment(Request $request) {
 
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
-        $externalId = $request->header('X-EXTERNAL-ID');
         $today = Carbon::today()->toDateString();
 
         $existing = DB::table('external_ids')
@@ -234,12 +233,7 @@ public function flagPayment(Request $request) {
             return $this->handleInconsistentRequest($request);
         }
 
-        DB::table('external_ids')->insert([
-            'external_id' => $externalId,
-            'date' => $today,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+   
 
         Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
