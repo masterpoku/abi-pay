@@ -224,14 +224,8 @@ public function flagPayment(Request $request) {
         $partnerId = $request->header('X-PARTNER-ID');
         $today = Carbon::today()->toDateString();
 
-        $existing = DB::table('external_ids')
-                      ->where('external_id', $externalId)
-                      ->whereDate('created_at', $today)
-                      ->exists();
-        
-        
 
-   
+
 
         Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
@@ -292,15 +286,25 @@ public function flagPayment(Request $request) {
         } catch (\Illuminate\Database\QueryException $e) {}
 
         $user_data = DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->first();
+        ->where('id_invoice', $validated['virtualAccountNo'])
+        ->first();
+        // Cek apakah external_id sudah ada hari ini
+        $existing = DB::table('external_ids')
+        ->where('external_id', $externalId)
+        ->whereDate('created_at', $today)
+        ->exists();
+
+        // Jika external_id sudah pernah digunakan hari ini, kirimkan error X-EXTERNAL-ID duplicate
         if ($existing) {
-                return $this->handleInconsistentRequest($user_data,$request);
+        return $this->handleDuplicateExternalId($user_data, $request);
         }
-        if(!$externalId === $validated['paymentRequestId']) {
-                return $this->handleConflictRequest($user_data ,$request);
-    
+
+        // Pastikan externalId dan paymentRequestId harus sama
+        if ($externalId !== $validated['paymentRequestId']) {
+        return $this->handleDuplicatePaymentRequestId($user_data, $request);
         }
+
+
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated), 404);
         }
@@ -339,21 +343,11 @@ private function handleInvalidMandatoryField() {
     ];
 }
 
-private function handleInconsistentRequest($userdata,$previousPayment) {
+private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
     if($userdata->status_pembayaran == '1'){
-        $responstatus = "Paid Bill";
-        $english = "Bill has been paid";
-        $indonesia = "Tagihan telah dibayar";
- 
-        $responseCode = "4042514";  
         $responflag = "01";
      }else{
-        $responstatus = "Successful";
-        $english = "Success";
-        $indonesia = "Sukses";
-
-        $responseCode = "2002500";
         $responflag = "00";
      }
         return [
@@ -392,20 +386,10 @@ private function handleInconsistentRequest($userdata,$previousPayment) {
         ];
 
 }
-private function handleConflictRequest($userdata,$previousPayment) {
+private function handleDuplicateExternalId($userdata,$previousPayment) {
     if($userdata->status_pembayaran == '1'){
-        $responstatus = "Paid Bill";
-        $english = "Bill has been paid";
-        $indonesia = "Tagihan telah dibayar";
- 
-        $responseCode = "4042514";  
         $responflag = "01";
      }else{
-        $responstatus = "Successful";
-        $english = "Success";
-        $indonesia = "Sukses";
-
-        $responseCode = "2002500";
         $responflag = "00";
      }
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
@@ -432,7 +416,7 @@ private function handleConflictRequest($userdata,$previousPayment) {
                 ],
                 "trxDateTime" => $previousPayment['trxDateTime'],
                 "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => $responflag,
+                "paymentFlagStatus" => '01',
                 "billDetails" =>  [],
                 "freeTexts" => [
                     [
