@@ -344,7 +344,7 @@ private function handleInvalidMandatoryField() {
     ];
 }
 
-private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
+private function handleDuplicateExternalId($userdata,$previousPayment) {
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
     if($userdata->status_pembayaran == '1'){
         $responflag = "01";
@@ -387,7 +387,7 @@ private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
         ];
 
 }
-private function handleDuplicateExternalId($userdata,$previousPayment) {
+private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
     if($userdata->status_pembayaran == '1'){
         $responflag = "01";
      }else{
