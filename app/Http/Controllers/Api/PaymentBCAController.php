@@ -485,7 +485,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                 "indonesia" => "Virtual Account Tidak Ditemukan"
             ],
             "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-            "customerNo" => "04000199",  // Ganti dengan customerNo yang sesuai
+            "customerNo" => $customerNo, // Ganti dengan customerNo yang sesuai
             "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
             "virtualAccountName" => "",
             "paymentRequestId" => $previousPayment['paymentRequestId'],
