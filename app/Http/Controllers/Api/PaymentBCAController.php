@@ -395,11 +395,13 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
     $customerNo = substr($previousPayment['virtualAccountNo'], 5); // Sesuaikan jika perlu
     $english = 'Success'; // Ganti dengan logika sesuai kondisi jika perlu
     $indonesia = 'Sukses'; // Ganti dengan logika sesuai kondisi jika perlu
+
+    // Menentukan responflag berdasarkan status pembayaran sebelumnya
     $responflag = $existingPayment->status_pembayaran == 1 ? '00' : '01';
 
     // Logika untuk cek status pembayaran
     if ($existingPayment) {
-        // Poin 8: Sukses (status pembayaran == 0 - belum dibayar)
+        // Poin 8: Pembayaran sukses pertama kali
         if ($existingPayment->status_pembayaran == 0) {
             return response()->json([
                 "responseCode" => "4042518",
@@ -437,7 +439,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
             ], 200);
         }
 
-        // Poin 9: Tagihan telah dibayar (status pembayaran == 1 - sudah dibayar)
+        // Poin 9: Tagihan sudah dibayar (status pembayaran == 1)
         if ($existingPayment->status_pembayaran == 1) {
             return response()->json([
                 "responseCode" => "4042518",
@@ -462,7 +464,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     ],
                     "trxDateTime" => $previousPayment['trxDateTime'],
                     "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => '01', // Status gagal (sudah dibayar)
+                    "paymentFlagStatus" => '01', // Status gagal (tagihan sudah dibayar)
                     "billDetails" => [],
                     "freeTexts" => [
                         [
@@ -512,6 +514,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
         "additionalInfo" => (object) []
     ], 404);
 }
+
 
 private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
     if($userdata->status_pembayaran == '1'){
