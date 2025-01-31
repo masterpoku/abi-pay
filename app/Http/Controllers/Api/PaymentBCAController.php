@@ -296,8 +296,6 @@ public function flagPayment(Request $request) {
             ->first();
 
         if ($existingPayment) {
-            return $this->handleDuplicatePaymentRequestId($user_data,$validated);
-        }else{
             return $this->handlePaymentResponse($existingPayment, $user_data, $validated);
         }
             
