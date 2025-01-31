@@ -446,7 +446,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                 "responseMessage" => "Inconsistent Request",
                 "virtualAccountData" => [
                     "paymentFlagReason" => [
-                        "english" => "Bill has been paid",
+                        "english" => "Paid Bill",
                         "indonesia" => "Tagihan telah dibayar"
                     ],
                     "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
