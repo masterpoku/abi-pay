@@ -399,7 +399,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
 
     // Logika untuk cek status pembayaran
     if ($existingPayment) {
-        // Poin 8: Sukses (status pembayaran == 1)
+        // Poin 8: Sukses (status pembayaran == 0 - belum dibayar)
         if ($existingPayment->status_pembayaran == 0) {
             return response()->json([
                 "responseCode" => "4042518",
@@ -424,7 +424,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     ],
                     "trxDateTime" => $previousPayment['trxDateTime'],
                     "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => $responflag,
+                    "paymentFlagStatus" => '00', // Status sukses
                     "billDetails" => [],
                     "freeTexts" => [
                         [
@@ -437,7 +437,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
             ], 200);
         }
 
-        // Poin 9: Tagihan telah dibayar (status pembayaran == 2)
+        // Poin 9: Tagihan telah dibayar (status pembayaran == 1 - sudah dibayar)
         if ($existingPayment->status_pembayaran == 1) {
             return response()->json([
                 "responseCode" => "4042518",
@@ -462,7 +462,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     ],
                     "trxDateTime" => $previousPayment['trxDateTime'],
                     "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => $responflag,
+                    "paymentFlagStatus" => '01', // Status gagal (sudah dibayar)
                     "billDetails" => [],
                     "freeTexts" => [
                         [
