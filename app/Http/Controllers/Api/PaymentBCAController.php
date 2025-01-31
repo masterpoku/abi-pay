@@ -285,9 +285,6 @@ public function flagPayment(Request $request) {
             ->where('id_invoice', $validated['virtualAccountNo'])
             ->first();
 
-        if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated), 404);
-        }
 
         // Cek apakah external_id dan payment_request_id sudah ada
         $existingPayment = DB::table('tagihan_pembayaran')
@@ -295,11 +292,8 @@ public function flagPayment(Request $request) {
             ->where('payment_request_id', $validated['paymentRequestId'])
             ->first();
 
-        if ($existingPayment) {
-            return $this->handlePaymentResponse($existingPayment, $user_data, $validated);
-        }
-            
-
+        
+      
         // Cek apakah external_id ada tetapi payment_request_id berbeda (Conflict)
         $conflictingPayment = DB::table('tagihan_pembayaran')
             ->where('external_id', $externalId)
@@ -308,6 +302,12 @@ public function flagPayment(Request $request) {
 
         if ($conflictingPayment) {
             return $this->handleDuplicatePaymentRequestId($user_data,$validated);
+        }if ($existingPayment) {
+            return $this->handlePaymentResponse($existingPayment, $user_data, $validated);
+        }
+        
+        if (!$user_data) {
+            return response()->json($this->buildNotFoundResponse($validated), 404);
         }
 
         // Jika semua valid, update status pembayaran
