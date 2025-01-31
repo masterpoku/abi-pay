@@ -437,10 +437,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                 ],
                 "additionalInfo" => (object) []
             ], 200);
-        }
-
-        // Poin 9: Tagihan sudah dibayar (status pembayaran == 1)
-        if ($existingPayment->status_pembayaran == 1) {
+        }else {
             return response()->json([
                 "responseCode" => "4042518",
                 "responseMessage" => "Inconsistent Request",
