@@ -295,12 +295,19 @@ public function flagPayment(Request $request) {
             ->where('payment_request_id', $validated['paymentRequestId'])
             ->first();
 
-        if ($existingPayment) {
-            if ($existingPayment->status_pembayaran == 1) {
-                $paymentResponse = $this->handleDuplicateExternalId($user_data, $validated);
-                return response()->json($paymentResponse, 400);
+            if ($existingPayment) {
+                if ($existingPayment->status_pembayaran == 1) {
+                    $paymentResponse = $this->handleDuplicateExternalIdpaid($user_data, $validated);
+                    
+                    return response()->json($paymentResponse, 400);
+                } else {
+                    // Panggil handleDuplicateExternalId jika status pembayaran tidak 1
+                    $paymentResponse = $this->handleDuplicateExternalIdunpaid($user_data, $validated);
+                    
+                    return response()->json($paymentResponse, 400);
+                }
             }
-        }
+            
 
         // Cek apakah external_id ada tetapi payment_request_id berbeda (Conflict)
         $conflictingPayment = DB::table('tagihan_pembayaran')
@@ -350,17 +357,54 @@ private function handleInvalidMandatoryField() {
     ];
 }
 
-private function handleDuplicateExternalId($userdata,$previousPayment) {
+private function handleDuplicateExternalIdunpaid($userdata,$previousPayment) {
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
-    if($userdata->status_pembayaran == '1'){
-        $responflag = "00";
-        $english = "Bill has been paid";
-        $indonesia = "Tagihan telah dibayar";
-     }else{
         $responflag = "00";
         $english = "Success";
         $indonesia = "Sukses";
-     }
+  
+        return [
+            "responseCode" => "4042518",
+            "responseMessage" => "Inconsistent Request",
+            "virtualAccountData" => [
+                "paymentFlagReason" => [
+                    "english" => $english ,
+                    "indonesia" => $indonesia
+                ],
+                  "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+                "customerNo" => $customerNo,
+                "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
+                "virtualAccountName" => $userdata->nama_jamaah,
+                "paymentRequestId" => $previousPayment['paymentRequestId'],
+                "paidAmount" => [
+                    "value" => $userdata->nominal_tagihan,
+                    "currency" => "IDR"
+                ],
+                "totalAmount" => [
+                    "value" =>$userdata->nominal_tagihan,
+                    "currency" => "IDR"
+                ],
+                "trxDateTime" => $previousPayment['trxDateTime'],
+                "referenceNo" =>  $previousPayment['referenceNo'],
+                "paymentFlagStatus" => $responflag,
+                "billDetails" =>  [],
+                "freeTexts" => [
+                    [
+                        "english" => "",
+                        "indonesia" => ""
+                    ]
+                ]
+            ],
+            "additionalInfo" => (object) []
+        ];
+
+}
+private function handleDuplicateExternalIdpaid($userdata,$previousPayment) {
+    $customerNo = substr($previousPayment['virtualAccountNo'], 5);
+        $responflag = "00";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+  
         return [
             "responseCode" => "4042518",
             "responseMessage" => "Inconsistent Request",
