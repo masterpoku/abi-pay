@@ -296,17 +296,8 @@ public function flagPayment(Request $request) {
             ->first();
 
         if ($existingPayment) {
-            if ($existingPayment->status_pembayaran == 1) {
-                return response()->json([
-                    'responseCode' => '4042518',
-                    'responseMessage' => 'Inconsistent Request',
-                    'paymentFlagStatus' => '00',
-                    'paymentFlagReason' => 'Success'
-                ], 400);
-            } else {
-                $paymentResponse = $this->handleDuplicateExternalId($user_data, $existingPayment);
-        
-            }
+            $paymentResponse = $this->handleDuplicateExternalId($user_data, $existingPayment);
+            return response()->json($paymentResponse, 400);
         }
 
         // Cek apakah external_id ada tetapi payment_request_id berbeda (Conflict)
