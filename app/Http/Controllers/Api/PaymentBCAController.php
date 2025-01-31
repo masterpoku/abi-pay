@@ -430,8 +430,8 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     "billDetails" => [],
                     "freeTexts" => [
                         [
-                            "english" => "",
-                            "indonesia" => ""
+                            "english" => "Free text",
+                            "indonesia" => "Tulisan bebas"
                         ]
                     ]
                 ],
@@ -443,8 +443,8 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                 "responseMessage" => "Inconsistent Request",
                 "virtualAccountData" => [
                     "paymentFlagReason" => [
-                        "english" => "Paid Bill",
-                        "indonesia" => "Tagihan telah dibayar"
+                        "english" => $english,
+                        "indonesia" => $indonesia
                     ],
                     "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
                     "customerNo" => $customerNo,
@@ -461,12 +461,12 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     ],
                     "trxDateTime" => $previousPayment['trxDateTime'],
                     "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => $responflag , // Status gagal (tagihan sudah dibayar)
+                    "paymentFlagStatus" => $responflag, // Status sukses
                     "billDetails" => [],
                     "freeTexts" => [
                         [
-                            "english" => "",
-                            "indonesia" => ""
+                            "english" => "Free text",
+                            "indonesia" => "Tulisan bebas"
                         ]
                     ]
                 ],
