@@ -295,18 +295,11 @@ public function flagPayment(Request $request) {
             ->where('payment_request_id', $validated['paymentRequestId'])
             ->first();
 
-            if ($existingPayment) {
-                if ($existingPayment->status_pembayaran == 1) {
-                    $paymentResponse = $this->handleDuplicateExternalIdpaid($user_data, $validated);
-                    
-                    return response()->json($paymentResponse, 400);
-                } else {
-                    // Panggil handleDuplicateExternalId jika status pembayaran tidak 1
-                    $paymentResponse = $this->handleDuplicateExternalIdunpaid($user_data, $validated);
-                    
-                    return response()->json($paymentResponse, 400);
-                }
-            }
+        if ($existingPayment) {
+            return $this->handleDuplicatePaymentRequestId($user_data,$validated);
+        }else{
+            return $this->handlePaymentResponse($existingPayment, $user_data, $validated);
+        }
             
 
         // Cek apakah external_id ada tetapi payment_request_id berbeda (Conflict)
@@ -399,48 +392,129 @@ private function handleDuplicateExternalIdunpaid($userdata,$previousPayment) {
         ];
 
 }
-private function handleDuplicateExternalIdpaid($userdata,$previousPayment) {
-    $customerNo = substr($previousPayment['virtualAccountNo'], 5);
-        $responflag = "00";
-        $english = "Bill has been paid";
-        $indonesia = "Tagihan telah dibayar";
-  
-        return [
-            "responseCode" => "4042518",
-            "responseMessage" => "Inconsistent Request",
-            "virtualAccountData" => [
-                "paymentFlagReason" => [
-                    "english" => $english ,
-                    "indonesia" => $indonesia
-                ],
-                  "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-                "customerNo" => $customerNo,
-                "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                "virtualAccountName" => $userdata->nama_jamaah,
-                "paymentRequestId" => $previousPayment['paymentRequestId'],
-                "paidAmount" => [
-                    "value" => $userdata->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "totalAmount" => [
-                    "value" =>$userdata->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "trxDateTime" => $previousPayment['trxDateTime'],
-                "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => $responflag,
-                "billDetails" =>  [],
-                "freeTexts" => [
-                    [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object) []
-        ];
+public function handlePaymentResponse($existingPayment, $userdata, $previousPayment) {
+    // Ambil data dari $previousPayment dan $userdata
+    $customerNo = substr($previousPayment['virtualAccountNo'], 5); // Sesuaikan jika perlu
+    $english = 'Success'; // Ganti dengan logika sesuai kondisi jika perlu
+    $indonesia = 'Sukses'; // Ganti dengan logika sesuai kondisi jika perlu
+    $responflag = $existingPayment->status_pembayaran == 1 ? '00' : '01';
 
+    // Logika untuk cek status pembayaran
+    if ($existingPayment) {
+        // Poin 8: Sukses (status pembayaran == 1)
+        if ($existingPayment->status_pembayaran == 1) {
+            return response()->json([
+                "responseCode" => "4042518",
+                "responseMessage" => "Inconsistent Request",
+                "virtualAccountData" => [
+                    "paymentFlagReason" => [
+                        "english" => $english,
+                        "indonesia" => $indonesia
+                    ],
+                    "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+                    "customerNo" => $customerNo,
+                    "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
+                    "virtualAccountName" => $userdata->nama_jamaah,
+                    "paymentRequestId" => $previousPayment['paymentRequestId'],
+                    "paidAmount" => [
+                        "value" => $userdata->nominal_tagihan,
+                        "currency" => "IDR"
+                    ],
+                    "totalAmount" => [
+                        "value" => $userdata->nominal_tagihan,
+                        "currency" => "IDR"
+                    ],
+                    "trxDateTime" => $previousPayment['trxDateTime'],
+                    "referenceNo" => $previousPayment['referenceNo'],
+                    "paymentFlagStatus" => $responflag,
+                    "billDetails" => [],
+                    "freeTexts" => [
+                        [
+                            "english" => "",
+                            "indonesia" => ""
+                        ]
+                    ]
+                ],
+                "additionalInfo" => (object) []
+            ], 200);
+        }
+
+        // Poin 9: Tagihan telah dibayar (status pembayaran == 2)
+        if ($existingPayment->status_pembayaran == 2) {
+            return response()->json([
+                "responseCode" => "4042518",
+                "responseMessage" => "Inconsistent Request",
+                "virtualAccountData" => [
+                    "paymentFlagReason" => [
+                        "english" => "Bill has been paid",
+                        "indonesia" => "Tagihan telah dibayar"
+                    ],
+                    "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+                    "customerNo" => $customerNo,
+                    "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
+                    "virtualAccountName" => $userdata->nama_jamaah,
+                    "paymentRequestId" => $previousPayment['paymentRequestId'],
+                    "paidAmount" => [
+                        "value" => $userdata->nominal_tagihan,
+                        "currency" => "IDR"
+                    ],
+                    "totalAmount" => [
+                        "value" => $userdata->nominal_tagihan,
+                        "currency" => "IDR"
+                    ],
+                    "trxDateTime" => $previousPayment['trxDateTime'],
+                    "referenceNo" => $previousPayment['referenceNo'],
+                    "paymentFlagStatus" => $responflag,
+                    "billDetails" => [],
+                    "freeTexts" => [
+                        [
+                            "english" => "",
+                            "indonesia" => ""
+                        ]
+                    ]
+                ],
+                "additionalInfo" => (object) []
+            ], 400);
+        }
+    }
+
+    // Poin 9: Virtual Account Tidak Ditemukan
+    return response()->json([
+        "responseCode" => "4042518",
+        "responseMessage" => "Inconsistent Request",
+        "virtualAccountData" => [
+            "paymentFlagReason" => [
+                "english" => "Virtual Account Not Found",
+                "indonesia" => "Virtual Account Tidak Ditemukan"
+            ],
+            "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
+            "customerNo" => "04000199",  // Ganti dengan customerNo yang sesuai
+            "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
+            "virtualAccountName" => "",
+            "paymentRequestId" => $previousPayment['paymentRequestId'],
+            "paidAmount" => [
+                "value" => "",
+                "currency" => ""
+            ],
+            "totalAmount" => [
+                "value" => "",
+                "currency" => ""
+            ],
+            "trxDateTime" => $previousPayment['trxDateTime'],
+            "referenceNo" => $previousPayment['referenceNo'],
+            "paymentFlagStatus" => "01",  // Status gagal
+            "billDetails" => [],
+            "freeTexts" => [
+                [
+                    "english" => "",
+                    "indonesia" => ""
+                ]
+            ]
+        ],
+        "additionalInfo" => (object) []
+    ], 404);
 }
+
 private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
     if($userdata->status_pembayaran == '1'){
         $responflag = "01";
