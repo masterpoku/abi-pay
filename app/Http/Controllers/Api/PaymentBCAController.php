@@ -297,7 +297,7 @@ public function flagPayment(Request $request) {
 
         if ($existingPayment) {
             if ($existingPayment->status_pembayaran == 1) {
-                $paymentResponse = $this->handleDuplicateExternalId($user_data, $existingPayment);
+                $paymentResponse = $this->handleDuplicateExternalId($user_data, $validated);
                 return response()->json($paymentResponse, 400);
             }
         }
