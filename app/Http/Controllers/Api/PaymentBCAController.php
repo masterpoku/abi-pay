@@ -400,7 +400,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
     // Logika untuk cek status pembayaran
     if ($existingPayment) {
         // Poin 8: Sukses (status pembayaran == 1)
-        if ($existingPayment->status_pembayaran == 1) {
+        if ($existingPayment->status_pembayaran == 0) {
             return response()->json([
                 "responseCode" => "4042518",
                 "responseMessage" => "Inconsistent Request",
@@ -438,7 +438,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
         }
 
         // Poin 9: Tagihan telah dibayar (status pembayaran == 2)
-        if ($existingPayment->status_pembayaran == 2) {
+        if ($existingPayment->status_pembayaran == 1) {
             return response()->json([
                 "responseCode" => "4042518",
                 "responseMessage" => "Inconsistent Request",
