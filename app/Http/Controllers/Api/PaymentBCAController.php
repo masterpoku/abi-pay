@@ -353,17 +353,21 @@ private function handleInvalidMandatoryField() {
 private function handleDuplicateExternalId($userdata,$previousPayment) {
     $customerNo = substr($previousPayment['virtualAccountNo'], 5);
     if($userdata->status_pembayaran == '1'){
-        $responflag = "00";
+        $responflag = "01";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
      }else{
         $responflag = "00";
+        $english = "Success";
+        $indonesia = "Sukses";
      }
         return [
             "responseCode" => "4042518",
             "responseMessage" => "Inconsistent Request",
             "virtualAccountData" => [
                 "paymentFlagReason" => [
-                    "english" => "Success",
-                    "indonesia" => "Sukses"
+                    "english" => $english,
+                    "indonesia" => $indonesia
                 ],
                   "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
                 "customerNo" => $customerNo,
