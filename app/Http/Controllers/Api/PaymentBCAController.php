@@ -426,7 +426,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     ],
                     "trxDateTime" => $previousPayment['trxDateTime'],
                     "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => '00', // Status sukses
+                    "paymentFlagStatus" => $responflag, // Status sukses
                     "billDetails" => [],
                     "freeTexts" => [
                         [
@@ -464,7 +464,7 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
                     ],
                     "trxDateTime" => $previousPayment['trxDateTime'],
                     "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => '01', // Status gagal (tagihan sudah dibayar)
+                    "paymentFlagStatus" => $responflag , // Status gagal (tagihan sudah dibayar)
                     "billDetails" => [],
                     "freeTexts" => [
                         [
