@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -288,39 +289,16 @@ public function flagPayment(Request $request) {
 
         // Cek apakah external_id dan payment_request_id sudah ada
         $existingPayment = DB::table('tagihan_pembayaran')
-            ->where('external_id', $externalId)
-            ->where('payment_request_id', $validated['paymentRequestId'])
-            ->first();
+        ->where('external_id', $validated['externalId'])
+        ->where('payment_request_id', $validated['paymentRequestId'])
+        ->first();
 
+    if ($existingPayment) {
+        return $this->handlePaymentResponse($existingPayment, $user_data, $validated);
+    }
+
+    return response()->json($this->buildNotFoundResponse($validated), 404);
         
-      
-        // Cek apakah external_id ada tetapi payment_request_id berbeda (Conflict)
-        $conflictingPayment = DB::table('tagihan_pembayaran')
-            ->where('external_id', $externalId)
-            ->where('payment_request_id', '!=', $validated['paymentRequestId'])
-            ->exists();
-
-        if ($conflictingPayment) {
-            return $this->handleDuplicatePaymentRequestId($user_data,$validated);
-        }if ($existingPayment) {
-            return $this->handlePaymentResponse($existingPayment, $user_data, $validated);
-        }
-        
-        if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated), 404);
-        }
-
-        // Jika semua valid, update status pembayaran
-        DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->update([
-                'status_pembayaran' => '1',
-                'external_id' => $externalId,
-                'payment_request_id' => $validated['paymentRequestId'],
-                'updated_at' => now(),
-            ]);
-
-        return response()->json($this->buildSuccessResponse($validated, $user_data));
     } catch (Exception $e) {
         Log::error('Flag Payment Error:', ['error' => $e->getMessage()]);
         return response()->json([
@@ -348,158 +326,64 @@ private function handleInvalidMandatoryField() {
     ];
 }
 
-private function handleDuplicateExternalIdunpaid($userdata,$previousPayment) {
-    $customerNo = substr($previousPayment['virtualAccountNo'], 5);
-        $responflag = "00";
-        $english = "Success";
-        $indonesia = "Sukses";
-  
-        return [
-            "responseCode" => "4042518",
-            "responseMessage" => "Inconsistent Request",
-            "virtualAccountData" => [
-                "paymentFlagReason" => [
-                    "english" => $english ,
-                    "indonesia" => $indonesia
-                ],
-                  "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-                "customerNo" => $customerNo,
-                "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                "virtualAccountName" => $userdata->nama_jamaah,
-                "paymentRequestId" => $previousPayment['paymentRequestId'],
-                "paidAmount" => [
-                    "value" => $userdata->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "totalAmount" => [
-                    "value" =>$userdata->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "trxDateTime" => $previousPayment['trxDateTime'],
-                "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => $responflag,
-                "billDetails" =>  [],
-                "freeTexts" => [
-                    [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object) []
-        ];
-
-}
-public function handlePaymentResponse($existingPayment, $userdata, $previousPayment) {
-    // Ambil data dari $previousPayment dan $userdata
-    $customerNo = substr($previousPayment['virtualAccountNo'], 5); // Sesuaikan jika perlu
-    $english = 'Success'; // Ganti dengan logika sesuai kondisi jika perlu
-    $indonesia = 'Sukses'; // Ganti dengan logika sesuai kondisi jika perlu
-
-    // Menentukan responflag berdasarkan status pembayaran sebelumnya
-    $responflag = $existingPayment->status_pembayaran == 1 ? '00' : '01';
-
-    // Logika untuk cek status pembayaran
-    if ($existingPayment) {
-        // Poin 8: Pembayaran sukses pertama kali
-        if ($existingPayment->status_pembayaran == 0) {
-            return response()->json([
-                "responseCode" => "4042518",
-                "responseMessage" => "Inconsistent Request",
-                "virtualAccountData" => [
-                    "paymentFlagReason" => [
-                        "english" => $english,
-                        "indonesia" => $indonesia
-                    ],
-                    "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-                    "customerNo" => $customerNo,
-                    "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                    "virtualAccountName" => $userdata->nama_jamaah,
-                    "paymentRequestId" => $previousPayment['paymentRequestId'],
-                    "paidAmount" => [
-                        "value" => $userdata->nominal_tagihan,
-                        "currency" => "IDR"
-                    ],
-                    "totalAmount" => [
-                        "value" => $userdata->nominal_tagihan,
-                        "currency" => "IDR"
-                    ],
-                    "trxDateTime" => $previousPayment['trxDateTime'],
-                    "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => $responflag, // Status sukses
-                    "billDetails" => [],
-                    "freeTexts" => [
-                        [
-                            "english" => "Free text",
-                            "indonesia" => "Tulisan bebas"
-                        ]
-                    ]
-                ],
-                "additionalInfo" => (object) []
-            ], 200);
-        }else {
-            return response()->json([
-                "responseCode" => "4042518",
-                "responseMessage" => "Inconsistent Request",
-                "virtualAccountData" => [
-                    "paymentFlagReason" => [
-                        "english" => $english,
-                        "indonesia" => $indonesia
-                    ],
-                    "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-                    "customerNo" => $customerNo,
-                    "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                    "virtualAccountName" => $userdata->nama_jamaah,
-                    "paymentRequestId" => $previousPayment['paymentRequestId'],
-                    "paidAmount" => [
-                        "value" => $userdata->nominal_tagihan,
-                        "currency" => "IDR"
-                    ],
-                    "totalAmount" => [
-                        "value" => $userdata->nominal_tagihan,
-                        "currency" => "IDR"
-                    ],
-                    "trxDateTime" => $previousPayment['trxDateTime'],
-                    "referenceNo" => $previousPayment['referenceNo'],
-                    "paymentFlagStatus" => $responflag, // Status sukses
-                    "billDetails" => [],
-                    "freeTexts" => [
-                        [
-                            "english" => "Free text",
-                            "indonesia" => "Tulisan bebas"
-                        ]
-                    ]
-                ],
-                "additionalInfo" => (object) []
-            ], 400);
-        }
+private function handlePaymentResponse($existingPayment, $userData, $validated): JsonResponse
+{
+    if (!$userData) {
+        return response()->json($this->buildNotFoundResponse($validated), 404);
     }
 
-    // Poin 9: Virtual Account Tidak Ditemukan
-    return response()->json([
-        "responseCode" => "4042518",
-        "responseMessage" => "Inconsistent Request",
+    // Cek apakah ada konflik dengan external_id yang berbeda payment_request_id
+    $conflictingPayment = DB::table('tagihan_pembayaran')
+        ->where('external_id', $validated['externalId'])
+        ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+        ->exists();
+
+    if ($conflictingPayment) {
+        return response()->json($this->handleDuplicatePaymentRequestId($userData, $validated), 409);
+    }
+
+    // Update status pembayaran jika belum dibayar
+    if ($existingPayment->status_pembayaran == 0) {
+        DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->update([
+                'status_pembayaran' => 1,
+                'external_id' => $validated['externalId'],
+                'payment_request_id' => $validated['paymentRequestId'],
+                'updated_at' => now(),
+            ]);
+    }
+
+    return response()->json($this->buildSuccessResponse($validated, $userData), 200);
+}
+
+
+private function handleDuplicatePaymentRequestId($userData, $validated): array
+{
+    return [
+        "responseCode" => "4092500",
+        "responseMessage" => "Conflict",
         "virtualAccountData" => [
             "paymentFlagReason" => [
-                "english" => "Virtual Account Not Found",
-                "indonesia" => "Virtual Account Tidak Ditemukan"
+                "english" => "Cannot use the same X-EXTERNAL-ID",
+                "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
             ],
-            "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-            "customerNo" => $customerNo, // Ganti dengan customerNo yang sesuai
-            "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-            "virtualAccountName" => "",
-            "paymentRequestId" => $previousPayment['paymentRequestId'],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
+            "customerNo" => substr($validated['virtualAccountNo'], 5),
+            "virtualAccountNo" => "   " . $validated['virtualAccountNo'],
+            "virtualAccountName" => $userData->nama_jamaah,
+            "paymentRequestId" => $validated['paymentRequestId'],
             "paidAmount" => [
-                "value" => "",
-                "currency" => ""
+                "value" => number_format($userData->nominal_tagihan, 2, '.', ''),
+                "currency" => "IDR"
             ],
             "totalAmount" => [
-                "value" => "",
-                "currency" => ""
+                "value" => number_format($userData->nominal_tagihan, 2, '.', ''),
+                "currency" => "IDR"
             ],
-            "trxDateTime" => $previousPayment['trxDateTime'],
-            "referenceNo" => $previousPayment['referenceNo'],
-            "paymentFlagStatus" => "01",  // Status gagal
+            "trxDateTime" => $validated['trxDateTime'],
+            "referenceNo" =>  $validated['referenceNo'],
+            "paymentFlagStatus" => "01",
             "billDetails" => [],
             "freeTexts" => [
                 [
@@ -509,54 +393,8 @@ public function handlePaymentResponse($existingPayment, $userdata, $previousPaym
             ]
         ],
         "additionalInfo" => (object) []
-    ], 404);
+    ];
 }
-
-
-private function handleDuplicatePaymentRequestId($userdata,$previousPayment) {
-    if($userdata->status_pembayaran == '1'){
-        $responflag = "01";
-     }else{
-        $responflag = "00";
-     }
-    $customerNo = substr($previousPayment['virtualAccountNo'], 5);
-        return [
-            "responseCode" => "4092500",
-            "responseMessage" => "Conflict",
-            "virtualAccountData" => [
-                "paymentFlagReason" => [
-                    "english" => "Cannot use the same X-EXTERNAL-ID",
-                    "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama",
-                ],
-                "partnerServiceId" => "   " . $previousPayment['partnerServiceId'],
-                "customerNo" => $customerNo,
-                "virtualAccountNo" => "   " . $previousPayment['virtualAccountNo'],
-                "virtualAccountName" => $userdata->nama_jamaah,
-                "paymentRequestId" => $previousPayment['paymentRequestId'],
-                "paidAmount" => [
-                    "value" => $userdata->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "totalAmount" => [
-                    "value" =>$userdata->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "trxDateTime" => $previousPayment['trxDateTime'],
-                "referenceNo" =>  $previousPayment['referenceNo'],
-                "paymentFlagStatus" => '01',
-                "billDetails" =>  [],
-                "freeTexts" => [
-                    [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object) []
-        ];
-
-}
-
     private function mandatoryFields()
     {
         return [
@@ -713,9 +551,24 @@ private function buildSuccessResponse($validated, $user_data)
 
 private function buildNotFoundResponse($validated)
 {
-    $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
+    // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
+    $customerNo = substr($validated['virtualAccountNo'], 5);
 
-    return [
+    // Cek apakah ada konflik dengan external_id yang memiliki payment_request_id berbeda
+    $conflictingPayment = DB::table('tagihan_pembayaran')
+        ->where('external_id', $validated['externalId'])
+        ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+        ->exists();
+        $user_data = DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $validated['virtualAccountNo'])
+        ->first();
+    // Jika ada konflik, kembalikan response 409 (Conflict)
+    if ($conflictingPayment) {
+        return response()->json($this->handleDuplicatePaymentRequestId($user_data, $validated), 409);
+    }
+
+    // Jika tidak ada konflik, kembalikan response 404 (Not Found)
+    return response()->json([
         "responseCode" => "4042512",
         "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
         "virtualAccountData" => [
@@ -748,6 +601,6 @@ private function buildNotFoundResponse($validated)
             ]
         ],
         "additionalInfo" => (object) []
-    ];
+    ], 404);
 }
 }
