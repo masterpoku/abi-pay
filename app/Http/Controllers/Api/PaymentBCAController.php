@@ -288,6 +288,8 @@ public function flagPayment(Request $request) {
         $user_data = DB::table('tagihan_pembayaran')
         ->where('id_invoice', $validated['virtualAccountNo'])
         ->first();
+
+       
         // Cek apakah external_id sudah ada hari ini
         $existing = DB::table('external_ids')
         ->where('external_id', $externalId)
@@ -298,11 +300,10 @@ public function flagPayment(Request $request) {
         if ($existing) {
         return $this->handleDuplicateExternalId($user_data, $request);
         }
-
         // Pastikan externalId dan paymentRequestId harus sama
         if ($externalId !== $validated['paymentRequestId']) {
-        return $this->handleDuplicatePaymentRequestId($user_data, $request);
-        }
+            return $this->handleDuplicatePaymentRequestId($user_data, $request);
+            }
 
 
         if (!$user_data) {
