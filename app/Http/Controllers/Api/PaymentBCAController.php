@@ -222,10 +222,6 @@ public function flagPayment(Request $request) {
 
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
-        $today = Carbon::today()->toDateString();
-
-
-
 
         Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
         Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
@@ -275,7 +271,7 @@ public function flagPayment(Request $request) {
             'paymentRequestId' => 'required',
             'referenceNo' => 'required',
         ]);
-        
+
         try {
             DB::table('external_ids')->insert([
                 'external_id' => $externalId,
@@ -286,34 +282,50 @@ public function flagPayment(Request $request) {
         } catch (\Illuminate\Database\QueryException $e) {}
 
         $user_data = DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $validated['virtualAccountNo'])
-        ->first();
-
-       
-        // Cek apakah external_id sudah ada hari ini
-        $existing = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->whereDate('created_at', $today)
-        ->exists();
-
-        // Jika external_id sudah pernah digunakan hari ini, kirimkan error X-EXTERNAL-ID duplicate
-        if ($existing) {
-        return $this->handleDuplicateExternalId($user_data, $request);
-        }
-        // Pastikan externalId dan paymentRequestId harus sama
-        if ($externalId !== $validated['paymentRequestId']) {
-            return $this->handleDuplicatePaymentRequestId($user_data, $request);
-            }
-
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->first();
 
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated), 404);
         }
 
+        // Cek apakah external_id dan payment_request_id sudah ada
+        $existingPayment = DB::table('tagihan_pembayaran')
+            ->where('external_id', $externalId)
+            ->where('payment_request_id', $validated['paymentRequestId'])
+            ->first();
+
+        if ($existingPayment) {
+            if ($existingPayment->status_pembayaran == 1) {
+                return response()->json([
+                    'responseCode' => '4042518',
+                    'responseMessage' => 'Inconsistent Request',
+                    'paymentFlagStatus' => '00',
+                    'paymentFlagReason' => 'Success'
+                ], 400);
+            } else {
+                $paymentResponse = $this->handleDuplicateExternalId($user_data, $existingPayment);
+        
+            }
+        }
+
+        // Cek apakah external_id ada tetapi payment_request_id berbeda (Conflict)
+        $conflictingPayment = DB::table('tagihan_pembayaran')
+            ->where('external_id', $externalId)
+            ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+            ->exists();
+
+        if ($conflictingPayment) {
+            return $this->handleDuplicatePaymentRequestId($user_data,$validated);
+        }
+
+        // Jika semua valid, update status pembayaran
         DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo'])
             ->update([
-                'status_pembayaran' => 1,
+                'status_pembayaran' => '1',
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
                 'updated_at' => now(),
             ]);
 
@@ -326,6 +338,7 @@ public function flagPayment(Request $request) {
         ], 500);
     }
 }
+
 private function handleInvalidMandatoryField() {
     return [
         'responseCode' => '4002502',
