@@ -565,10 +565,10 @@ private function buildNotFoundResponse($validated,$externalId)
         ];
      
     } else {
-        $responseMessage = "Invalid Bill/Virtual Account";
+        $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
     }
 
-    // Jika tidak ada konflik, kembalikan response 404 (Not Found)
+ 
     return response()->json([
         "responseCode" => "4042512",
         "responseMessage" => $responseMessage,
@@ -577,11 +577,11 @@ private function buildNotFoundResponse($validated,$externalId)
                 "english" => "Virtual Account Not Found",
                 "indonesia" => "Virtual Account Tidak Ditemukan"
             ],
-            "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "customerNo" => $customerNo,
-            "virtualAccountNo" => "   " . $validated['virtualAccountNo'],
+            "partnerServiceId" => isset($validated['partnerServiceId']) ? "   " . $validated['partnerServiceId'] : "",
+            "customerNo" => isset($validated['customerNo']) ? $validated['customerNo'] : "",
+            "virtualAccountNo" => isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : "",
             "virtualAccountName" => "",
-            "paymentRequestId" => $validated['paymentRequestId'],
+            "paymentRequestId" => isset($validated['paymentRequestId']) ? $validated['paymentRequestId'] : "",
             "paidAmount" => [
                 "value" => "",
                 "currency" => ""
@@ -590,10 +590,10 @@ private function buildNotFoundResponse($validated,$externalId)
                 "value" => "",
                 "currency" => ""
             ],
-            "trxDateTime" => $validated['trxDateTime'],
-            "referenceNo" =>  $validated['referenceNo'],
+            "trxDateTime" => isset($validated['trxDateTime']) ? $validated['trxDateTime'] : now()->toIso8601String(),
+            "referenceNo" => isset($validated['referenceNo']) ? $validated['referenceNo'] : "",
             "paymentFlagStatus" => "01",
-            "billDetails" =>  [],
+            "billDetails" => [],
             "freeTexts" => [
                 [
                     "english" => "",
@@ -603,6 +603,7 @@ private function buildNotFoundResponse($validated,$externalId)
         ],
         "additionalInfo" => (object) []
     ], 404);
+    
 }
 
 
