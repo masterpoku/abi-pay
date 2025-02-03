@@ -288,7 +288,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
     //     return $this->handleInconsistentExternalIdRequest($userData, $validated);
     // }
 
-    if ($existingPayment->status_pembayaran == '0') {
+    if ($userData->status_pembayaran == '0') {
         DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo'])
             ->update([
