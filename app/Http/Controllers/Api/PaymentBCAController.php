@@ -544,7 +544,7 @@ private function buildSuccessResponse($validated, $user_data)
     ];
 }
 
-private function buildNotFoundResponse($userData,$validated,$externalId)
+private function buildNotFoundResponse($userData, $validated, $externalId)
 {
     // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
     $customerNo = substr($validated['virtualAccountNo'], 5);
@@ -554,7 +554,8 @@ private function buildNotFoundResponse($userData,$validated,$externalId)
         ->where('external_id', $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
-        $inconsistentRequest = DB::table('tagihan_pembayaran')
+
+    $inconsistentRequest = DB::table('tagihan_pembayaran')
         ->where('id_invoice', $validated['virtualAccountNo'])
         ->where(function ($query) use ($validated, $externalId) {
             $query->where('external_id', '!=', $externalId)
@@ -562,37 +563,43 @@ private function buildNotFoundResponse($userData,$validated,$externalId)
         })
         ->exists();
 
+    // Menentukan response berdasarkan kondisi
     if ($inconsistentRequest) {
-        return $this->handleInconsistentExternalIdRequest($userData, $validated);
-    }
-    // Jika ada konflik, 
-    if ($conflictingPayment) {
+        $responseCode = "4222501";
+        $responseMessage = "Inconsistent Request";
+        $conflictReason = [
+            "english" => "The provided X-EXTERNAL-ID and paymentRequestId do not match the recorded data",
+            "indonesia" => "X-EXTERNAL-ID dan paymentRequestId yang diberikan tidak sesuai dengan data yang tercatat"
+        ];
+        $httpStatus = 422;
+    } elseif ($conflictingPayment) {
         $responseCode = "4092500";
         $responseMessage = "Conflict";
         $conflictReason = [
             "english" => "Cannot use the same X-EXTERNAL-ID",
             "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
         ];
-     
+        $httpStatus = 409;
     } else {
+        $responseCode = "4042512";
         $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
         $conflictReason = [
             "english" => "Virtual Account Not Found",
             "indonesia" => "Virtual Account Tidak Ditemukan"
         ];
+        $httpStatus = 404;
     }
 
- 
     return response()->json([
-        "responseCode" => "4042512",
+        "responseCode" => $responseCode,
         "responseMessage" => $responseMessage,
         "virtualAccountData" => [
             "paymentFlagReason" => $conflictReason,
-            "partnerServiceId" => isset($validated['partnerServiceId']) ? "   " . $validated['partnerServiceId'] : "",
-            "customerNo" => isset($validated['customerNo']) ? $validated['customerNo'] : "",
-            "virtualAccountNo" => isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : "",
+            "partnerServiceId" => $validated['partnerServiceId'] ?? "",
+            "customerNo" => $customerNo ?? "",
+            "virtualAccountNo" => $validated['virtualAccountNo'] ?? "",
             "virtualAccountName" => "",
-            "paymentRequestId" => isset($validated['paymentRequestId']) ? $validated['paymentRequestId'] : "",
+            "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
                 "value" => "",
                 "currency" => ""
@@ -601,8 +608,8 @@ private function buildNotFoundResponse($userData,$validated,$externalId)
                 "value" => "",
                 "currency" => ""
             ],
-            "trxDateTime" => isset($validated['trxDateTime']) ? $validated['trxDateTime'] : now()->toIso8601String(),
-            "referenceNo" => isset($validated['referenceNo']) ? $validated['referenceNo'] : "",
+            "trxDateTime" => $validated['trxDateTime'] ?? now()->toIso8601String(),
+            "referenceNo" => $validated['referenceNo'] ?? "",
             "paymentFlagStatus" => "01",
             "billDetails" => [],
             "freeTexts" => [
@@ -613,9 +620,9 @@ private function buildNotFoundResponse($userData,$validated,$externalId)
             ]
         ],
         "additionalInfo" => (object) []
-    ], 404);
-    
+    ], $httpStatus);
 }
+
 
 
     private function mandatoryFields()
