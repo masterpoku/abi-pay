@@ -410,13 +410,15 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "00";
      }
 
-     $conflictingPayment = DB::table('tagihan_pembayaran')
-     ->where('external_id', $externalId)
-     ->where('payment_request_id', $validated['paymentRequestId'])
+     $inconsistentRequest = DB::table('tagihan_pembayaran')
      ->where('id_invoice', $validated['virtualAccountNo'])
+     ->where(function ($query) use ($validated, $externalId) {
+         $query->where('external_id', '!=', $externalId)
+               ->orWhere('payment_request_id', '!=', $validated['paymentRequestId']);
+     })
      ->exists();
-
-        if ($conflictingPayment == 1) {
+ 
+        if ($inconsistentRequest) {
             $responseCode = "4042518";
             $responstatus = "Inconsistent Request";
             $responflag = "00";
