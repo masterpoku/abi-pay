@@ -299,7 +299,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
             ]);
     }
 
-    return $this->buildSuccessResponse($validated, $userData);
+    return $this->buildSuccessResponse($validated, $userData, $externalId);
 }
 
 private function handleInconsistentExternalIdRequest($userData, $validated): JsonResponse
@@ -391,7 +391,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
     ], 409);
 }
 
-private function buildSuccessResponse($validated, $user_data)
+private function buildSuccessResponse($validated, $user_data, $externalId)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
     if($user_data->status_pembayaran == '1'){
@@ -409,6 +409,20 @@ private function buildSuccessResponse($validated, $user_data)
         $responseCode = "2002500";
         $responflag = "00";
      }
+
+     $conflictingPayment = DB::table('tagihan_pembayaran')
+     ->where('external_id', $externalId)
+     ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+     ->exists();
+
+        if (!$conflictingPayment) {
+            $responseCode = "4042518";
+            $responstatus = "Inconsistent Request";
+            $responflag = "00";
+            $english = "Success";
+            $indonesia = "Sukses";
+    
+        }
 
     return response()->json([
         "responseCode" => $responseCode,
