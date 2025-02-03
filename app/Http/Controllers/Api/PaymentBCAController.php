@@ -425,8 +425,8 @@ private function handleInconsistentExternalIdRequest($userData, $validated): Jso
         "responseMessage" => "Inconsistent Request",
         "virtualAccountData" => [
             "paymentFlagReason" => [
-                "english" => "The provided X-EXTERNAL-ID and paymentRequestId do not match the recorded data",
-                "indonesia" => "X-EXTERNAL-ID dan paymentRequestId yang diberikan tidak sesuai dengan data yang tercatat"
+                "english" => "Success",
+                "indonesia" => "Sukses"
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
             "customerNo" => substr($validated['virtualAccountNo'], 5),
