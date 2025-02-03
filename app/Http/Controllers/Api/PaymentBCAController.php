@@ -380,7 +380,7 @@ EOF;
 private function handlePaymentResponse($existingPayment, $userData, $validated, $externalId): JsonResponse
 {
     if (!$userData) {
-        return response()->json($this->buildNotFoundResponse($validated, $externalId), 404);
+        return $this->buildNotFoundResponse($validated, $externalId);
     }
 
     $conflictingPayment = DB::table('tagihan_pembayaran')
@@ -389,7 +389,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
         ->exists();
 
     if ($conflictingPayment) {
-        return response()->json($this->handleDuplicatePaymentRequestId($userData, $validated), 409);
+        $this->handleDuplicatePaymentRequestId($userData, $validated);
     }
 
     $inconsistentRequest = DB::table('tagihan_pembayaran')
@@ -401,7 +401,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
         ->exists();
 
     if ($inconsistentRequest) {
-        return response()->json($this->handleInconsistentExternalIdRequest($userData, $validated), 422);
+        return $this->handleInconsistentExternalIdRequest($userData, $validated);
     }
 
     if ($existingPayment && $existingPayment->status_pembayaran == 0) {
@@ -415,7 +415,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
             ]);
     }
 
-    return response()->json($this->buildSuccessResponse($validated, $userData), 200);
+    return $this->buildSuccessResponse($validated, $userData);
 }
 
 private function handleInconsistentExternalIdRequest($userData, $validated): array
