@@ -412,17 +412,18 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             'payment_request_id' => $validated['paymentRequestId'],
             'created_at' => now(),
         ]);
+        
     } else {
         // HIT KEDUA -> Respon "Inconsistent Request"
         $responseCode = "4042518";
         $responstatus = "Inconsistent Request";
         $responflag = "00";
-        $english = "Request is inconsistent";
-        $indonesia = "Permintaan tidak konsisten";
+        $english = "Success";
+        $indonesia = "Sukses";
     }
 
     // **Update status pembayaran hanya jika belum lunas & respon sukses**
-    if ($responflag == "00" && $user_data->status_pembayaran == '0') {
+    if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
         DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo'])
             ->update([
