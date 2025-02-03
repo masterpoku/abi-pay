@@ -380,7 +380,7 @@ EOF;
 private function handlePaymentResponse($existingPayment, $userData, $validated, $externalId): JsonResponse
 {
     if (!$userData) {
-        return response()->json($this->buildNotFoundResponse($validated), 404);
+        return response()->json($this->buildNotFoundResponse($validated, $externalId), 404);
     }
 
     $conflictingPayment = DB::table('tagihan_pembayaran')
@@ -544,14 +544,14 @@ private function buildSuccessResponse($validated, $user_data)
     ];
 }
 
-private function buildNotFoundResponse($validated)
+private function buildNotFoundResponse($validated,$externalId)
 {
     // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
     $customerNo = substr($validated['virtualAccountNo'], 5);
 
     // Cek apakah ada konflik dengan external_id yang memiliki payment_request_id berbeda
     $conflictingPayment = DB::table('tagihan_pembayaran')
-        ->where('external_id', $validated['externalId'])
+        ->where('external_id', $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
 
