@@ -380,7 +380,7 @@ EOF;
 private function handlePaymentResponse($existingPayment, $userData, $validated, $externalId): JsonResponse
 {
     if (!$userData) {
-        return $this->buildNotFoundResponse($userData, $validated, $externalId);
+        return $this->buildNotFoundResponse($validated, $externalId);
     }
 
     $conflictingPayment = DB::table('tagihan_pembayaran')
@@ -544,7 +544,7 @@ private function buildSuccessResponse($validated, $user_data)
     ];
 }
 
-private function buildNotFoundResponse($userData, $validated, $externalId)
+private function buildNotFoundResponse($validated, $externalId)
 {
     // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
     $customerNo = substr($validated['virtualAccountNo'], 5);
@@ -555,24 +555,7 @@ private function buildNotFoundResponse($userData, $validated, $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
 
-    $inconsistentRequest = DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $validated['virtualAccountNo'])
-        ->where(function ($query) use ($validated, $externalId) {
-            $query->where('external_id', '!=', $externalId)
-                  ->orWhere('payment_request_id', '!=', $validated['paymentRequestId']);
-        })
-        ->exists();
-
-    // Menentukan response berdasarkan kondisi
-    if ($inconsistentRequest) {
-        $responseCode = "4222501";
-        $responseMessage = "Inconsistent Request";
-        $conflictReason = [
-            "english" => "The provided X-EXTERNAL-ID and paymentRequestId do not match the recorded data",
-            "indonesia" => "X-EXTERNAL-ID dan paymentRequestId yang diberikan tidak sesuai dengan data yang tercatat"
-        ];
-        $httpStatus = 422;
-    } elseif ($conflictingPayment) {
+    if ($conflictingPayment) {
         $responseCode = "4092500";
         $responseMessage = "Conflict";
         $conflictReason = [
