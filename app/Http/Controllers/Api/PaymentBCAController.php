@@ -389,32 +389,34 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responseCode = "4042514";
         $responflag = "01";
     } else {
-        $exists = DB::table('external_ids')
-            ->where('external_id', $externalId)
-            ->where('payment_request_id', $validated['paymentRequestId'])
-            ->exists();
-
-        if (!$exists) {
-            // HIT PERTAMA -> Sukses
-            DB::table('external_ids')->insert([
-                'external_id' => $externalId,
-                'payment_request_id' => $validated['paymentRequestId'],
-                'created_at' => now(),
-            ]);
-            $responstatus = "Successful";
-            $english = "Success";
-            $indonesia = "Sukses";
-            $responseCode = "2002500";
-            $responflag = "00";
-        } else {
-            $responseCode = "4042518";
-            $responstatus = "Inconsistent Request";
-            $responflag = "00";
-            $english = "Success";
-            $indonesia = "Sukses";
-        }
+        $responstatus = "Successful";
+        $english = "Success";
+        $indonesia = "Sukses";
+        $responseCode = "2002500";
+        $responflag = "00";
+        
     }
-                
+    $exists = DB::table('external_ids')
+    ->where('external_id', $externalId)
+    ->where('payment_request_id', $validated['paymentRequestId'])
+    ->exists();
+
+    if (!$exists) {
+        // HIT PERTAMA -> Sukses
+
+        DB::table('external_ids')->insert([
+            'external_id' => $externalId,
+            'payment_request_id' => $validated['paymentRequestId'],
+            'created_at' => now(),
+        ]);
+    
+    } else {
+        $responseCode = "4042518";
+        $responstatus = "Inconsistent Request";
+        $responflag = "00";
+        $english = "Success";
+        $indonesia = "Sukses";
+    }    
  
     
     
