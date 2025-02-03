@@ -595,9 +595,9 @@ private function buildNotFoundResponse($userData, $validated, $externalId)
         "responseMessage" => $responseMessage,
         "virtualAccountData" => [
             "paymentFlagReason" => $conflictReason,
-            "partnerServiceId" => $validated['partnerServiceId'] ?? "",
+            "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
             "customerNo" => $customerNo ?? "",
-            "virtualAccountNo" => $validated['virtualAccountNo'] ?? "",
+            "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
             "virtualAccountName" => "",
             "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
