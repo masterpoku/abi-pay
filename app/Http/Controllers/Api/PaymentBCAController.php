@@ -420,6 +420,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
 
 private function handleInconsistentExternalIdRequest($userData, $validated): JsonResponse
 {
+    Log::info('handleInconsistentExternalIdRequest userdata:', ['userdata' => $userData]);
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
     if($userData->status_pembayaran == '1'){
         $responstatus = "Paid Bill";
@@ -437,7 +438,7 @@ private function handleInconsistentExternalIdRequest($userData, $validated): Jso
         $responflag = "00";
      }
     return response()->json([
-        "responseCode" => "2002500",
+        "responseCode" => $responseCode ,
         "responseMessage" => $responstatus,
         "virtualAccountData" => [
             "paymentFlagReason" => [
