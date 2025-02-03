@@ -423,6 +423,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
     }
 
     // **Update status pembayaran hanya jika belum lunas & respon sukses**
+    // Jika respon sukses dan status pembayaran belum lunas, maka update status pembayaran menjadi lunas
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
         DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo'])
