@@ -399,23 +399,20 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
 
         $responseCode = "2002500";
         $responflag = "00";
-     }
 
-     $inconsistentRequest = DB::table('tagihan_pembayaran')
-     ->where('id_invoice', $validated['virtualAccountNo'])
-     ->where(function ($query) use ($validated, $externalId) {
-         $query->where('payment_request_id', '!=', $validated['paymentRequestId']);
-     })
-     ->exists();
- 
-        if ($inconsistentRequest) {
-            $responseCode = "4042518";
-            $responstatus = "Inconsistent Request";
-            $responflag = "00";
-            $english = "Success";
-            $indonesia = "Sukses";
-    
-        }
+        
+     }
+         $inconsistentRequest = DB::table('external_ids')
+        ->where('external_id', 'LIKE', $externalId . '%')
+        ->exists();
+
+    if ($inconsistentRequest) {
+        $responseCode = "4042518";
+        $responstatus = "Inconsistent Request";
+        $responflag = "00";
+        $english = "Success";
+        $indonesia = "Sukses";
+    }
     
     if ($responflag == "01") {
         if ($user_data->status_pembayaran == '0') {
