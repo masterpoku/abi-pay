@@ -243,7 +243,14 @@ EOF;
             ]);
     
             try {
-                DB::table('external_ids')->insert([ 'external_id' => $externalId, 'date' => $today, 'created_at' => now(), 'updated_at' => now() ]);
+                DB::table('external_ids')->insert([
+                    'id' => null,
+                    'external_id' => $externalId,
+                    'payment_request_id' => $validated['paymentRequestId'],
+                    'date' => $today,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
             } catch (\Illuminate\Database\QueryException $e) {}
     
             $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
@@ -403,8 +410,9 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         
      }
          $inconsistentRequest = DB::table('external_ids')
-        ->where('external_id', 'LIKE', $externalId . '%')
-        ->exists();
+         ->where('external_id', $externalId)
+         ->where('payment_request_id', $validated['paymentRequestId'])
+         ->exists();
 
     if ($inconsistentRequest) {
         $responseCode = "4042518";
