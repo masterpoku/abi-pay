@@ -566,6 +566,10 @@ private function buildNotFoundResponse($validated,$externalId)
      
     } else {
         $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
+        $conflictReason = [
+            "english" => "Virtual Account Not Found",
+            "indonesia" => "Virtual Account Tidak Ditemukan"
+        ];
     }
 
  
@@ -573,10 +577,7 @@ private function buildNotFoundResponse($validated,$externalId)
         "responseCode" => "4042512",
         "responseMessage" => $responseMessage,
         "virtualAccountData" => [
-            "paymentFlagReason" => [
-                "english" => "Virtual Account Not Found",
-                "indonesia" => "Virtual Account Tidak Ditemukan"
-            ],
+            "paymentFlagReason" => $conflictReason,
             "partnerServiceId" => isset($validated['partnerServiceId']) ? "   " . $validated['partnerServiceId'] : "",
             "customerNo" => isset($validated['customerNo']) ? $validated['customerNo'] : "",
             "virtualAccountNo" => isset($validated['virtualAccountNo']) ? "   " . $validated['virtualAccountNo'] : "",
