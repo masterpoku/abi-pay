@@ -242,17 +242,7 @@ EOF;
                 'referenceNo' => 'required',
             ]);
     
-            try {
-                DB::table('external_ids')->insert([
-                    'id' => null,
-                    'external_id' => $externalId,
-                    'payment_request_id' => $validated['paymentRequestId'],
-                    'date' => $today,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-            } catch (\Illuminate\Database\QueryException $e) {}
-    
+            // Cek apakah invoice sudah ada    
             $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
     
             $existingPayment = DB::table('tagihan_pembayaran')
@@ -392,35 +382,41 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
 private function buildSuccessResponse($validated, $user_data, $externalId)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
-    if($user_data->status_pembayaran == '1'){
+    if ($user_data->status_pembayaran == '1') {
         $responstatus = "Paid Bill";
         $english = "Bill has been paid";
         $indonesia = "Tagihan telah dibayar";
- 
-        $responseCode = "4042514";  
+        $responseCode = "4042514";
         $responflag = "01";
-     }else{
-        $responstatus = "Successful";
-        $english = "Success";
-        $indonesia = "Sukses";
+    } else {
+        $exists = DB::table('external_ids')
+            ->where('external_id', $externalId)
+            ->where('payment_request_id', $validated['paymentRequestId'])
+            ->exists();
 
-        $responseCode = "2002500";
-        $responflag = "00";
-
-        
-     }
-         $inconsistentRequest = DB::table('external_ids')
-         ->where('external_id', $externalId)
-         ->where('payment_request_id', $validated['paymentRequestId'])
-         ->exists();
-
-    if ($inconsistentRequest) {
-        $responseCode = "4042518";
-        $responstatus = "Inconsistent Request";
-        $responflag = "00";
-        $english = "Success";
-        $indonesia = "Sukses";
+        if (!$exists) {
+            // HIT PERTAMA -> Sukses
+            DB::table('external_ids')->insert([
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
+                'created_at' => now(),
+            ]);
+            $responstatus = "Successful";
+            $english = "Success";
+            $indonesia = "Sukses";
+            $responseCode = "2002500";
+            $responflag = "00";
+        } else {
+            $responseCode = "4042518";
+            $responstatus = "Inconsistent Request";
+            $responflag = "00";
+            $english = "Success";
+            $indonesia = "Sukses";
+        }
     }
+                
+ 
+    
     
     if ($responflag == "01") {
         if ($user_data->status_pembayaran == '0') {
