@@ -555,14 +555,14 @@ private function buildNotFoundResponse($validated, $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
 
-    if ($conflictingPayment) {
-        $responseCode = "4092500";
-        $responseMessage = "Conflict";
+    if (!$conflictingPayment) {
+        $responseCode = "4042518";
+        $responseMessage = "Inconsistent Request";
         $conflictReason = [
-            "english" => "Cannot use the same X-EXTERNAL-ID",
-            "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
+            "english" => "Virtual Account Not Found",
+            "indonesia" => "Virtual Account Tidak Ditemukan"
         ];
-        $httpStatus = 409;
+        $httpStatus = 404;
     } else {
         $responseCode = "4042512";
         $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
