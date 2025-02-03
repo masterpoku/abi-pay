@@ -421,8 +421,8 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
 private function handleInconsistentExternalIdRequest($userData, $validated): JsonResponse
 {
     return response()->json([
-        "responseCode" => "4222501",
-        "responseMessage" => "Inconsistent Request",
+        "responseCode" => "2002500",
+        "responseMessage" => "Successful",
         "virtualAccountData" => [
             "paymentFlagReason" => [
                 "english" => "Success",
