@@ -420,12 +420,29 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
 
 private function handleInconsistentExternalIdRequest($userData, $validated): JsonResponse
 {
+    $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
+    if($userData->status_pembayaran == '1'){
+        $responstatus = "Paid Bill";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+ 
+        $responseCode = "4042514";  
+        $responflag = "01";
+     }else{
+        $responstatus = "Successful";
+        $english = "Success";
+        $indonesia = "Sukses";
+
+        $responseCode = "2002500";
+        $responflag = "00";
+     }
     return response()->json([
         "responseCode" => "2002500",
-        "responseMessage" => "Successful",
+        "responseMessage" => $responstatus,
         "virtualAccountData" => [
             "paymentFlagReason" => [
-                "english" => "Success",
+                "english" => $english,
+                "indonesia" => $indonesia,
                 "indonesia" => "Sukses"
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
@@ -443,7 +460,7 @@ private function handleInconsistentExternalIdRequest($userData, $validated): Jso
             ],
             "trxDateTime" => $validated['trxDateTime'],
             "referenceNo" => $validated['referenceNo'],
-            "paymentFlagStatus" => "01",
+            "paymentFlagStatus" => $responflag,
             "billDetails" => [],
             "freeTexts" => [["english" => "", "indonesia" => ""]]
         ],
