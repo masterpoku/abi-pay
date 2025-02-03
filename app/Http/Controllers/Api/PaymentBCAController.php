@@ -392,17 +392,17 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
         $this->handleDuplicatePaymentRequestId($userData, $validated);
     }
 
-    $inconsistentRequest = DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $validated['virtualAccountNo'])
-        ->where(function ($query) use ($validated, $externalId) {
-            $query->where('external_id', '!=', $externalId)
-                  ->orWhere('payment_request_id', '!=', $validated['paymentRequestId']);
-        })
-        ->exists();
+    // $inconsistentRequest = DB::table('tagihan_pembayaran')
+    //     ->where('id_invoice', $validated['virtualAccountNo'])
+    //     ->where(function ($query) use ($validated, $externalId) {
+    //         $query->where('external_id', '!=', $externalId)
+    //               ->orWhere('payment_request_id', '!=', $validated['paymentRequestId']);
+    //     })
+    //     ->exists();
 
-    if ($inconsistentRequest) {
-        return $this->handleInconsistentExternalIdRequest($userData, $validated);
-    }
+    // if ($inconsistentRequest) {
+    //     return $this->handleInconsistentExternalIdRequest($userData, $validated);
+    // }
 
     if ($existingPayment && $existingPayment->status_pembayaran == 0) {
         DB::table('tagihan_pembayaran')
