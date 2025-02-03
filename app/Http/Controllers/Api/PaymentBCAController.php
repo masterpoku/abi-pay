@@ -507,7 +507,8 @@ private function handleDuplicatePaymentRequestId($userData, $validated): array
     ];
 }
 
-private function buildSuccessResponse($validated, $user_data)
+
+private function buildSuccessResponse($validated, $user_data): JsonResponse
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
     if($user_data->status_pembayaran == '1'){
@@ -526,7 +527,7 @@ private function buildSuccessResponse($validated, $user_data)
         $responflag = "00";
      }
 
-    return [
+    $response = [
         "responseCode" => $responseCode,
         "responseMessage" => $responstatus,
         "virtualAccountData" => [
@@ -560,7 +561,10 @@ private function buildSuccessResponse($validated, $user_data)
         ],
         "additionalInfo" => (object) [] // Informasi tambahan kosong
     ];
+
+    return response()->json($response); // Mengembalikan response dalam bentuk JSON
 }
+
 
 private function buildNotFoundResponse($validated, $externalId)
 {
