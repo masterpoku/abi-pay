@@ -249,11 +249,11 @@ EOF;
             $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
     
             $existingPayment = DB::table('tagihan_pembayaran')
-                ->where('external_id', $validated['externalId'])
+                ->where('external_id', $externalId)
                 ->where('payment_request_id', $validated['paymentRequestId'])
                 ->first();
     
-            return $this->handlePaymentResponse($existingPayment, $userData, $validated);
+            return $this->handlePaymentResponse($existingPayment, $userData, $validated, $externalId);
         } catch (Exception $e) {
             Log::error('Flag Payment Error:', ['error' => $e->getMessage()]);
             return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
@@ -377,15 +377,14 @@ EOF;
 //     }
 // }
 
-private function handlePaymentResponse($existingPayment, $userData, $validated): JsonResponse
+private function handlePaymentResponse($existingPayment, $userData, $validated, $externalId): JsonResponse
 {
     if (!$userData) {
         return response()->json($this->buildNotFoundResponse($validated), 404);
     }
 
-    // Cek apakah ada konflik dengan external_id yang berbeda payment_request_id
     $conflictingPayment = DB::table('tagihan_pembayaran')
-        ->where('external_id', $validated['externalId'])
+        ->where('external_id', $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
 
@@ -393,11 +392,10 @@ private function handlePaymentResponse($existingPayment, $userData, $validated):
         return response()->json($this->handleDuplicatePaymentRequestId($userData, $validated), 409);
     }
 
-    // Cek apakah external_id sesuai dengan payment_request_id yang tersimpan
     $inconsistentRequest = DB::table('tagihan_pembayaran')
         ->where('id_invoice', $validated['virtualAccountNo'])
-        ->where(function ($query) use ($validated) {
-            $query->where('external_id', '!=', $validated['externalId'])
+        ->where(function ($query) use ($validated, $externalId) {
+            $query->where('external_id', '!=', $externalId)
                   ->orWhere('payment_request_id', '!=', $validated['paymentRequestId']);
         })
         ->exists();
@@ -406,13 +404,12 @@ private function handlePaymentResponse($existingPayment, $userData, $validated):
         return response()->json($this->handleInconsistentExternalIdRequest($userData, $validated), 422);
     }
 
-    // Update status pembayaran jika belum dibayar
-    if ($existingPayment->status_pembayaran == 0) {
+    if ($existingPayment && $existingPayment->status_pembayaran == 0) {
         DB::table('tagihan_pembayaran')
             ->where('id_invoice', $validated['virtualAccountNo'])
             ->update([
                 'status_pembayaran' => 1,
-                'external_id' => $validated['externalId'],
+                'external_id' => $externalId,
                 'payment_request_id' => $validated['paymentRequestId'],
                 'updated_at' => now(),
             ]);
