@@ -466,7 +466,7 @@ private function handleInconsistentExternalIdRequest($userData, $validated): Jso
             "freeTexts" => [["english" => "", "indonesia" => ""]]
         ],
         "additionalInfo" => (object) []
-    ], 422);
+    ], 200);
 }
 
 private function handleDuplicatePaymentRequestId($userData, $validated): array
