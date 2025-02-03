@@ -410,7 +410,7 @@ private function buildSuccessResponse($validated, $user_data)
         $responflag = "00";
      }
 
-    return [
+    return response()->json([
         "responseCode" => $responseCode,
         "responseMessage" => $responstatus,
         "virtualAccountData" => [
@@ -443,7 +443,7 @@ private function buildSuccessResponse($validated, $user_data)
             ]
         ],
         "additionalInfo" => (object) [] // Informasi tambahan kosong
-    ];
+    ], 200);
 }
 
 private function buildNotFoundResponse($validated, $externalId)
