@@ -353,9 +353,9 @@ private function handleInconsistentExternalIdRequest($userData, $validated): Jso
     ], 200);
 }
 
-private function handleDuplicatePaymentRequestId($userData, $validated): array
+private function handleDuplicatePaymentRequestId($userData, $validated)
 {
-    return [
+    return response()->json([
         "responseCode" => "4092500",
         "responseMessage" => "Conflict",
         "virtualAccountData" => [
@@ -388,7 +388,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated): array
             ]
         ],
         "additionalInfo" => (object) []
-    ];
+    ], 409);
 }
 
 private function buildSuccessResponse($validated, $user_data)
