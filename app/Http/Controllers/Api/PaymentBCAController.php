@@ -288,16 +288,7 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
     //     return $this->handleInconsistentExternalIdRequest($userData, $validated);
     // }
 
-    if ($userData->status_pembayaran == '0') {
-        DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->update([
-                'status_pembayaran' => '1',
-                'external_id' => $externalId,
-                'payment_request_id' => $validated['paymentRequestId'],
-                'updated_at' => now(),
-            ]);
-    }
+  
 
     return $this->buildSuccessResponse($validated, $userData, $externalId);
 }
@@ -426,6 +417,19 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $indonesia = "Sukses";
     
         }
+    
+    if ($responflag == "01") {
+        if ($user_data->status_pembayaran == '0') {
+            DB::table('tagihan_pembayaran')
+                ->where('id_invoice', $validated['virtualAccountNo'])
+                ->update([
+                    'status_pembayaran' => '1',
+                    'external_id' => $externalId,
+                    'payment_request_id' => $validated['paymentRequestId'],
+                    'updated_at' => now(),
+                ]);
+        }
+    }
 
     return response()->json([
         "responseCode" => $responseCode,
