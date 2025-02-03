@@ -434,7 +434,7 @@ private function handleInconsistentExternalIdRequest($userData, $validated): arr
             "virtualAccountName" => $userData->nama_jamaah,
             "paymentRequestId" => $validated['paymentRequestId'],
             "paidAmount" => [
-                "value" => number_format($validated['totalAmount'], 2, '.', ''),
+                "value" => number_format($userData->nominal_tagihan, 2, '.', ''),
                 "currency" => "IDR"
             ],
             "totalAmount" => [
