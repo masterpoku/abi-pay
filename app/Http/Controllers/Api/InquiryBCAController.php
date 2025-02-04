@@ -356,7 +356,7 @@ class InquiryBCAController extends Controller
     /**
      * Membuat respons untuk data yang tidak ditemukan.
      */
-    private function buildNotFoundResponse( $externalId, $validated)
+    private function buildNotFoundResponse( $validated)
     {
 
         
