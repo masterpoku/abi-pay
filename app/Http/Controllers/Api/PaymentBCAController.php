@@ -390,6 +390,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
     $english = "Success";
     $indonesia = "Sukses";
     $responflag = "00";
+    $code = 200;
 
     // Jika status pembayaran sudah "1" (Paid)
     if ($user_data->status_pembayaran == '1') {
@@ -398,6 +399,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $english = "Bill has been paid";
         $indonesia = "Tagihan telah dibayar";
         $responflag = "01";
+        $code = 200;
     }
 
     // Cek apakah request dengan `external_id` dan `payment_request_id` sudah ada
@@ -422,6 +424,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "00";
         $english = "Success";
         $indonesia = "Sukses";
+        $code = 404;
     }
 
     // **Update status pembayaran hanya jika belum lunas & respon sukses**
@@ -471,7 +474,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             ]
         ],
         "additionalInfo" => (object) [] // Informasi tambahan kosong
-    ], 200);
+    ], $code);
 }
 
 private function buildNotFoundResponse($validated, $externalId)
