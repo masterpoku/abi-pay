@@ -188,7 +188,7 @@ class InquiryBCAController extends Controller
             ->first();
     
         if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($externalId,$validated),404);
+            return response()->json($this->buildNotFoundResponse($validated),404);
         }else{
             
         }
@@ -203,7 +203,7 @@ class InquiryBCAController extends Controller
         }
     
         // Jika semua validasi lolos
-        $response = $this->buildSuccessResponse($validated, $user_data, $externalId);
+        $response = $this->buildSuccessResponse($validated, $user_data);
     
         return response()->json($response);
     }
@@ -302,30 +302,10 @@ class InquiryBCAController extends Controller
     /**
      * Membuat respons untuk data yang ditemukan.
      */
-    private function buildSuccessResponse($validated, $user_data, $externalId)
+    private function buildSuccessResponse($validated, $user_data)
     {
-        $conflictingPayment = DB::table('tagihan_pembayaran')
-        ->where('external_id', $externalId)
-        ->where('payment_request_id', '!=', $validated['inquiryRequestId'])
-        ->exists();
-
-    if (!$conflictingPayment) {
-        $responseCode = "4042418";
-        $responseMessage = "Inconsistent Request";
-        $conflictReason = [
-            "english" => "Virtual Account Not Found",
-            "indonesia" => "Virtual Account Tidak Ditemukan"
-        ];
-      
-    } else {
-        $responseCode = "4042412";
-        $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
-        $conflictReason = [
-            "english" => "Virtual Account Not Found",
-            "indonesia" => "Virtual Account Tidak Ditemukan"
-        ];
        
-    }
+    
         
         if($user_data->status_pembayaran == '1'){
             $responstatus = "Paid Bill";
@@ -379,20 +359,7 @@ class InquiryBCAController extends Controller
     private function buildNotFoundResponse( $externalId, $validated)
     {
 
-        $conflictingPayment = DB::table('tagihan_pembayaran')
-        ->where('external_id', $externalId)
-        ->where('payment_request_id', '!=', $validated['inquiryRequestId'])
-        ->exists();
-
-    if (!$conflictingPayment) {
-        $responseCode = "4042418";
-        $responseMessage = "Inconsistent Request";
-        $conflictReason = [
-            "english" => "Virtual Account Not Found",
-            "indonesia" => "Virtual Account Tidak Ditemukan"
-        ];
-      
-    } else {
+        
         $responseCode = "4042412";
         $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
         $conflictReason = [
@@ -400,7 +367,7 @@ class InquiryBCAController extends Controller
             "indonesia" => "Virtual Account Tidak Ditemukan"
         ];
        
-    }
+    
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
             "responseCode" => $responseCode,
