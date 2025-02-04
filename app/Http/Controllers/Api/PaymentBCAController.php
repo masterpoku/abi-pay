@@ -410,12 +410,18 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
 
     if (!$exists) {
         // HIT PERTAMA -> Simpan ke database dan tetap sukses
-        DB::table('external_ids')->insert([
-            'external_id' => $externalId,
-            'payment_request_id' => $validated['paymentRequestId'],
-            'date' => now()->toDateString(),
-            'created_at' => now(),
-        ]);
+        try {
+            DB::table('external_ids')->insert([
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
+                'date' => now()->toDateString(),
+                'created_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            $this->handleDuplicatePaymentRequestId($user_data, $validated);
+        }
+
+
         
     } else {
         // HIT KEDUA -> Respon "Inconsistent Request"
