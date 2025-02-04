@@ -408,25 +408,21 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         ->where('payment_request_id', $validated['paymentRequestId'])
         ->exists();
 
-    if (!$exists) {
+    if ($exists) {
         // HIT PERTAMA -> Simpan ke database dan tetap sukses
-        try {
-            DB::table('external_ids')->insert([
+        DB::table('external_ids')->insert([
                 'external_id' => $externalId,
                 'payment_request_id' => $validated['paymentRequestId'],
                 'date' => now()->toDateString(),
                 'created_at' => now(),
             ]);
-        } catch (\Exception $e) {
-            $this->handleDuplicatePaymentRequestId($user_data, $validated);
-        }
 
 
         
     } else {
         // HIT KEDUA -> Respon "Inconsistent Request"
-        $responseCode = "4042518";
-        $responstatus = "Inconsistent Request";
+        $responseCode = "4092500";
+        $responstatus = "Conflict";
         $responflag = "00";
         $english = "Success";
         $indonesia = "Sukses";
