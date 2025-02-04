@@ -188,7 +188,7 @@ class InquiryBCAController extends Controller
             ->first();
     
         if (!$user_data) {
-            return response()->json($this->buildNotFoundResponse($validated),404);
+            return response()->json($this->buildNotFoundResponse($externalId,$validated),404);
         }else{
             
         }
@@ -353,20 +353,38 @@ class InquiryBCAController extends Controller
     /**
      * Membuat respons untuk data yang tidak ditemukan.
      */
-    private function buildNotFoundResponse($validated)
+    private function buildNotFoundResponse( $externalId, $validated)
     {
 
-    
+        $conflictingPayment = DB::table('tagihan_pembayaran')
+        ->where('external_id', $externalId)
+        ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+        ->exists();
+
+    if (!$conflictingPayment) {
+        $responseCode = "4042418";
+        $responseMessage = "Inconsistent Request";
+        $conflictReason = [
+            "english" => "Virtual Account Not Found",
+            "indonesia" => "Virtual Account Tidak Ditemukan"
+        ];
+        $httpStatus = 404;
+    } else {
+        $responseCode = "4042412";
+        $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
+        $conflictReason = [
+            "english" => "Virtual Account Not Found",
+            "indonesia" => "Virtual Account Tidak Ditemukan"
+        ];
+        $httpStatus = 404;
+    }
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
-            "responseCode" => "4042412",
-            "responseMessage" => "Invalid Bill/Virtual Account [Not Found]",
+            "responseCode" => $responseCode,
+            "responseMessage" => $responseMessage,
             "virtualAccountData" => [
                 "inquiryStatus" => "01",
-                "inquiryReason" => [
-                    "english" => "Virtual Account Not Found",
-                    "indonesia" => "Virtual Account Tidak Ditemukan"
-                ],
+                "inquiryReason" => $conflictReason,
                 "partnerServiceId" => "   ".$validated['partnerServiceId'],
                 "customerNo" => $customerNo,
                 "virtualAccountNo" => "   ".$validated['virtualAccountNo'],
