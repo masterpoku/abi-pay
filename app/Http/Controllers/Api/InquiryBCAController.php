@@ -43,9 +43,10 @@ class InquiryBCAController extends Controller
         $today = Carbon::today()->toDateString();
 
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
-        $existing = DB::table('tagihan_pembayaran')
-                      ->where('external_id', $externalId)->exists();
-        if ($existing) {
+        $conflictingPayment = DB::table('external_ids')
+        ->where('external_id', $externalId)
+        ->exists();
+        if ($conflictingPayment) {
             // Jika sudah ada, beri respons 409 Conflict
             $customerNo = substr($request->input('virtualAccountNo'), 5);
             return response()->json([
