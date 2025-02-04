@@ -208,9 +208,9 @@ class InquiryBCAController extends Controller
         }
     
         // Jika semua validasi lolos
-        $response = $this->buildSuccessResponse($validated, $user_data);
+        return $this->buildSuccessResponse($validated, $user_data);
     
-        return response()->json($response);
+        // return response()->json($response);
     }
 
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
@@ -318,6 +318,7 @@ class InquiryBCAController extends Controller
             $indonesia = "Tagihan telah dibayar";
             $inquiryStatus = "01";
             $responseCode = "4042414";
+            $code = 404;
         
          }else{
             $responstatus = "Successful";
@@ -325,9 +326,10 @@ class InquiryBCAController extends Controller
             $indonesia = "Sukses";
             $inquiryStatus = "00";
             $responseCode = "2002400";
+            $code = 200;
          }
         $customerNo = substr($validated['virtualAccountNo'], 5);
-        return [
+        return response()->json([
             "responseCode" => $responseCode,
             "responseMessage" => $responstatus,
             "virtualAccountData" => [
@@ -355,7 +357,7 @@ class InquiryBCAController extends Controller
                 ]
             ],
            "additionalInfo" => (object) []
-        ];
+        ], $code);
     }
 
     /**
