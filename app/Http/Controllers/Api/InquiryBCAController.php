@@ -45,6 +45,7 @@ class InquiryBCAController extends Controller
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
         $conflictingPayment = DB::table('external_ids')
         ->where('external_id', $externalId)
+        ->where('payment_request_id', '!=', $request->input('paymentRequestId'))
         ->exists();
         if ($conflictingPayment) {
             // Jika sudah ada, beri respons 409 Conflict
