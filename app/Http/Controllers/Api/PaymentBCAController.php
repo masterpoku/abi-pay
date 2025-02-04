@@ -494,7 +494,7 @@ private function buildNotFoundResponse($validated, $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
 
-    if (!$conflictingPayment) {
+    if ($conflictingPayment) {
         $responseCode = "4042518";
         $responseMessage = "Inconsistent Request";
         $conflictReason = [
