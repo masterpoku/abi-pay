@@ -505,24 +505,9 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "01";
         $code = 200;
     } else {
-        // **Cek apakah virtualAccountNo ditemukan**
-        $vaExists = DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->exists();
-
-        if (!$vaExists) {
-            // **Respon Inconsistent Request jika VA tidak ditemukan**
-            $responseCode = "4042518";
-            $responstatus = "Inconsistent Request";
-            $english = "Success";
-            $indonesia = "Sukses";
-            $responflag = "01";
-            $code = 404;
-        } else {
+     
             // **Cek apakah external_id ada di database**
-            $externalIdExists = DB::table('external_ids')
-                ->where('external_id', $externalId)
-                ->exists();
+            $externalIdExists = DB::table('external_ids')->where('external_id', $externalId)->exists();
 
             if (!$externalIdExists) {
                 // **Respon Inconsistent Request jika external_id tidak ada**
@@ -566,7 +551,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                 }
             }
         }
-    }
+    
 
     // **Update status pembayaran hanya jika belum lunas & respon sukses**
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
