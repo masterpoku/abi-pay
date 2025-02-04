@@ -42,14 +42,14 @@ class InquiryBCAController extends Controller
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
         $exists = DB::table('external_ids')
         ->where('external_id', $externalId)
-        ->where('payment_request_id', $request->input('paymentRequestId'))
+        ->where('payment_request_id', $request->input('inquiryRequestId'))
         ->exists();
 
         if (!$exists) {
             // HIT PERTAMA -> Simpan ke database dan tetap sukses
             DB::table('external_ids')->insert([
                 'external_id' => $externalId,
-                'payment_request_id' => $request->input('paymentRequestId'),
+                'payment_request_id' => $request->input('inquiryRequestId'),
                 'date' => now()->toDateString(),
                 'created_at' => now(),
             ]);
@@ -203,7 +203,7 @@ class InquiryBCAController extends Controller
         }
     
         // Jika semua validasi lolos
-        $response = $this->buildSuccessResponse($validated, $user_data);
+        $response = $this->buildSuccessResponse($validated, $user_data, $externalId);
     
         return response()->json($response);
     }
@@ -302,8 +302,31 @@ class InquiryBCAController extends Controller
     /**
      * Membuat respons untuk data yang ditemukan.
      */
-    private function buildSuccessResponse($validated, $user_data)
+    private function buildSuccessResponse($validated, $user_data, $externalId)
     {
+        $conflictingPayment = DB::table('tagihan_pembayaran')
+        ->where('external_id', $externalId)
+        ->where('payment_request_id', '!=', $validated['inquiryRequestId'])
+        ->exists();
+
+    if (!$conflictingPayment) {
+        $responseCode = "4042418";
+        $responseMessage = "Inconsistent Request";
+        $conflictReason = [
+            "english" => "Virtual Account Not Found",
+            "indonesia" => "Virtual Account Tidak Ditemukan"
+        ];
+      
+    } else {
+        $responseCode = "4042412";
+        $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
+        $conflictReason = [
+            "english" => "Virtual Account Not Found",
+            "indonesia" => "Virtual Account Tidak Ditemukan"
+        ];
+       
+    }
+        
         if($user_data->status_pembayaran == '1'){
             $responstatus = "Paid Bill";
             $english = "Bill has been paid";
@@ -358,7 +381,7 @@ class InquiryBCAController extends Controller
 
         $conflictingPayment = DB::table('tagihan_pembayaran')
         ->where('external_id', $externalId)
-        ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+        ->where('payment_request_id', '!=', $validated['inquiryRequestId'])
         ->exists();
 
     if (!$conflictingPayment) {
