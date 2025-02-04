@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PaymentBCAController;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Stringable;
 
 class InquiryBCAController extends Controller
 {
@@ -38,33 +39,62 @@ class InquiryBCAController extends Controller
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
         $externalId = $request->header('X-EXTERNAL-ID');
-        
+        $inquiryRequestId = $request->input('inquiryRequestId');
+        $virtualAccountNo = $request->input('virtualAccountNo');
+        $customerNo = substr($virtualAccountNo, 5);
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
-        $exists = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->where('payment_request_id', $request->input('inquiryRequestId'))
-        ->exists();
-
-        if (!$exists) {
-            // HIT PERTAMA -> Simpan ke database dan tetap sukses
-            DB::table('external_ids')->insert([
-                'external_id' => $externalId,
-                'payment_request_id' => $request->input('inquiryRequestId'),
-                'date' => now()->toDateString(),
-                'created_at' => now(),
-            ]);
-
-            // HIT PERTAMA -> Simpan ke database dan tetap sukses
-            DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $request->input('virtualAccountNo'))
-            ->update([
-                'external_id' => $externalId,
-                'payment_request_id' => $request->input('inquiryRequestId'),
-            ]);
-        }
-        if ($exists) {
-            // Jika sudah ada, beri respons 409 Conflict
-            $customerNo = substr($request->input('virtualAccountNo'), 5);
+        return DB::transaction(function () use ($externalId, $inquiryRequestId, $virtualAccountNo, $customerNo, $request) {
+            $exists = DB::table('external_ids')
+                ->where('external_id', $externalId)
+                ->where('date', now()->toDateString())
+                ->exists();
+    
+            if (!$exists) {
+                // HIT PERTAMA -> Simpan ke database dan tetap sukses
+                DB::table('external_ids')->insert([
+                    'external_id' => $externalId,
+                    'payment_request_id' => $inquiryRequestId,
+                    'date' => now()->toDateString(),
+                    'created_at' => now(),
+                ]);
+    
+                // Update tagihan_pembayaran
+                DB::table('tagihan_pembayaran')
+                    ->where('id_invoice', $virtualAccountNo)
+                    ->update([
+                        'external_id' => $externalId,
+                        'payment_request_id' => $inquiryRequestId,
+                    ]);
+    
+                // Response sukses
+                return response()->json([
+                    'responseCode' => '200',
+                    'responseMessage' => 'Success',
+                    'virtualAccountData' => [
+                        'inquiryStatus' => '00',
+                        'partnerServiceId' => "   ".$request->input('partnerServiceId'),
+                        'customerNo' => $customerNo,
+                        'virtualAccountNo' => "   ".$virtualAccountNo,
+                        'virtualAccountName' => '',
+                        'inquiryRequestId' => $inquiryRequestId,
+                        'totalAmount' => [
+                            'value' => '',
+                            'currency' => '',
+                        ],
+                        'subCompany' => '00000',
+                        'billDetails' => [],
+                        'freeTexts' => [
+                            [
+                                'english' => '',
+                                'indonesia' => '',
+                            ],
+                        ],
+                    ],
+                    'additionalInfo' => (object) [],
+                ], 200);
+            }
+    
+            // Jika sudah ada, beri response 409 Conflict
             return response()->json([
                 'responseCode' => '4092400',
                 'responseMessage' => 'Conflict',
@@ -76,9 +106,9 @@ class InquiryBCAController extends Controller
                     ],
                     "partnerServiceId" => "   ".$request->input('partnerServiceId'),
                     "customerNo" => $customerNo,
-                    "virtualAccountNo" => "   ".$request->input('virtualAccountNo'),
+                    "virtualAccountNo" => "   ".$virtualAccountNo,
                     "virtualAccountName" => '',
-                    "inquiryRequestId" => $request->input('inquiryRequestId'),
+                    "inquiryRequestId" => $inquiryRequestId,
                     'totalAmount' => [
                         'value' => '',
                         'currency' => '',
@@ -94,8 +124,7 @@ class InquiryBCAController extends Controller
                 ],
                 'additionalInfo' => (object) [],
             ], 409);
-        }
-
+        });
        
     
 
