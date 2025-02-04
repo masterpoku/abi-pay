@@ -380,7 +380,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
     ], 409);
 }
 
-private function buildSuccessResponse($validated, $user_data, $externalId)
+private function buildSuccessResponse2($validated, $user_data, $externalId)
 {
         $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
 
@@ -482,6 +482,137 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             ]
         ],
         "additionalInfo" => (object) [] // Informasi tambahan kosong
+    ], $code);
+}
+private function buildSuccessResponse($validated, $user_data, $externalId)
+{
+    $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
+
+    // Default response jika pembayaran belum dilakukan
+    $responseCode = "2002500";
+    $responstatus = "Successful";
+    $english = "Success";
+    $indonesia = "Sukses";
+    $responflag = "00";
+    $code = 200;
+
+    // Jika status pembayaran sudah "1" (Paid)
+    if ($user_data->status_pembayaran == '1') {
+        $responseCode = "4042514";
+        $responstatus = "Paid Bill";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+        $responflag = "01";
+        $code = 200;
+    } else {
+        // **Cek apakah virtualAccountNo ditemukan**
+        $vaExists = DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->exists();
+
+        if (!$vaExists) {
+            // **Respon Inconsistent Request jika VA tidak ditemukan**
+            $responseCode = "4042518";
+            $responstatus = "Inconsistent Request";
+            $english = "Virtual Account Not Found";
+            $indonesia = "Virtual Account Tidak Ditemukan";
+            $responflag = "01";
+            $code = 404;
+        } else {
+            // **Cek apakah external_id ada di database**
+            $externalIdExists = DB::table('external_ids')
+                ->where('external_id', $externalId)
+                ->exists();
+
+            if (!$externalIdExists) {
+                // **Respon Inconsistent Request jika external_id tidak ada**
+                $responseCode = "4042518";
+                $responstatus = "Inconsistent Request";
+                $english = "External ID Not Found";
+                $indonesia = "External ID Tidak Ditemukan";
+                $responflag = "01";
+                $code = 404;
+            } else {
+                // **Cek apakah payment_request_id berbeda dengan external_id yang ada**
+                $conflictingPayment = DB::table('external_ids')
+                    ->where('external_id', $externalId)
+                    ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+                    ->exists();
+
+                if ($conflictingPayment) {
+                    // **Respon Conflict jika external_id sudah digunakan dengan payment_request_id berbeda**
+                    $responseCode = "4092400";
+                    $responstatus = "Conflict";
+                    $english = "Cannot use the same X-EXTERNAL-ID";
+                    $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
+                    $responflag = "01";
+                    $code = 409;
+                } else {
+                    // **Cek apakah kombinasi external_id dan payment_request_id sudah ada**
+                    $exists = DB::table('external_ids')
+                        ->where('external_id', $externalId)
+                        ->where('payment_request_id', $validated['paymentRequestId'])
+                        ->exists();
+
+                    if (!$exists) {
+                        // **HIT PERTAMA -> Simpan ke database dan tetap sukses**
+                        DB::table('external_ids')->insert([
+                            'external_id' => $externalId,
+                            'payment_request_id' => $validated['paymentRequestId'],
+                            'date' => now()->toDateString(),
+                            'created_at' => now(),
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    // **Update status pembayaran hanya jika belum lunas & respon sukses**
+    if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
+        DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $validated['virtualAccountNo'])
+            ->update([
+                'status_pembayaran' => '1',
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
+                'updated_at' => now(),
+            ]);
+    }
+
+    return response()->json([
+        "responseCode" => $responseCode,
+        "responseMessage" => $responstatus,
+        "virtualAccountData" => [
+            "paymentFlagReason" => [
+                "english" => $english,
+                "indonesia" => $indonesia
+            ],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
+            "customerNo" => $customerNo,
+            "virtualAccountNo" => "   " . $user_data->id_invoice,
+            "virtualAccountName" => $user_data->nama_jamaah,
+            "paymentRequestId" => $validated['paymentRequestId'],
+            "paidAmount" => [
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''),
+                "currency" => "IDR"
+            ],
+            "totalAmount" => [
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''),
+                "currency" => "IDR"
+            ],
+            "trxDateTime" => $validated['trxDateTime'],
+            "referenceNo" => $validated['referenceNo'],
+            "paymentFlagStatus" => $responflag,
+            "billDetails" => [],
+            "freeTexts" => [
+                [
+                    "english" => "Free text",
+                    "indonesia" => "Tulisan bebas"
+                ]
+            ]
+        ],
+        "additionalInfo" => (object) []
     ], $code);
 }
 
