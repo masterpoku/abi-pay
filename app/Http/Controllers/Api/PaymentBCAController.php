@@ -497,11 +497,11 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
     $code = 200;
     
     // Validasi external_id sebelum digunakan
-    $externalId = $validated['externalId'] ?? null;
+    $externalId = $externalId ?? null;
     if (!$externalId) {
         return response()->json([
             'responseCode' => "4002400",
-            'responstatus' => "Bad Request",
+            'responstatus' => "Inconsistent Request",
             'english' => "Success",
             'indonesia' => "Sukses",
             'responflag' => "01",
