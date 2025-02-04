@@ -514,8 +514,8 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             // **Respon Inconsistent Request jika VA tidak ditemukan**
             $responseCode = "4042518";
             $responstatus = "Inconsistent Request";
-            $english = "Virtual Account Not Found";
-            $indonesia = "Virtual Account Tidak Ditemukan";
+            $english = "Success";
+            $indonesia = "Sukses";
             $responflag = "01";
             $code = 404;
         } else {
@@ -528,8 +528,8 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                 // **Respon Inconsistent Request jika external_id tidak ada**
                 $responseCode = "4042518";
                 $responstatus = "Inconsistent Request";
-                $english = "External ID Not Found";
-                $indonesia = "External ID Tidak Ditemukan";
+                $english = "Success";
+                $indonesia = "Sukses";
                 $responflag = "01";
                 $code = 404;
             } else {
@@ -543,8 +543,8 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                     // **Respon Conflict jika external_id sudah digunakan dengan payment_request_id berbeda**
                     $responseCode = "4092400";
                     $responstatus = "Conflict";
-                    $english = "Cannot use the same X-EXTERNAL-ID";
-                    $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
+                    $english = "Success";
+                    $indonesia = "Sukses";
                     $responflag = "01";
                     $code = 409;
                 } else {
