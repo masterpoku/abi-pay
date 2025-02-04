@@ -43,7 +43,6 @@ class InquiryBCAController extends Controller
         $virtualAccountNo = $request->input('virtualAccountNo');
         $customerNo = substr($virtualAccountNo, 5);
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
-        return DB::transaction(function () use ($externalId, $inquiryRequestId, $virtualAccountNo, $customerNo, $request) {
             $exists = DB::table('external_ids')
                 ->where('external_id', $externalId)
                 ->where('date', now()->toDateString())
@@ -66,34 +65,8 @@ class InquiryBCAController extends Controller
                         'payment_request_id' => $inquiryRequestId,
                     ]);
     
-                // Response sukses
-                return response()->json([
-                    'responseCode' => '200',
-                    'responseMessage' => 'Success',
-                    'virtualAccountData' => [
-                        'inquiryStatus' => '00',
-                        'partnerServiceId' => "   ".$request->input('partnerServiceId'),
-                        'customerNo' => $customerNo,
-                        'virtualAccountNo' => "   ".$virtualAccountNo,
-                        'virtualAccountName' => '',
-                        'inquiryRequestId' => $inquiryRequestId,
-                        'totalAmount' => [
-                            'value' => '',
-                            'currency' => '',
-                        ],
-                        'subCompany' => '00000',
-                        'billDetails' => [],
-                        'freeTexts' => [
-                            [
-                                'english' => '',
-                                'indonesia' => '',
-                            ],
-                        ],
-                    ],
-                    'additionalInfo' => (object) [],
-                ], 200);
-            }
-    
+              
+            }else{
             // Jika sudah ada, beri response 409 Conflict
             return response()->json([
                 'responseCode' => '4092400',
@@ -124,8 +97,11 @@ class InquiryBCAController extends Controller
                 ],
                 'additionalInfo' => (object) [],
             ], 409);
-        });
-       
+
+
+            }
+    
+            
     
 
   
