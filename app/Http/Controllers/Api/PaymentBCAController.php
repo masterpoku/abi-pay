@@ -489,7 +489,7 @@ private function buildNotFoundResponse($validated, $externalId)
     $customerNo = substr($validated['virtualAccountNo'], 5);
 
     // Cek apakah ada konflik dengan external_id yang memiliki payment_request_id berbeda
-    $conflictingPayment = DB::table('tagihan_pembayaran')
+    $conflictingPayment = DB::table('external_ids')
         ->where('external_id', $externalId)
         ->where('payment_request_id', '!=', $validated['paymentRequestId'])
         ->exists();
