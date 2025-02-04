@@ -39,15 +39,30 @@ class InquiryBCAController extends Controller
         $partnerId = $request->header('X-PARTNER-ID');
         $externalId = $request->header('X-EXTERNAL-ID');
         
-        // Mengambil tanggal hari ini
-        $today = Carbon::today()->toDateString();
-
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
-        $conflictingPayment = DB::table('external_ids')
+        $exists = DB::table('external_ids')
         ->where('external_id', $externalId)
-        ->where('payment_request_id', '!=', $request->input('paymentRequestId'))
+        ->where('payment_request_id', $request->input('paymentRequestId'))
         ->exists();
-        if ($conflictingPayment) {
+
+        if (!$exists) {
+            // HIT PERTAMA -> Simpan ke database dan tetap sukses
+            DB::table('external_ids')->insert([
+                'external_id' => $externalId,
+                'payment_request_id' => $request->input('paymentRequestId'),
+                'date' => now()->toDateString(),
+                'created_at' => now(),
+            ]);
+
+            // HIT PERTAMA -> Simpan ke database dan tetap sukses
+            DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $request->input('virtualAccountNo'))
+            ->update([
+                'external_id' => $externalId,
+                'payment_request_id' => $request->input('inquiryRequestId'),
+            ]);
+        }
+        if ($exists) {
             // Jika sudah ada, beri respons 409 Conflict
             $customerNo = substr($request->input('virtualAccountNo'), 5);
             return response()->json([
@@ -81,12 +96,7 @@ class InquiryBCAController extends Controller
             ], 409);
         }
 
-        DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $request->input('virtualAccountNo'))
-        ->update([
-            'external_id' => $externalId,
-            'payment_request_id' => $request->input('inquiryRequestId'),
-        ]);
+       
     
 
   
