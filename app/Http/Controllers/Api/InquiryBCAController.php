@@ -368,7 +368,7 @@ class InquiryBCAController extends Controller
             "english" => "Virtual Account Not Found",
             "indonesia" => "Virtual Account Tidak Ditemukan"
         ];
-        $httpStatus = 404;
+      
     } else {
         $responseCode = "4042412";
         $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
@@ -376,7 +376,7 @@ class InquiryBCAController extends Controller
             "english" => "Virtual Account Not Found",
             "indonesia" => "Virtual Account Tidak Ditemukan"
         ];
-        $httpStatus = 404;
+       
     }
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
