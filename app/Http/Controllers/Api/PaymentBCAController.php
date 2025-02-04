@@ -264,10 +264,11 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
         return $this->buildNotFoundResponse($validated, $externalId);
     }
 
-    $conflictingPayment = DB::table('tagihan_pembayaran')
-    ->where('external_id', $externalId)
-    ->where('payment_request_id', '!=', $validated['paymentRequestId'])
-    ->exists();
+    
+    $conflictingPayment = DB::table('external_ids')
+        ->where('external_id', $externalId)
+        ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+        ->exists();
 
     if ($conflictingPayment) {
         $this->handleDuplicatePaymentRequestId($userData, $validated);
