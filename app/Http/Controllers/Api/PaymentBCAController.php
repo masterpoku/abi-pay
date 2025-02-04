@@ -265,9 +265,9 @@ private function handlePaymentResponse($existingPayment, $userData, $validated, 
     }
 
     $conflictingPayment = DB::table('tagihan_pembayaran')
-        ->where('external_id', $externalId)
-        ->where('payment_request_id', '!=', $validated['paymentRequestId'])
-        ->exists();
+    ->where('external_id', $externalId)
+    ->where('payment_request_id', '!=', $validated['paymentRequestId'])
+    ->exists();
 
     if ($conflictingPayment) {
         $this->handleDuplicatePaymentRequestId($userData, $validated);
