@@ -410,6 +410,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         DB::table('external_ids')->insert([
             'external_id' => $externalId,
             'payment_request_id' => $validated['paymentRequestId'],
+            'date' => now()->toDateString(),
             'created_at' => now(),
         ]);
         
