@@ -402,19 +402,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "01";
         $code = 404;
     } else {
-        $external_id = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->first();
-        if($external_id){
-            $responseCode = "4092500";
-            $responstatus = "conflict";
-            $english = "Success";
-            $indonesia = "Sukses";
-            $responflag = "01";
-            $code = 409;
-        }else{
-            // **Cek apakah external_id dan paymentRequestId sudah ada di database**
-                $existingRecord = DB::table('external_ids')
+        $existingRecord = DB::table('external_ids')
                 ->where('external_id', $externalId)
                 ->where('payment_request_id', $validated['paymentRequestId'])
                 ->first();
@@ -429,6 +417,21 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                 $code = 404;
                 Log::info('handlePaymentResponse "Inconsistent Request"');
             }else{
+                
+                
+                $external_id = DB::table('external_ids')
+                ->where('external_id', $externalId)
+                ->first();
+                if($external_id){
+                    $responseCode = "4092500";
+                    $responstatus = "conflict";
+                    $english = "Success";
+                    $indonesia = "Sukses";
+                    $responflag = "01";
+                    $code = 409;
+                }else{
+            // **Cek apakah external_id dan paymentRequestId sudah ada di database**
+                
                 // Jika status pembayaran sudah "1" (Paid)
                 if ($user_data->status_pembayaran == '1') {
                     $responseCode = "4042514";
