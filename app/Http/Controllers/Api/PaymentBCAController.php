@@ -419,7 +419,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $english = "Cannot use the same X-EXTERNAL-ID";
             $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
             $responflag = "01";
-            $code = 404;
+            $code = 409;
             Log::info('handlePaymentResponse "Conflict"');
         }
     
@@ -433,10 +433,11 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $english = "Success";
             $indonesia = "Sukses";
             $responflag = "00";
-            $code = 409;
+            $code = 404;
+            Log::info('handlePaymentResponse "Inconsistent Request"');
         }
 
-        
+
         if ($existingRecord && $paymentRequestId && 
         $existingRecord->external_id != $externalId && 
         $paymentRequestId->payment_request_id == $validated['paymentRequestId']
