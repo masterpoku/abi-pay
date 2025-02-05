@@ -486,7 +486,7 @@ private function buildSuccessResponse2($validated, $user_data, $externalId)
 }
 private function buildSuccessResponse($validated, $user_data, $externalId)
 {
-    $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
+        $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
 
     // Default response jika pembayaran belum dilakukan
     $responseCode = "2002500";
@@ -495,44 +495,42 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
     $indonesia = "Sukses";
     $responflag = "00";
     $code = 200;
-    
+
     // Validasi external_id sebelum digunakan
     $externalId = $externalId ?? null;
     if (!$externalId) {
-        return response()->json([
-            'responseCode' => "4002400",
-            'responstatus' => "Inconsistent Request",
-            'english' => "Success",
-            'indonesia' => "Sukses",
-            'responflag' => "01",
-            'code' => 400
-        ], 400);
-    }
-    
-    // **Cek apakah external_id ada di database**
-    $existingRecord = DB::table('external_ids')->where('external_id', $externalId)->first();
-    
-    if (!$existingRecord) {
-        // **Respon Inconsistent Request jika external_id tidak ada**
-        $responseCode = "4042518";
+        $responseCode = "4002400";
         $responstatus = "Inconsistent Request";
         $english = "Success";
         $indonesia = "Sukses";
         $responflag = "01";
-        $code = 404;
+        $code = 400;
     } else {
-        // **Cek apakah payment_request_id berbeda dengan external_id yang ada**
-        if ($existingRecord->payment_request_id != $validated['paymentRequestId']) {
-            // **Respon Conflict jika external_id sudah digunakan dengan payment_request_id berbeda**
-            $responseCode = "4092400";
-            $responstatus = "Conflict";
-            $english = "Success";
-            $indonesia = "Sukses";
-            $responflag = "01";
-            $code = 409;
+        // **Cek apakah external_id ada di database**
+        $existingRecord = DB::table('external_ids')->where('external_id', $externalId)->first();
+
+        if ($existingRecord) {
+            // **Cek apakah payment_request_id berbeda**
+            if ($existingRecord->payment_request_id != $validated['paymentRequestId']) {
+                // **Respon Inconsistent Request jika external_id & payment_request_id berbeda**
+                $responseCode = "4042518";
+                $responstatus = "Inconsistent Request";
+                $english = "Success";
+                $indonesia = "Sukses";
+                $responflag = "01";
+                $code = 404;
+            } else {
+                // **Respon Conflict jika hanya X-EXTERNAL-ID yang duplicate**
+                $responseCode = "4092400";
+                $responstatus = "Conflict";
+                $english = "Success";
+                $indonesia = "Sukses";
+                $responflag = "01";
+                $code = 409;
+            }
         }
     }
-    
+
     // Jika status pembayaran sudah "1" (Paid)
     if ($user_data->status_pembayaran == '1') {
         $responseCode = "4042514";
@@ -542,9 +540,9 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "01";
         $code = 200;
     }
-    
+
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
-    if (!$existingRecord) {
+    if ($code == 200 && !$existingRecord) {
         DB::table('external_ids')->insert([
             'external_id' => $externalId,
             'payment_request_id' => $validated['paymentRequestId'],
@@ -552,7 +550,6 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             'created_at' => now(),
         ]);
     }
-    
 
     // **Update status pembayaran hanya jika belum lunas & respon sukses**
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
