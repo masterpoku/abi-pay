@@ -402,15 +402,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "01";
         $code = 404;
     } else {
-        if ($user_data->status_pembayaran == '1') {
-            $responseCode = "4042514";
-            $responstatus = "Paid Bill";
-            $english = "Bill has been paid";
-            $indonesia = "Tagihan telah dibayar";
-            $responflag = "01";
-            $code = 200;
-            Log::info('handlePaymentResponse "Paid Bill"');
-        }
+       
     
         $existingRecord = DB::table('external_ids')
             ->where('external_id', $externalId)
@@ -440,9 +432,27 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $responstatus = "Inconsistent Request";
             $english = "Success";
             $indonesia = "Sukses";
-            $responflag = "01";
-            $code = 404;
+            $responflag = "00";
+            $code = 409;
         }
+
+        
+        if ($existingRecord && $paymentRequestId && 
+        $existingRecord->external_id != $externalId && 
+        $paymentRequestId->payment_request_id == $validated['paymentRequestId']
+    ) {
+        if ($user_data->status_pembayaran == '1') {
+            $responseCode = "4042514";
+            $responstatus = "Paid Bill";
+            $english = "Bill has been paid";
+            $indonesia = "Tagihan telah dibayar";
+            $responflag = "01";
+            $code = 200;
+            Log::info('handlePaymentResponse "Paid Bill"');
+        }
+    }
+
+      
     }
     
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
