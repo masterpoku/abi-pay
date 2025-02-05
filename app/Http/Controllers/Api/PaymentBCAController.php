@@ -418,36 +418,34 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                 Log::info('handlePaymentResponse "Inconsistent Request"');
             }else{
 
-                $external_id = DB::table('external_ids')
-                ->where('external_id', $externalId)
-                ->first();
-                if($external_id){
-                    $responseCode = "4092500";
-                    $responstatus = "Conflict";
-                    $english = "Success";
-                    $indonesia = "Sukses";
-                    $responflag = "01";
-                    $code = 409;
-                    
-                }else{
+                $existingRecord = DB::table('external_ids')
+                        ->where('external_id', $externalId)
+                        ->orWhere('payment_request_id', $validated['paymentRequestId'])
+                        ->first();
 
-                    $paymentRequestId = DB::table('external_ids')
-                    ->where('payment_request_id', $validated['paymentRequestId'])
-                    ->first();
-                    if($paymentRequestId){
-                        if ($user_data->status_pembayaran == '1') {
-                            $responseCode = "4042514";
-                            $responstatus = "Paid Bill";
-                            $english = "Bill has been paid";
-                            $indonesia = "Tagihan telah dibayar";
+                    if ($existingRecord) {
+                        if ($existingRecord->external_id === $externalId) {
+                            $responseCode = "4092500";
+                            $responstatus = "Conflict";
+                            $english = "Cannot use the same X-EXTERNAL-ID";
+                            $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
                             $responflag = "01";
-                            $code = 200;
-                            Log::info('handlePaymentResponse "Paid Bill"');
+                            $code = 409;
+                        } elseif ($existingRecord->payment_request_id === $validated['paymentRequestId']) {
+                            if ($user_data->status_pembayaran == '1') {
+                                $responseCode = "4042514";
+                                $responstatus = "Paid Bill";
+                                $english = "Bill has been paid";
+                                $indonesia = "Tagihan telah dibayar";
+                                $responflag = "01";
+                                $code = 200;
+                                Log::info('handlePaymentResponse "Paid Bill"');
+                            }
                         }
                     }
 
                 
-            }
+            
         }
         
     }
