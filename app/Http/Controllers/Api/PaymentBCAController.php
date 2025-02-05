@@ -664,8 +664,8 @@ private function buildNotFoundResponse($validated, $externalId)
                 $responseCode = "4092500";
                 $responseMessage = "Conflict";
                 $conflictReason = [
-                    "english" => "Virtual Account Not Found",
-                    "indonesia" => "Virtual Account Tidak Ditemukan"
+                    "english" => "Cannot use the same X-EXTERNAL-ID",
+                    "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
                 ];
                 $httpStatus = 409;
                 Log::info('buildNotFoundResponse "Conflict"');
@@ -688,7 +688,7 @@ private function buildNotFoundResponse($validated, $externalId)
 
     
     // Jika tidak ada konflik dan external_id belum ada di database, insert baru
-    if ($httpStatus == 200 && !$existingRecord) {
+    if (!$existingRecord) {
         DB::table('external_ids')->insert([
             'external_id' => $externalId,
             'payment_request_id' => $validated['paymentRequestId'],
