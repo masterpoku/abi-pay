@@ -395,40 +395,53 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
     // Validasi external_id sebelum digunakan
     $externalId = $externalId ?? null;
     if (!$externalId) {
-        $responseCode = "4002400";
+        $responseCode = "4042518";
         $responstatus = "Inconsistent Request";
         $english = "Success";
         $indonesia = "Sukses";
         $responflag = "01";
-        $code = 400;
+        $code = 404;
     } else {
-        // **Cek apakah external_id dan paymentRequestId sudah ada di database**
-        $existingRecord = DB::table('external_ids')
-            ->where('external_id', $externalId)
-            ->where('payment_request_id', $validated['paymentRequestId'])
-            ->first();
-    
-        if ($existingRecord) {
-            // **Jika kombinasi external_id dan paymentRequestId sudah ada, return error Inconsistent Request**
-            $responseCode = "4042518";
-            $responstatus = "Inconsistent Request";
+        $external_id = DB::table('external_ids')
+        ->where('external_id', $externalId)
+        ->first();
+        if($external_id){
+            $responseCode = "4092500";
+            $responstatus = "conflict";
             $english = "Success";
             $indonesia = "Sukses";
             $responflag = "01";
-            $code = 404;
-            Log::info('handlePaymentResponse "Inconsistent Request"');
+            $code = 409;
         }else{
-             // Jika status pembayaran sudah "1" (Paid)
-            if ($user_data->status_pembayaran == '1') {
-                $responseCode = "4042514";
-                $responstatus = "Paid Bill";
-                $english = "Bill has been paid";
-                $indonesia = "Tagihan telah dibayar";
+            // **Cek apakah external_id dan paymentRequestId sudah ada di database**
+                $existingRecord = DB::table('external_ids')
+                ->where('external_id', $externalId)
+                ->where('payment_request_id', $validated['paymentRequestId'])
+                ->first();
+
+            if ($existingRecord) {
+                // **Jika kombinasi external_id dan paymentRequestId sudah ada, return error Inconsistent Request**
+                $responseCode = "4042518";
+                $responstatus = "Inconsistent Request";
+                $english = "Success";
+                $indonesia = "Sukses";
                 $responflag = "01";
-                $code = 200;
-                Log::info('handlePaymentResponse "Paid Bill"');
+                $code = 404;
+                Log::info('handlePaymentResponse "Inconsistent Request"');
+            }else{
+                // Jika status pembayaran sudah "1" (Paid)
+                if ($user_data->status_pembayaran == '1') {
+                    $responseCode = "4042514";
+                    $responstatus = "Paid Bill";
+                    $english = "Bill has been paid";
+                    $indonesia = "Tagihan telah dibayar";
+                    $responflag = "01";
+                    $code = 200;
+                    Log::info('handlePaymentResponse "Paid Bill"');
+                }
             }
         }
+        
     }
     
    
