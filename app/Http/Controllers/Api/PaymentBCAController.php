@@ -642,7 +642,7 @@ private function buildNotFoundResponse($validated, $externalId)
 
         $externalId = $externalId ?? null;
         if (!$externalId) {
-            $responseCode = "4042512";
+            $responseCode = "4042518";
             $responseMessage = "Inconsistent Request";
             $conflictReason = [
                 "english" => "Virtual Account Not Found",
@@ -667,7 +667,7 @@ private function buildNotFoundResponse($validated, $externalId)
                     "english" => "Cannot use the same X-EXTERNAL-ID",
                     "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
                 ];
-                $httpStatus = 409;
+                $httpStatus = 404;
                 Log::info('buildNotFoundResponse "Conflict"');
             }
 
