@@ -402,7 +402,6 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "01";
         $code = 404;
     } else {
-
         if ($user_data->status_pembayaran == '1') {
             $responseCode = "4042514";
             $responstatus = "Paid Bill";
@@ -412,14 +411,17 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $code = 200;
             Log::info('handlePaymentResponse "Paid Bill"');
         }
+    
         $existingRecord = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->first();
-        
+            ->where('external_id', $externalId)
+            ->first();
+    
         $paymentRequestId = DB::table('external_ids')
             ->where('payment_request_id', $validated['paymentRequestId'])
             ->first();
-        if ($existingRecord->external_id == $externalId) {
+    
+        // **Cek jika $existingRecord tidak null sebelum mengakses propertinya**
+        if ($existingRecord && $existingRecord->external_id == $externalId) {
             $responseCode = "4092500";
             $responstatus = "Conflict";
             $english = "Cannot use the same X-EXTERNAL-ID";
@@ -428,7 +430,12 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $code = 404;
             Log::info('handlePaymentResponse "Conflict"');
         }
-       if ($existingRecord->external_id == $externalId && $paymentRequestId->payment_request_id == $validated['paymentRequestId']) {
+    
+        // **Cek jika $existingRecord dan $paymentRequestId tidak null sebelum mengakses propertinya**
+        if ($existingRecord && $paymentRequestId && 
+            $existingRecord->external_id == $externalId && 
+            $paymentRequestId->payment_request_id == $validated['paymentRequestId']
+        ) {
             $responseCode = "4042518";
             $responstatus = "Inconsistent Request";
             $english = "Success";
@@ -436,12 +443,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $responflag = "01";
             $code = 404;
         }
-    
-        }
-
-    
-    
-   
+    }
     
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
     if ($code == 200 && !$existingRecord) {
@@ -452,6 +454,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             'created_at' => now(),
         ]);
     }
+    
     
     // **Update status pembayaran hanya jika belum lunas & respon sukses**
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
