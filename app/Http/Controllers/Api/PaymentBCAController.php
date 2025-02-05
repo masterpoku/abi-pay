@@ -416,18 +416,22 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             $indonesia = "Sukses";
             $responflag = "01";
             $code = 404;
+            Log::info('handlePaymentResponse "Inconsistent Request"');
+        }else{
+             // Jika status pembayaran sudah "1" (Paid)
+            if ($user_data->status_pembayaran == '1') {
+                $responseCode = "4042514";
+                $responstatus = "Paid Bill";
+                $english = "Bill has been paid";
+                $indonesia = "Tagihan telah dibayar";
+                $responflag = "01";
+                $code = 200;
+                Log::info('handlePaymentResponse "Paid Bill"');
+            }
         }
     }
     
-    // Jika status pembayaran sudah "1" (Paid)
-    if ($user_data->status_pembayaran == '1') {
-        $responseCode = "4042514";
-        $responstatus = "Paid Bill";
-        $english = "Bill has been paid";
-        $indonesia = "Tagihan telah dibayar";
-        $responflag = "01";
-        $code = 200;
-    }
+   
     
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
     if ($code == 200 && !$existingRecord) {
