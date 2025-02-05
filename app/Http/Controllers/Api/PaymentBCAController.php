@@ -402,6 +402,16 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $responflag = "01";
         $code = 404;
     } else {
+
+        if ($user_data->status_pembayaran == '1') {
+            $responseCode = "4042514";
+            $responstatus = "Paid Bill";
+            $english = "Bill has been paid";
+            $indonesia = "Tagihan telah dibayar";
+            $responflag = "01";
+            $code = 200;
+            Log::info('handlePaymentResponse "Paid Bill"');
+        }
         $existingRecord = DB::table('external_ids')
         ->where('external_id', $externalId)
         ->first();
@@ -409,33 +419,16 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $paymentRequestId = DB::table('external_ids')
             ->where('payment_request_id', $validated['paymentRequestId'])
             ->first();
-        
-        // **Jika kombinasi external_id dan paymentRequestId sudah ada, return error Conflict**
-        if ($existingRecord) {
+        if ($existingRecord->external_id == $externalId) {
             $responseCode = "4092500";
             $responstatus = "Conflict";
-            $english = "Success";
-            $indonesia = "Sukses";
+            $english = "Cannot use the same X-EXTERNAL-ID";
+            $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
             $responflag = "01";
             $code = 404;
             Log::info('handlePaymentResponse "Conflict"');
         }
-        
-        // **Cek apakah paymentRequestId tidak sama dengan yang ada di database**
-        if ($paymentRequestId && $paymentRequestId->payment_request_id != $validated['paymentRequestId']) {
-            if ($user_data->status_pembayaran == '1') {
-                $responseCode = "4042514";
-                $responstatus = "Paid Bill";
-                $english = "Bill has been paid";
-                $indonesia = "Tagihan telah dibayar";
-                $responflag = "01";
-                $code = 200;
-                Log::info('handlePaymentResponse "Paid Bill"');
-            }
-        }
-        
-        // **Cek jika external_id berbeda tetapi paymentRequestId sama**
-        if ($existingRecord && $existingRecord->external_id != $externalId && $paymentRequestId->payment_request_id == $validated['paymentRequestId']) {
+       if ($existingRecord->external_id == $externalId && $paymentRequestId->payment_request_id == $validated['paymentRequestId']) {
             $responseCode = "4042518";
             $responstatus = "Inconsistent Request";
             $english = "Success";
