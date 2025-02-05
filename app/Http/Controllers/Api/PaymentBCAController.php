@@ -630,21 +630,7 @@ private function buildNotFoundResponse($validated, $externalId)
     // Mengambil sebagian dari nomor VA sebagai nomor pelanggan
     $customerNo = substr($validated['virtualAccountNo'] ?? '', 5);
     
-    $existingRecord = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->first();
-
-    $paymentRequestId = DB::table('external_ids')
-        ->where('payment_request_id', $validated['paymentRequestId'] ?? null)
-        ->first();
-
-    // Cek apakah ada konflik dengan external_id yang memiliki payment_request_id berbeda
-    $conflictingPayment = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->where('payment_request_id', '!=', $validated['paymentRequestId'] ?? null)
-        ->exists();
-
-    // Default Response (Invalid Virtual Account)
+    // Default response
     $responseCode = "4042512";
     $responseMessage = "Invalid Bill/Virtual Account [Not Found]";
     $conflictReason = [
@@ -653,31 +639,54 @@ private function buildNotFoundResponse($validated, $externalId)
     ];
     $httpStatus = 404;
 
-    // Jika ada konflik dengan payment_request_id yang berbeda
-    if ($conflictingPayment) {
-        $responseCode = "4042518";
-        $responseMessage = "Inconsistent Request";
-    } 
-    // Jika external_id sudah ada dan digunakan kembali
-    elseif ($existingRecord && $existingRecord->external_id == $externalId) {
-        $responseCode = "4092500";
-        $responseMessage = "Conflict";
-        $conflictReason = [
-            "english" => "Cannot use the same X-EXTERNAL-ID",
-            "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
-        ];
-        $httpStatus = 409;
-        Log::info('handlePaymentResponse "Conflict"');
-    } 
-    // Jika external_id dan paymentRequestId cocok, tapi terjadi inkonsistensi data
-    elseif ($existingRecord && $paymentRequestId && 
-        $existingRecord->external_id == $externalId && 
-        $paymentRequestId->payment_request_id == $validated['paymentRequestId']) {
-        $responseCode = "4042518";
-        $responseMessage = "Inconsistent Request";
-        Log::info('handlePaymentResponse "Inconsistent Request"');
-    }
 
+        $externalId = $externalId ?? null;
+        if (!$externalId) {
+            $responseCode = "4042512";
+            $responseMessage = "Inconsistent Request";
+            $conflictReason = [
+                "english" => "Virtual Account Not Found",
+                "indonesia" => "Virtual Account Tidak Ditemukan"
+            ];
+            $httpStatus = 404;
+        }else{
+            $existingRecord = DB::table('external_ids')
+            ->where('external_id', $externalId)
+            ->first();
+
+             $paymentRequestId = DB::table('external_ids')
+            ->where('payment_request_id', $validated['paymentRequestId'])
+            ->first();
+        
+        
+        
+            if ($existingRecord?->external_id == $externalId) {
+                $responseCode = "4092500";
+                $responseMessage = "Conflict";
+                $conflictReason = [
+                    "english" => "Virtual Account Not Found",
+                    "indonesia" => "Virtual Account Tidak Ditemukan"
+                ];
+                $httpStatus = 409;
+                Log::info('buildNotFoundResponse "Conflict"');
+            }
+
+            if ($existingRecord?->external_id == $externalId && $paymentRequestId?->payment_request_id == $validated['paymentRequestId']) {
+                $responseCode = "4042512";
+                $responseMessage = "Inconsistent Request";
+                $conflictReason = [
+                    "english" => "Virtual Account Not Found",
+                    "indonesia" => "Virtual Account Tidak Ditemukan"
+                ];
+                Log::info('buildNotFoundResponse "Conflict"');
+            }
+        
+        
+        }
+
+
+
+    
     // Jika tidak ada konflik dan external_id belum ada di database, insert baru
     if ($httpStatus == 200 && !$existingRecord) {
         DB::table('external_ids')->insert([
