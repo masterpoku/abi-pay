@@ -441,7 +441,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                 $english = "Bill has been paid";
                 $indonesia = "Tagihan telah dibayar";
                 $responflag = "01";
-                $code = 200;
+                $code = 404;
                 Log::info('handlePaymentResponse "Paid Bill"');
             }
         }
