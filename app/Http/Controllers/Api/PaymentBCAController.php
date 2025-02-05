@@ -432,9 +432,8 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
             Log::info('handlePaymentResponse "Inconsistent Request"');
         }
 
-        if ($existingRecord && $paymentRequestId && 
-            $existingRecord->external_id != $externalId && 
-            $paymentRequestId->payment_request_id == $validated['paymentRequestId']
+        if ($existingRecord?->external_id != $externalId && 
+            $paymentRequestId?->payment_request_id == $validated['paymentRequestId']
         ) {
             if ($user_data->status_pembayaran == '1') {
                 $responseCode = "4042514";
