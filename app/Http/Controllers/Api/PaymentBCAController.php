@@ -688,7 +688,7 @@ private function buildNotFoundResponse($validated, $externalId)
 
     
     // Jika tidak ada konflik dan external_id belum ada di database, insert baru
-    if (!$existingRecord) {
+    if ($httpStatus == 404 && !$existingRecord) {
         DB::table('external_ids')->insert([
             'external_id' => $externalId,
             'payment_request_id' => $validated['paymentRequestId'],
