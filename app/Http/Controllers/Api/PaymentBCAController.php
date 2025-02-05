@@ -533,8 +533,19 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
 
     // Jika status pembayaran sudah "1" (Paid)
     if ($user_data->status_pembayaran == '1') {
-        $responseCode = "4042514";
-        $responstatus = "Paid Bill";
+        // **Respon Paid Bill jika status pembayaran sudah "1" (Paid)**
+        if ($existingRecord->payment_request_id != $validated['paymentRequestId']) {
+            // **Respon Inconsistent Request jika external_id & payment_request_id berbeda**
+            $responseCode = "4042518";
+            $responstatus = "Inconsistent Request";
+            $code = 404;
+        }else{
+
+            $responseCode = "4042514";
+            $responstatus = "Paid Bill";
+        }
+
+        
         $english = "Bill has been paid";
         $indonesia = "Tagihan telah dibayar";
         $responflag = "01";
