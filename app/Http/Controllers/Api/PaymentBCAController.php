@@ -667,7 +667,7 @@ private function buildNotFoundResponse($validated, $externalId)
                     "english" => "Cannot use the same X-EXTERNAL-ID",
                     "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
                 ];
-                $httpStatus = 404;
+                $httpStatus = 409;
                 Log::info('buildNotFoundResponse "Conflict"');
             }
 
