@@ -672,7 +672,7 @@ private function buildNotFoundResponse($validated, $externalId)
             }
 
             if ($existingRecord?->external_id == $externalId && $paymentRequestId?->payment_request_id == $validated['paymentRequestId']) {
-                $responseCode = "4042512";
+                $responseCode = "4042518";
                 $responseMessage = "Inconsistent Request";
                 $conflictReason = [
                     "english" => "Virtual Account Not Found",
