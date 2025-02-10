@@ -46,7 +46,7 @@
                 <div class="card-body text-center">
                     <h5 class="card-title">Transaksi Pandding</h5>
                     <div>
-                        <h1><span class="text-danger">{{  $status_pandding }}</span></h1>
+                        <h1><span class="text-warning">{{  $status_pandding }}</span></h1>
                     </div>
                 </div>
             </div>
