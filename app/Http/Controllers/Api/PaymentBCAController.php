@@ -249,11 +249,12 @@ EOF;
                 }
             
                 // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
-                if ((is_array($value) || !preg_match('/^\d+$/', (string) $value)) && in_array($key, $this->mandatoryFields())) {
-                    return response()->json([
-                        'responseCode' => '4002401',
-                        'responseMessage' => "Invalid Field Format {virtualAccountNo}",
-                        'statusCode' => 400,
+                if (in_array($key, ['partnerServiceId', 'customerNo', 'virtualAccountNo'])) {
+                    if (!is_string($value) || !preg_match('/^\d+$/', $value)) {
+                        return response()->json([
+                            'responseCode' => '4002401',
+                            'responseMessage' => "Invalid Field Format {$key}",
+                            'statusCode' => 400,
                         'virtualAccountData' => [
                             'inquiryStatus' => '01',
                             'inquiryReason' => [
@@ -262,6 +263,7 @@ EOF;
                             ]
                         ]
                     ], 400);
+                        }
                 }
                 
             }
