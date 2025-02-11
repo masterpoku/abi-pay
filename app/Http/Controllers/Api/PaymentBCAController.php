@@ -249,7 +249,7 @@ EOF;
                 }
             
                 // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
-                if (!preg_match('/^\d+$/', $value) && in_array($key, $this->mandatoryFields())) {
+                if ((is_array($value) || !preg_match('/^\d+$/', (string) $value)) && in_array($key, $this->mandatoryFields())) {
                     return response()->json([
                         'responseCode' => '4002401',
                         'responseMessage' => "Invalid Field Format {virtualAccountNo}",
@@ -263,6 +263,7 @@ EOF;
                         ]
                     ], 400);
                 }
+                
             }
             
             $validated = $request->validate([
