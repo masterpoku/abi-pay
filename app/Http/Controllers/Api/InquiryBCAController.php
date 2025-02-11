@@ -427,27 +427,27 @@ class InquiryBCAController extends Controller
         }
     
         // Cek validasi amount setelah cek status pembayaran
-        $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
-        $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
-        $nominalTagihan = (float)$user_data->nominal_tagihan;
+        // $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
+        // $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
+        // $nominalTagihan = (float)$user_data->nominal_tagihan;
     
-        Log::info('data validate: '.json_encode($validated));
-        Log::info('paidAmount: '.$paidAmount);
-        Log::info('nominalTagihan: '.$nominalTagihan);
-        Log::info('totalAmount: '.$totalAmount);
-        if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
-            return response()->json([
-                "responseCode" => "4042513",
-                "responseMessage" => "Invalid Amount",
-                "virtualAccountData" => [
-                    "paymentFlagStatus" => "01",
-                    "paymentFlagReason" => [
-                        "english" => "Invalid Amount",
-                        "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
-                    ]
-                ]
-            ], 404);
-        }
+        // Log::info('data validate: '.json_encode($validated));
+        // Log::info('paidAmount: '.$paidAmount);
+        // Log::info('nominalTagihan: '.$nominalTagihan);
+        // Log::info('totalAmount: '.$totalAmount);
+        // if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
+        //     return response()->json([
+        //         "responseCode" => "4042513",
+        //         "responseMessage" => "Invalid Amount",
+        //         "virtualAccountData" => [
+        //             "paymentFlagStatus" => "01",
+        //             "paymentFlagReason" => [
+        //                 "english" => "Invalid Amount",
+        //                 "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+        //             ]
+        //         ]
+        //     ], 404);
+        // }
     
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return response()->json([
