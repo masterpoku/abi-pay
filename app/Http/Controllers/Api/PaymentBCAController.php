@@ -396,7 +396,7 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
 
       
     }
-    if ($user_data->nominal_tagihan == '5') {
+    if ($user_data->nominal_tagihan == '2') {
         $responseCode = "4042519";
         $responstatus = "Invalid Bill/Virtual Account";
         $english = "Bill has been expired";
