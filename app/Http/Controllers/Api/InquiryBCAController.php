@@ -431,6 +431,9 @@ class InquiryBCAController extends Controller
         $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
         $nominalTagihan = (float)$user_data->nominal_tagihan;
     
+        Log::info('paidAmount: '.$paidAmount);
+        Log::info('nominalTagihan: '.$nominalTagihan);
+        Log::info('totalAmount: '.$totalAmount);
         if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
             return response()->json([
                 "responseCode" => "4042513",
