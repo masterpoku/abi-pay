@@ -231,6 +231,39 @@ EOF;
             if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
                 return response()->json(["responseCode" => "4012401", "responseMessage" => "Invalid token (B2B)"], 401);
             }
+            foreach ($request->all() as $key => $value) {
+                // Cek apakah field kosong untuk mandatory fields
+                if (empty($value) && in_array($key, $this->mandatoryFields())) {
+                    return response()->json([
+                        'responseCode' => '4002402',
+                        'responseMessage' => "Invalid Mandatory Field {virtualAccountNo}",
+                        'statusCode' => 400,
+                        'virtualAccountData' => [
+                            'inquiryStatus' => '01',
+                            'inquiryReason' => [
+                                'english' => "Invalid Mandatory Field {virtualAccountNo}",
+                                'indonesia' => "Isian wajib {virtualAccountNo} tidak valid"
+                            ]
+                        ]
+                    ], 400);
+                }
+            
+                // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
+                if (!preg_match('/^\d+$/', $value) && in_array($key, $this->mandatoryFields())) {
+                    return response()->json([
+                        'responseCode' => '4002401',
+                        'responseMessage' => "Invalid Field Format {virtualAccountNo}",
+                        'statusCode' => 400,
+                        'virtualAccountData' => [
+                            'inquiryStatus' => '01',
+                            'inquiryReason' => [
+                                'english' => "Invalid Field Format [virtualAccountNo]",
+                                'indonesia' => "Isian format [virtualAccountNo] tidak valid"
+                            ]
+                        ]
+                    ], 400);
+                }
+            }
             
             $validated = $request->validate([
                 'partnerServiceId' => 'required',
@@ -405,7 +438,25 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         $code = 404;
         Log::info('handlePaymentResponse "Paid Bill"');
     }
-    
+     // Cek validasi amount setelah cek status pembayaran
+     $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
+     $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
+     $nominalTagihan = (float)$user_data->nominal_tagihan;
+ 
+     if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
+         return response()->json([
+             "responseCode" => "4042513",
+             "responseMessage" => "Invalid Amount",
+             "virtualAccountData" => [
+                 "paymentFlagStatus" => "01",
+                 "paymentFlagReason" => [
+                     "english" => "Invalid Amount",
+                     "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+                 ]
+             ]
+         ], 404);
+     }
+ 
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
     if ($code == 200 && !$existingRecord) {
         DB::table('external_ids')->insert([
@@ -572,7 +623,14 @@ private function buildNotFoundResponse($validated, $externalId)
 }
 
 
-
+private function mandatoryFields()
+    {
+        return [
+            'partnerServiceId',
+            'customerNo',
+            'virtualAccountNo',
+        ];
+    }
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
     {
         return response()->json([
