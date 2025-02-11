@@ -442,23 +442,23 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         Log::info('handlePaymentResponse "Paid Bill"');
     }
      // Cek validasi amount setelah cek status pembayaran
-     $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
-     $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
-     $nominalTagihan = (float)$user_data->nominal_tagihan;
+    //  $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
+    //  $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
+    //  $nominalTagihan = (float)$user_data->nominal_tagihan;
  
-     if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
-         return response()->json([
-             "responseCode" => "4042513",
-             "responseMessage" => "Invalid Amount",
-             "virtualAccountData" => [
-                 "paymentFlagStatus" => "01",
-                 "paymentFlagReason" => [
-                     "english" => "Invalid Amount",
-                     "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
-                 ]
-             ]
-         ], 404);
-     }
+    //  if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
+    //      return response()->json([
+    //          "responseCode" => "4042513",
+    //          "responseMessage" => "Invalid Amount",
+    //          "virtualAccountData" => [
+    //              "paymentFlagStatus" => "01",
+    //              "paymentFlagReason" => [
+    //                  "english" => "Invalid Amount",
+    //                  "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+    //              ]
+    //          ]
+    //      ], 404);
+    //  }
  
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
     if ($code == 200 && !$existingRecord) {
