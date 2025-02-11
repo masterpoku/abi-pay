@@ -320,7 +320,15 @@ class InquiryBCAController extends Controller
             $responseCode = "4042414";
             $code = 404;
         
-         }else{
+         }elseif ($user_data->nominal_tagihan == '2') {
+            $responseCode = "4042519";
+            $responstatus = "Invalid Bill/Virtual Account";
+            $english = "Bill has been expired";
+            $indonesia = "Tagihan telah kadaluarsa";
+            $responflag = "01";
+            $code = 404;
+            Log::info('handlePaymentResponse "Paid Bill"');
+        }else{
             $responstatus = "Successful";
             $english = "Success";
             $indonesia = "Sukses";
@@ -328,6 +336,8 @@ class InquiryBCAController extends Controller
             $responseCode = "2002400";
             $code = 200;
          }
+
+         
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return response()->json([
             "responseCode" => $responseCode,
