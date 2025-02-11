@@ -442,8 +442,8 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         Log::info('handlePaymentResponse "Paid Bill"');
     }
      // Cek validasi amount setelah cek status pembayaran
-     $paidAmount = (float)($validated['paidAmount']['value'] ?? 0);
-     $totalAmount = (float)($validated['totalAmount']['value'] ?? 0);
+     $paidAmount = $validated['paidAmount']['value'] ?? 0;
+     $totalAmount = $validated['totalAmount']['value'] ?? 0;
      $nominalTagihan = (float)$user_data->nominal_tagihan;
      Log::info('Amounts:', ['paidAmount' => $paidAmount, 'totalAmount' => $totalAmount, 'nominalTagihan' => $nominalTagihan]);
  
