@@ -286,7 +286,7 @@ EOF;
                 ->where('payment_request_id', $validated['paymentRequestId'])
                 ->first();
     
-            return $this->handlePaymentResponse($userData, $validated, $externalId);
+            return $this->handlePaymentResponse($request,$userData, $validated, $externalId);
         } catch (Exception $e) {
             Log::error('Flag Payment Error:', ['error' => $e->getMessage()]);
             return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
@@ -294,7 +294,7 @@ EOF;
     }
 
 
-private function handlePaymentResponse( $userData, $validated, $externalId): JsonResponse
+private function handlePaymentResponse( $request,$userData, $validated, $externalId): JsonResponse
 {
     if (!$userData) {
         return $this->buildNotFoundResponse($validated, $externalId);
@@ -310,7 +310,7 @@ private function handlePaymentResponse( $userData, $validated, $externalId): Jso
         $this->handleDuplicatePaymentRequestId($userData, $validated);
     }
 
-      return $this->buildSuccessResponse($validated, $userData, $externalId);
+      return $this->buildSuccessResponse($request,$validated, $userData, $externalId);
 }
 
 
@@ -352,7 +352,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
     ], 409);
 }
 
-private function buildSuccessResponse($validated, $user_data, $externalId)
+private function buildSuccessResponse($request,$validated, $user_data, $externalId)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
     Log::info('buildSuccessResponse validated:', $validated);
@@ -442,9 +442,9 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
         Log::info('handlePaymentResponse "Paid Bill"');
     }
      // Cek validasi amount setelah cek status pembayaran
-     $paidAmount = $validated['paidAmount']['value'] ?? 0;
-     $totalAmount = $validated['totalAmount']['value'] ?? 0;
-     $nominalTagihan = (float)$user_data->nominal_tagihan;
+     $paidAmount = $request->input('paidAmount.value') ?? 0;
+     $totalAmount = $request->input('totalAmount.value') ?? 0;
+     $nominalTagihan = $user_data->nominal_tagihan;
      Log::info('Amounts:', ['paidAmount' => $paidAmount, 'totalAmount' => $totalAmount, 'nominalTagihan' => $nominalTagihan]);
  
      if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
