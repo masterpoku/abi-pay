@@ -148,26 +148,58 @@ class InquiryBCAController extends Controller
         }
     
             // Cek apakah ada field mandatory yang kosong
+            // foreach ($request->all() as $key => $value) {
+            //     if (empty($value) && in_array($key, $this->mandatoryFields())) {
+            //         return response()->json([
+            //             'responseCode' => '4002402',
+            //             'responseMessage' => 'Invalid Mandatory Field '.$virtualAccountNo,
+            //             'statusCode' => 400,
+            //             'virtualAccountData' => [
+            //                 'inquiryStatus' => '01',
+            //                 'inquiryReason' => [
+            //                     'english' => 'Invalid Mandatory Field [virtualAccountNo]',
+            //                     'indonesia' => 'Isian wajib [virtualAccountNo] tidak valid'
+            //                 ]
+            //             ]
+            //         ], 400);
+            //     }
+            // }
+
             foreach ($request->all() as $key => $value) {
+                // Cek apakah field kosong untuk mandatory fields
                 if (empty($value) && in_array($key, $this->mandatoryFields())) {
                     return response()->json([
-                        'responseCode' => '4002502',
-                        'responseMessage' => 'Invalid Mandatory Field',
+                        'responseCode' => '4002402',
+                        'responseMessage' => "Invalid Mandatory Field {virtualAccountNo}",
                         'statusCode' => 400,
                         'virtualAccountData' => [
-                            'paymentFlagStatus' => '01',
-                            'paymentFlagReason' => [
-                                'english' => 'Any Value',
-                                'indonesia' => 'Any Value'
-                            ],
-                            'partnerServiceId' => '   14999',
-                            'customerNo' => '040002',
-                            
-                            'paymentRequestId' => 'Any Value'
+                            'inquiryStatus' => '01',
+                            'inquiryReason' => [
+                                'english' => "Invalid Mandatory Field {virtualAccountNo}",
+                                'indonesia' => "Isian wajib {virtualAccountNo} tidak valid"
+                            ]
+                        ]
+                    ], 400);
+                }
+            
+                // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
+                if (!preg_match('/^\d+$/', $value) && in_array($key, $this->mandatoryFields())) {
+                    return response()->json([
+                        'responseCode' => '4002401',
+                        'responseMessage' => "Invalid Field Format {virtualAccountNo}",
+                        'statusCode' => 400,
+                        'virtualAccountData' => [
+                            'inquiryStatus' => '01',
+                            'inquiryReason' => [
+                                'english' => "Invalid Field Format [virtualAccountNo]",
+                                'indonesia' => "Isian format [virtualAccountNo] tidak valid"
+                            ]
                         ]
                     ], 400);
                 }
             }
+            
+
             $virtualAccountNo = $request->virtualAccountNo;
             Log::info('Virtual Account No:', [$virtualAccountNo]);
               if(!preg_match('/^\d+$/', $virtualAccountNo)) {
@@ -217,7 +249,7 @@ class InquiryBCAController extends Controller
     {
         return response()->json([
             'responseCode' => '4002501', // Kode untuk Invalid Field Format
-            'responseMessage' => 'Invalid Field Format',
+            'responseMessage' => 'Invalid Mandatory Field {virtualAccountNo}',
             'statusCode' => 400,
             'virtualAccountData' => [
                 'paymentFlagStatus' => '01',
@@ -239,9 +271,6 @@ class InquiryBCAController extends Controller
             'partnerServiceId',
             'customerNo',
             'virtualAccountNo',
-            'trxDateInit',
-            'channelCode',
-            'inquiryRequestId',
         ];
     }
     
@@ -307,37 +336,112 @@ class InquiryBCAController extends Controller
     /**
      * Membuat respons untuk data yang ditemukan.
      */
+    // private function buildSuccessResponse($validated, $user_data)
+    // {
+
+        
+    //     if($user_data->status_pembayaran == '1'){
+    //         $responstatus = "Paid Bill";
+    //         $english = "Bill has been paid";
+    //         $indonesia = "Tagihan telah dibayar";
+    //         $inquiryStatus = "01";
+    //         $responseCode = "4042414";
+    //         $code = 404;
+        
+    //      }elseif ($user_data->nominal_tagihan == '2') {
+    //         $responseCode = "4042519";
+    //         $responstatus = "Invalid Bill/Virtual Account";
+    //         $english = "Bill has been expired";
+    //         $indonesia = "Tagihan telah kadaluarsa";
+    //         $code = 404;
+    //         Log::info('handlePaymentResponse "Paid Bill"');
+    //     }else{
+    //         $responstatus = "Successful";
+    //         $english = "Success";
+    //         $indonesia = "Sukses";
+    //         $inquiryStatus = "00";
+    //         $responseCode = "2002400";
+    //         $code = 200;
+    //      }
+
+         
+    //     $customerNo = substr($validated['virtualAccountNo'], 5);
+    //     return response()->json([
+    //         "responseCode" => $responseCode,
+    //         "responseMessage" => $responstatus,
+    //         "virtualAccountData" => [
+    //             "inquiryStatus" => $inquiryStatus,
+    //             "inquiryReason" => [
+    //                 "english" => $english,
+    //                 "indonesia" => $indonesia
+    //             ],
+    //             "partnerServiceId" => "   ".$validated['partnerServiceId'],
+    //             "customerNo" => $customerNo,
+    //             "virtualAccountNo" => "   ".$user_data->id_invoice,
+    //             "virtualAccountName" => $user_data->nama_jamaah,
+    //             "inquiryRequestId" => $validated['inquiryRequestId'],
+    //             "totalAmount" => [
+    //                 "value" => $user_data->nominal_tagihan,
+    //                 "currency" => "IDR"
+    //             ],
+    //             "subCompany" => "00000",
+    //             "billDetails" => [],
+    //             "freeTexts" => [
+    //                 [
+    //                     "english" => $user_data->nama_paket,
+    //                     "indonesia" => $user_data->nama_paket
+    //                 ]
+    //             ]
+    //         ],
+    //        "additionalInfo" => (object) []
+    //     ], $code);
+    // }
     private function buildSuccessResponse($validated, $user_data)
     {
-       
-    
-        
-        if($user_data->status_pembayaran == '1'){
+        // Cek status pembayaran
+        if ($user_data->status_pembayaran == '1') {
             $responstatus = "Paid Bill";
             $english = "Bill has been paid";
             $indonesia = "Tagihan telah dibayar";
             $inquiryStatus = "01";
             $responseCode = "4042414";
             $code = 404;
-        
-         }elseif ($user_data->nominal_tagihan == '2') {
+    
+        } elseif ($user_data->nominal_tagihan == '2') {
             $responseCode = "4042519";
             $responstatus = "Invalid Bill/Virtual Account";
             $english = "Bill has been expired";
             $indonesia = "Tagihan telah kadaluarsa";
-            $responflag = "01";
             $code = 404;
             Log::info('handlePaymentResponse "Paid Bill"');
-        }else{
+        } else {
             $responstatus = "Successful";
             $english = "Success";
             $indonesia = "Sukses";
             $inquiryStatus = "00";
             $responseCode = "2002400";
             $code = 200;
-         }
-
-         
+        }
+    
+        // Cek validasi amount setelah cek status pembayaran
+        $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
+        $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
+        $nominalTagihan = (float)$user_data->nominal_tagihan;
+    
+        if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
+            return response()->json([
+                "responseCode" => "4042513",
+                "responseMessage" => "Invalid Amount",
+                "virtualAccountData" => [
+                    "paymentFlagStatus" => "01",
+                    "paymentFlagReason" => [
+                        "english" => "Invalid Amount",
+                        "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+                    ]
+                ]
+            ], 404);
+        }
+    
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return response()->json([
             "responseCode" => $responseCode,
@@ -348,9 +452,9 @@ class InquiryBCAController extends Controller
                     "english" => $english,
                     "indonesia" => $indonesia
                 ],
-                "partnerServiceId" => "   ".$validated['partnerServiceId'],
+                "partnerServiceId" => "   " . $validated['partnerServiceId'],
                 "customerNo" => $customerNo,
-                "virtualAccountNo" => "   ".$user_data->id_invoice,
+                "virtualAccountNo" => "   " . $user_data->id_invoice,
                 "virtualAccountName" => $user_data->nama_jamaah,
                 "inquiryRequestId" => $validated['inquiryRequestId'],
                 "totalAmount" => [
@@ -366,10 +470,10 @@ class InquiryBCAController extends Controller
                     ]
                 ]
             ],
-           "additionalInfo" => (object) []
+            "additionalInfo" => (object)[]
         ], $code);
     }
-
+    
     /**
      * Membuat respons untuk data yang tidak ditemukan.
      */
