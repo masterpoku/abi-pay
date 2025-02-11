@@ -355,7 +355,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
 private function buildSuccessResponse($validated, $user_data, $externalId)
 {
     $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
-
+    Log::info('buildSuccessResponse validated:', $validated);
     // Default response jika pembayaran belum dilakukan
     $responseCode = "2002500";
     $responstatus = "Successful";
