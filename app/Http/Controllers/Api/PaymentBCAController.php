@@ -444,7 +444,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
      // Cek validasi amount setelah cek status pembayaran
      $paidAmount = (float) $request->input('paidAmount.value', 0);
      $totalAmount = (float) $request->input('totalAmount.value', 0);
-     $nominalTagihan = $user_data->nominal_tagihan;
+     $nominalTagihan = (float) $user_data->nominal_tagihan;
      Log::info('Amounts:', ['paidAmount' => $paidAmount, 'totalAmount' => $totalAmount, 'nominalTagihan' => $nominalTagihan]);
  
      if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
