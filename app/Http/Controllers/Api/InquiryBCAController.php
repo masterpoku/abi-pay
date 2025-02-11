@@ -170,34 +170,37 @@ class InquiryBCAController extends Controller
                 if (empty($value) && in_array($key, $this->mandatoryFields())) {
                     return response()->json([
                         'responseCode' => '4002402',
-                        'responseMessage' => "Invalid Mandatory Field {virtualAccountNo}",
+                        'responseMessage' => "Invalid Mandatory Field {$key}",
                         'statusCode' => 400,
                         'virtualAccountData' => [
                             'inquiryStatus' => '01',
                             'inquiryReason' => [
-                                'english' => "Invalid Mandatory Field {virtualAccountNo}",
-                                'indonesia' => "Isian wajib {virtualAccountNo} tidak valid"
+                                'english' => "Invalid Mandatory Field {$key}",
+                                'indonesia' => "Isian wajib {$key} tidak valid"
                             ]
                         ]
                     ], 400);
                 }
             
                 // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
-                if (!preg_match('/^\d+$/', $value) && in_array($key, $this->mandatoryFields())) {
+                if ((is_array($value) || !preg_match('/^\d+$/', (string) $value)) && in_array($key, $this->mandatoryFields())) {
                     return response()->json([
                         'responseCode' => '4002401',
-                        'responseMessage' => "Invalid Field Format {virtualAccountNo}",
+                        'responseMessage' => "Invalid Field Format {$key}",
                         'statusCode' => 400,
                         'virtualAccountData' => [
                             'inquiryStatus' => '01',
                             'inquiryReason' => [
-                                'english' => "Invalid Field Format [virtualAccountNo]",
-                                'indonesia' => "Isian format [virtualAccountNo] tidak valid"
+                                'english' => "Invalid Field Format [{$key}]",
+                                'indonesia' => "Isian format [{$key}] tidak valid"
                             ]
                         ]
                     ], 400);
                 }
             }
+            
+          
+            
             
 
             $virtualAccountNo = $request->virtualAccountNo;
@@ -244,7 +247,14 @@ class InquiryBCAController extends Controller
     
         // return response()->json($response);
     }
-
+    private function mandatoryFields()
+    {
+        return [
+            'partnerServiceId',
+            'customerNo',
+            'virtualAccountNo',
+        ];
+    }
     public function handleInvalidFieldFormat($fieldName, $fieldValue)
     {
         return response()->json([
@@ -265,14 +275,7 @@ class InquiryBCAController extends Controller
         ], 400);
     }
     
-    private function mandatoryFields()
-    {
-        return [
-            'partnerServiceId',
-            'customerNo',
-            'virtualAccountNo',
-        ];
-    }
+
     
     private function hashbody($body)
     {
