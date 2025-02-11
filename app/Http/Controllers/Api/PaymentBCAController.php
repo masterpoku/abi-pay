@@ -389,10 +389,21 @@ private function buildSuccessResponse($validated, $user_data, $externalId)
                 $code = 404;
                 Log::info('handlePaymentResponse "Paid Bill"');
             }
+
+           
         }
 
 
       
+    }
+    if ($user_data->nominal_tagihan == '5') {
+        $responseCode = "4042519";
+        $responstatus = "Invalid Bill/Virtual Account";
+        $english = "Bill has been expired";
+        $indonesia = "Tagihan telah kadaluarsa";
+        $responflag = "01";
+        $code = 404;
+        Log::info('handlePaymentResponse "Paid Bill"');
     }
     
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
