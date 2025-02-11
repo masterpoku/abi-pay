@@ -283,7 +283,7 @@ EOF;
                 ->where('payment_request_id', $validated['paymentRequestId'])
                 ->first();
     
-            return $this->handlePaymentResponse($existingPayment, $userData, $validated, $externalId);
+            return $this->handlePaymentResponse($userData, $validated, $externalId);
         } catch (Exception $e) {
             Log::error('Flag Payment Error:', ['error' => $e->getMessage()]);
             return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
@@ -291,7 +291,7 @@ EOF;
     }
 
 
-private function handlePaymentResponse($existingPayment, $userData, $validated, $externalId): JsonResponse
+private function handlePaymentResponse( $userData, $validated, $externalId): JsonResponse
 {
     if (!$userData) {
         return $this->buildNotFoundResponse($validated, $externalId);
