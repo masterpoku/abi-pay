@@ -200,13 +200,24 @@ class InquiryBCAController extends Controller
     
         foreach ($request->all() as $key => $value) {
             // Cek apakah field kosong untuk mandatory fields
-            if ((is_null($value) || $value === '') && in_array($key, $this->mandatoryFields())) {
-                return $this->Mandatoryresponse($key, $validated, $user_data);
+            if (empty($value) && in_array($key, $this->mandatoryFields())) {
+               
+                return $this->Mandatoryresponse($key,$validated, $user_data);
             }
         
             // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
-            if ((!is_numeric($value) || is_array($value)) && in_array($key, $this->mandatoryFields())) {
-                return $this->Mandatoryresponse($key, $validated, $user_data);
+            if ((is_array($value) || !preg_match('/^\d+$/', (string) $value)) && in_array($key, $this->mandatoryFields())) {
+                return response()->json([
+                    'responseCode' => '4002401',
+                    'responseMessage' => "Invalid Field Format {$key}",
+                    'virtualAccountData' => [
+                        'inquiryStatus' => '01',
+                        'inquiryReason' => [
+                            'english' => "Invalid Field Format [{$key}]",
+                            'indonesia' => "Isian format [{$key}] tidak valid"
+                        ]
+                    ]
+                ], 400);
             }
         }
         
@@ -306,51 +317,15 @@ class InquiryBCAController extends Controller
         return $is_valid;
     }
 
+
+    
+
+
+
     /**
      * Membuat respons untuk data yang ditemukan.
      */
-    private function Mandatoryresponse($key, $validated, $user_data)
-{
-    $responseCode = '4002402';
-    $responseMessage = "Invalid Mandatory Field {$key}";
-    $inquiryStatus = '01';
-    $english = "Invalid Mandatory Field [$key]";
-    $indonesia = "Isian wajib [$key] tidak valid";
-    $code = 400;
-
-    $customerNo = substr($validated['virtualAccountNo'], 5);
-
-    return response()->json([
-        "responseCode" => $responseCode,
-        "responseMessage" => $responseMessage,
-        "virtualAccountData" => [
-            "inquiryStatus" => $inquiryStatus,
-            "inquiryReason" => [
-                "english" => $english,
-                "indonesia" => $indonesia
-            ],
-            "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "customerNo" => $customerNo,
-            "virtualAccountNo" => "   " . $user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
-            "inquiryRequestId" => $validated['inquiryRequestId'],
-            "totalAmount" => [
-                "value" => $user_data->nominal_tagihan,
-                "currency" => "IDR"
-            ],
-            "subCompany" => "00000",
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => $user_data->nama_paket,
-                    "indonesia" => $user_data->nama_paket
-                ]
-            ]
-        ],
-        "additionalInfo" => (object) []
-    ], $code);
-}
-private function Formatresponse($key, $validated, $user_data)
+    private function Mandatoryresponse($key,$validated, $user_data)
 {
     $responseCode = '4002402';
     $responseMessage = "Invalid Mandatory Field {$key}";
