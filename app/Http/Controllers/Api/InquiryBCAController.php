@@ -198,32 +198,57 @@ class InquiryBCAController extends Controller
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
     
-        foreach ($request->all() as $key => $value) {
-            // Cek apakah field kosong untuk mandatory fields
-            if (empty($value) && in_array($key, $this->mandatoryFields())) {
-               
-                $responseCode = '4002402';
-                $responseMessage = "Invalid Mandatory Field {$key}";
-                $inquiryStatus = '01';
-                $english = "Invalid Mandatory Field [$key]";
-                $indonesia = "Isian wajib [$key] tidak valid";
-                $code = 400;
-                $customerNo = substr($validated['virtualAccountNo'], 5);
+        $validatedData = $request->all();
+        $mandatoryFields = $this->mandatoryFields();
 
+        foreach ($mandatoryFields as $field) {
+            if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
                 return response()->json([
-                    "responseCode" => $responseCode,
-                    "responseMessage" => $responseMessage,
+                    "responseCode" => '4002402',
+                    "responseMessage" => "Invalid Mandatory Field {$field}",
                     "virtualAccountData" => [
-                        "inquiryStatus" => $inquiryStatus,
+                        "inquiryStatus" => '01',
                         "inquiryReason" => [
-                            "english" => $english,
-                            "indonesia" => $indonesia
+                            "english" => "Invalid Mandatory Field [$field]",
+                            "indonesia" => "Isian wajib [$field] tidak valid"
                         ],
-                        "partnerServiceId" => "   " . $validated['partnerServiceId'],
-                        "customerNo" => $customerNo,
+                        "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
+                        "customerNo" => isset($validatedData['virtualAccountNo']) ? substr($validatedData['virtualAccountNo'], 5) : '',
+                        "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
+                        "virtualAccountName" => $user_data->nama_jamaah ?? '',
+                        "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? '',
+                        "totalAmount" => [
+                            "value" => $user_data->nominal_tagihan ?? 0,
+                            "currency" => "IDR"
+                        ],
+                        "subCompany" => "00000",
+                        "billDetails" => [],
+                        "freeTexts" => [
+                            [
+                                "english" => $user_data->nama_paket ?? '',
+                                "indonesia" => $user_data->nama_paket ?? ''
+                            ]
+                        ]
+                    ],
+                    "additionalInfo" => (object) []
+                ], 400);
+            }
+
+            if (!is_numeric($validatedData[$field]) || is_array($validatedData[$field])) {
+                return response()->json([
+                    "responseCode" => '4002401',
+                    "responseMessage" => "Invalid Field Format {$field}",
+                    "virtualAccountData" => [
+                        "inquiryStatus" => '01',
+                        "inquiryReason" => [
+                            "english" => "Invalid Field Format [$field]",
+                            "indonesia" => "Isian format [$field] tidak valid"
+                        ],
+                        "partnerServiceId" => "   " . $validatedData['partnerServiceId'],
+                        "customerNo" => substr($validatedData['virtualAccountNo'], 5),
                         "virtualAccountNo" => "   " . $user_data->id_invoice,
                         "virtualAccountName" => $user_data->nama_jamaah,
-                        "inquiryRequestId" => $validated['inquiryRequestId'],
+                        "inquiryRequestId" => $validatedData['inquiryRequestId'],
                         "totalAmount" => [
                             "value" => $user_data->nominal_tagihan,
                             "currency" => "IDR"
@@ -238,21 +263,6 @@ class InquiryBCAController extends Controller
                         ]
                     ],
                     "additionalInfo" => (object) []
-                ], $code);
-            }
-        
-            // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
-            if ((is_array($value) || !preg_match('/^\d+$/', (string) $value)) && in_array($key, $this->mandatoryFields())) {
-                return response()->json([
-                    'responseCode' => '4002401',
-                    'responseMessage' => "Invalid Field Format {$key}",
-                    'virtualAccountData' => [
-                        'inquiryStatus' => '01',
-                        'inquiryReason' => [
-                            'english' => "Invalid Field Format [{$key}]",
-                            'indonesia' => "Isian format [{$key}] tidak valid"
-                        ]
-                    ]
                 ], 400);
             }
         }
