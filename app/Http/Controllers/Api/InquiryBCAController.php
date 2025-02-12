@@ -175,8 +175,8 @@ class InquiryBCAController extends Controller
                         'virtualAccountData' => [
                             'inquiryStatus' => '01',
                             'inquiryReason' => [
-                                'english' => "Invalid Mandatory Field {$key}",
-                                'indonesia' => "Isian wajib {$key} tidak valid"
+                                'english' => "Invalid Mandatory Field [$key]",
+                                'indonesia' => "Isian wajib [$key] tidak valid"
                             ]
                         ]
                     ], 400);
