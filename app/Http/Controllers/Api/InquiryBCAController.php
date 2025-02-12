@@ -184,21 +184,21 @@ class InquiryBCAController extends Controller
                             "english" => "Invalid Mandatory Field [$field]",
                             "indonesia" => "Isian wajib [$field] tidak valid"
                         ],
-                        "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
+                        "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
                         "customerNo" => $validatedData['customerNo'] ?? "",
-                        "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
-                        "virtualAccountName" => $user_data->nama_jamaah ?? '',
-                        "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? '',
+                        "virtualAccountNo" => $virtualAccountNo ?? "",
+                        "virtualAccountName" => $user_data->nama_jamaah ?? "",
+                        "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                         "totalAmount" => [
-                            "value" => $user_data->nominal_tagihan ?? 0,
+                            "value" => $user_data->nominal_tagihan ?? "",
                             "currency" => "IDR"
                         ],
                         "subCompany" => "00000",
                         "billDetails" => [],
                         "freeTexts" => [
                             [
-                                "english" => $user_data->nama_paket ?? '',
-                                "indonesia" => $user_data->nama_paket ?? ''
+                                "english" => $user_data->nama_paket ?? "",
+                                "indonesia" => $user_data->nama_paket ?? ""
                             ]
                         ]
                     ],
@@ -216,13 +216,13 @@ class InquiryBCAController extends Controller
                             "english" => "Invalid Field Format [$field]",
                             "indonesia" => "Isian format [$field] tidak valid"
                         ],
-                        "partnerServiceId" => "   " . $validatedData['partnerServiceId'],
+                        "partnerServiceId" => "   " . $validatedData['partnerServiceId']    ?? "",
                         "customerNo" => $validatedData['customerNo'] ?? "" ,
-                        "virtualAccountNo" => "   " . $user_data->id_invoice,
-                        "virtualAccountName" => $user_data->nama_jamaah,
-                        "inquiryRequestId" => $validatedData['inquiryRequestId'],
+                        "virtualAccountNo" => "   " . $user_data->id_invoice ?? "",
+                        "virtualAccountName" => $user_data->nama_jamaah ?? "",
+                        "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
                         "totalAmount" => [
-                            "value" => $user_data->nominal_tagihan,
+                            "value" => $user_data->nominal_tagihan  ?? "",
                             "currency" => "IDR"
                         ],
                         "subCompany" => "00000",
@@ -271,11 +271,11 @@ class InquiryBCAController extends Controller
                     "english" => "Invalid Mandatory Field [$fieldName]",
                     "indonesia" => "Isian wajib [$fieldName] tidak valid"
                 ],
-                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
+                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
                 "customerNo" => $validatedData['customerNo'] ?? "",
                 "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
-                "virtualAccountName" => $user_data->nama_jamaah ?? '',
-                "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? '',
+                "virtualAccountName" => $user_data->nama_jamaah ?? "",
+                "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                 "totalAmount" => [
                     "value" => $user_data->nominal_tagihan ?? "",
                     "currency" => "IDR"
