@@ -146,27 +146,7 @@ class InquiryBCAController extends Controller
                     'responseMessage' => 'Unauthorized. [Signature]',
                 ], 401);
         }
-    
-            // Cek apakah ada field mandatory yang kosong
-            // foreach ($request->all() as $key => $value) {
-            //     if (empty($value) && in_array($key, $this->mandatoryFields())) {
-            //         return response()->json([
-            //             'responseCode' => '4002402',
-            //             'responseMessage' => 'Invalid Mandatory Field '.$virtualAccountNo,
-            //             'statusCode' => 400,
-            //             'virtualAccountData' => [
-            //                 'inquiryStatus' => '01',
-            //                 'inquiryReason' => [
-            //                     'english' => 'Invalid Mandatory Field [virtualAccountNo]',
-            //                     'indonesia' => 'Isian wajib [virtualAccountNo] tidak valid'
-            //                 ]
-            //             ]
-            //         ], 400);
-            //     }
-            // }
-
-           
-          
+  
             
             
 
