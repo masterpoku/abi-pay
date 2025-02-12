@@ -171,7 +171,6 @@ class InquiryBCAController extends Controller
                     return response()->json([
                         'responseCode' => '4002402',
                         'responseMessage' => "Invalid Mandatory Field {$key}",
-                        'statusCode' => 400,
                         'virtualAccountData' => [
                             'inquiryStatus' => '01',
                             'inquiryReason' => [
@@ -187,7 +186,6 @@ class InquiryBCAController extends Controller
                     return response()->json([
                         'responseCode' => '4002401',
                         'responseMessage' => "Invalid Field Format {$key}",
-                        'statusCode' => 400,
                         'virtualAccountData' => [
                             'inquiryStatus' => '01',
                             'inquiryReason' => [
@@ -260,7 +258,6 @@ class InquiryBCAController extends Controller
         return response()->json([
             'responseCode' => '4002501', // Kode untuk Invalid Field Format
             'responseMessage' => 'Invalid Mandatory Field {virtualAccountNo}',
-            'statusCode' => 400,
             'virtualAccountData' => [
                 'paymentFlagStatus' => '01',
                 'paymentFlagReason' => [
