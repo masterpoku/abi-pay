@@ -206,7 +206,7 @@ class InquiryBCAController extends Controller
         
             // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
             if ((!is_numeric($value) || is_array($value)) && in_array($key, $this->mandatoryFields())) {
-                return $this->Formatresponse($key, $validated, $user_data);
+                return $this->Mandatoryresponse($key, $validated, $user_data);
             }
         }
         
