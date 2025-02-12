@@ -277,7 +277,7 @@ class InquiryBCAController extends Controller
                 "virtualAccountName" => $user_data->nama_jamaah ?? '',
                 "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? '',
                 "totalAmount" => [
-                    "value" => $user_data->nominal_tagihan ?? 0,
+                    "value" => $user_data->nominal_tagihan ?? "",
                     "currency" => "IDR"
                 ],
                 "subCompany" => "00000",
