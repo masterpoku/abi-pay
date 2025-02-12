@@ -239,8 +239,8 @@ EOF;
                         'responseMessage' => "Invalid Mandatory Field {virtualAccountNo}",
                         'statusCode' => 400,
                         'virtualAccountData' => [
-                            'inquiryStatus' => '01',
-                            'inquiryReason' => [
+                            'paymentStatus' => '01',
+                            'paymentReason' => [
                                 'english' => "Invalid Mandatory Field {virtualAccountNo}",
                                 'indonesia' => "Isian wajib {virtualAccountNo} tidak valid"
                             ]
@@ -256,8 +256,8 @@ EOF;
                             'responseMessage' => "Invalid Field Format {$key}",
                             'statusCode' => 400,
                         'virtualAccountData' => [
-                            'inquiryStatus' => '01',
-                            'inquiryReason' => [
+                            'paymentStatus' => '01',
+                            'paymentReason' => [
                                 'english' => "Invalid Field Format [virtualAccountNo]",
                                 'indonesia' => "Isian format [virtualAccountNo] tidak valid"
                             ]
@@ -635,25 +635,39 @@ private function mandatoryFields()
             'virtualAccountNo',
         ];
     }
-    public function handleInvalidFieldFormat($fieldName, $fieldValue)
+    public function handleInvalidFieldFormat($fieldName, $validatedData)
     {
         return response()->json([
-            'responseCode' => '4002501', // Kode untuk Invalid Field Format
-            'responseMessage' => 'Invalid Field Format',
-            'statusCode' => 400,
-            'virtualAccountData' => [
-                'paymentFlagStatus' => '01',
-                'paymentFlagReason' => [
-                    'english' => 'Any Value',
-                    'indonesia' => 'Any Value'
+            "responseCode" => '4002402',
+            "responseMessage" => "Invalid Mandatory Field {$fieldName}",
+            "virtualAccountData" => [
+                "paymentFlagStatus" => '01',
+                "paymentFlagReason" => [
+                    "english" => "Invalid Mandatory Field [$fieldName]",
+                    "indonesia" => "Isian wajib [$fieldName] tidak valid"
                 ],
-                'partnerServiceId' => '   14999',
-                'customerNo' => 'any value',
-                'virtualAccountNo' => $fieldValue, // Mengembalikan nilai field yang bermasalah
-                'paymentRequestId' => 'Any Value'
-            ]
+                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
+                "customerNo" => $validatedData['customerNo'] ?? "",
+                "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
+                "virtualAccountName" => $user_data->nama_jamaah ?? '',
+                "paymentRequestId" => $validatedData['inquiryRequestId'] ?? '',
+                "totalAmount" => [
+                    "value" => $user_data->nominal_tagihan ?? 0,
+                    "currency" => "IDR"
+                ],
+                "subCompany" => "00000",
+                "billDetails" => [],
+                "freeTexts" => [
+                    [
+                        "english" => $user_data->nama_paket ?? '',
+                        "indonesia" => $user_data->nama_paket ?? ''
+                    ]
+                ]
+            ],
+            "additionalInfo" => (object) []
         ], 400);
     }
+    
     
     private function validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)
 {
