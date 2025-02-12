@@ -165,38 +165,7 @@ class InquiryBCAController extends Controller
             //     }
             // }
 
-            foreach ($request->all() as $key => $value) {
-                // Cek apakah field kosong untuk mandatory fields
-                if (empty($value) && in_array($key, $this->mandatoryFields())) {
-                    return response()->json([
-                        'responseCode' => '4002402',
-                        'responseMessage' => "Invalid Mandatory Field {$key}",
-                        'virtualAccountData' => [
-                            'inquiryStatus' => '01',
-                            'inquiryReason' => [
-                                'english' => "Invalid Mandatory Field [$key]",
-                                'indonesia' => "Isian wajib [$key] tidak valid"
-                            ]
-                        ]
-                    ], 400);
-                }
-            
-                // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
-                if ((is_array($value) || !preg_match('/^\d+$/', (string) $value)) && in_array($key, $this->mandatoryFields())) {
-                    return response()->json([
-                        'responseCode' => '4002401',
-                        'responseMessage' => "Invalid Field Format {$key}",
-                        'virtualAccountData' => [
-                            'inquiryStatus' => '01',
-                            'inquiryReason' => [
-                                'english' => "Invalid Field Format [{$key}]",
-                                'indonesia' => "Isian format [{$key}] tidak valid"
-                            ]
-                        ]
-                    ], 400);
-                }
-            }
-            
+           
           
             
             
@@ -227,11 +196,20 @@ class InquiryBCAController extends Controller
     
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
-        }else{
-            
         }
     
-
+        foreach ($request->all() as $key => $value) {
+            // Cek apakah field kosong untuk mandatory fields
+            if ((is_null($value) || $value === '') && in_array($key, $this->mandatoryFields())) {
+                return $this->Mandatoryresponse($key, $validated, $user_data);
+            }
+        
+            // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
+            if ((!is_numeric($value) || is_array($value)) && in_array($key, $this->mandatoryFields())) {
+                return $this->Formatresponse($key, $validated, $user_data);
+            }
+        }
+        
     
         if ($validated['partnerServiceId'] !== '14999') {
             return response()->json([
@@ -328,74 +306,92 @@ class InquiryBCAController extends Controller
         return $is_valid;
     }
 
-
-    
-
-
-
     /**
      * Membuat respons untuk data yang ditemukan.
      */
-    // private function buildSuccessResponse($validated, $user_data)
-    // {
+    private function Mandatoryresponse($key, $validated, $user_data)
+{
+    $responseCode = '4002402';
+    $responseMessage = "Invalid Mandatory Field {$key}";
+    $inquiryStatus = '01';
+    $english = "Invalid Mandatory Field [$key]";
+    $indonesia = "Isian wajib [$key] tidak valid";
+    $code = 400;
 
-        
-    //     if($user_data->status_pembayaran == '1'){
-    //         $responstatus = "Paid Bill";
-    //         $english = "Bill has been paid";
-    //         $indonesia = "Tagihan telah dibayar";
-    //         $inquiryStatus = "01";
-    //         $responseCode = "4042414";
-    //         $code = 404;
-        
-    //      }elseif ($user_data->nominal_tagihan == '2') {
-    //         $responseCode = "4042519";
-    //         $responstatus = "Invalid Bill/Virtual Account";
-    //         $english = "Bill has been expired";
-    //         $indonesia = "Tagihan telah kadaluarsa";
-    //         $code = 404;
-    //         Log::info('handlePaymentResponse "Paid Bill"');
-    //     }else{
-    //         $responstatus = "Successful";
-    //         $english = "Success";
-    //         $indonesia = "Sukses";
-    //         $inquiryStatus = "00";
-    //         $responseCode = "2002400";
-    //         $code = 200;
-    //      }
+    $customerNo = substr($validated['virtualAccountNo'], 5);
 
-         
-    //     $customerNo = substr($validated['virtualAccountNo'], 5);
-    //     return response()->json([
-    //         "responseCode" => $responseCode,
-    //         "responseMessage" => $responstatus,
-    //         "virtualAccountData" => [
-    //             "inquiryStatus" => $inquiryStatus,
-    //             "inquiryReason" => [
-    //                 "english" => $english,
-    //                 "indonesia" => $indonesia
-    //             ],
-    //             "partnerServiceId" => "   ".$validated['partnerServiceId'],
-    //             "customerNo" => $customerNo,
-    //             "virtualAccountNo" => "   ".$user_data->id_invoice,
-    //             "virtualAccountName" => $user_data->nama_jamaah,
-    //             "inquiryRequestId" => $validated['inquiryRequestId'],
-    //             "totalAmount" => [
-    //                 "value" => $user_data->nominal_tagihan,
-    //                 "currency" => "IDR"
-    //             ],
-    //             "subCompany" => "00000",
-    //             "billDetails" => [],
-    //             "freeTexts" => [
-    //                 [
-    //                     "english" => $user_data->nama_paket,
-    //                     "indonesia" => $user_data->nama_paket
-    //                 ]
-    //             ]
-    //         ],
-    //        "additionalInfo" => (object) []
-    //     ], $code);
-    // }
+    return response()->json([
+        "responseCode" => $responseCode,
+        "responseMessage" => $responseMessage,
+        "virtualAccountData" => [
+            "inquiryStatus" => $inquiryStatus,
+            "inquiryReason" => [
+                "english" => $english,
+                "indonesia" => $indonesia
+            ],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
+            "customerNo" => $customerNo,
+            "virtualAccountNo" => "   " . $user_data->id_invoice,
+            "virtualAccountName" => $user_data->nama_jamaah,
+            "inquiryRequestId" => $validated['inquiryRequestId'],
+            "totalAmount" => [
+                "value" => $user_data->nominal_tagihan,
+                "currency" => "IDR"
+            ],
+            "subCompany" => "00000",
+            "billDetails" => [],
+            "freeTexts" => [
+                [
+                    "english" => $user_data->nama_paket,
+                    "indonesia" => $user_data->nama_paket
+                ]
+            ]
+        ],
+        "additionalInfo" => (object) []
+    ], $code);
+}
+private function Formatresponse($key, $validated, $user_data)
+{
+    $responseCode = '4002402';
+    $responseMessage = "Invalid Mandatory Field {$key}";
+    $inquiryStatus = '01';
+    $english = "Invalid Mandatory Field [$key]";
+    $indonesia = "Isian wajib [$key] tidak valid";
+    $code = 400;
+
+    $customerNo = substr($validated['virtualAccountNo'], 5);
+
+    return response()->json([
+        "responseCode" => $responseCode,
+        "responseMessage" => $responseMessage,
+        "virtualAccountData" => [
+            "inquiryStatus" => $inquiryStatus,
+            "inquiryReason" => [
+                "english" => $english,
+                "indonesia" => $indonesia
+            ],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
+            "customerNo" => $customerNo,
+            "virtualAccountNo" => "   " . $user_data->id_invoice,
+            "virtualAccountName" => $user_data->nama_jamaah,
+            "inquiryRequestId" => $validated['inquiryRequestId'],
+            "totalAmount" => [
+                "value" => $user_data->nominal_tagihan,
+                "currency" => "IDR"
+            ],
+            "subCompany" => "00000",
+            "billDetails" => [],
+            "freeTexts" => [
+                [
+                    "english" => $user_data->nama_paket,
+                    "indonesia" => $user_data->nama_paket
+                ]
+            ]
+        ],
+        "additionalInfo" => (object) []
+    ], $code);
+}
+
     private function buildSuccessResponse($validated, $user_data)
     {
         // Cek status pembayaran
