@@ -202,7 +202,17 @@ class InquiryBCAController extends Controller
             // Cek apakah field kosong untuk mandatory fields
             if (empty($value) && in_array($key, $this->mandatoryFields())) {
                
-                return $this->Mandatoryresponse($key,$validated, $user_data);
+                return response()->json([
+                    'responseCode' => '4002402',
+                    'responseMessage' => "Invalid Mandatory Field {$key}",
+                    'virtualAccountData' => [
+                        'inquiryStatus' => '01',
+                        'inquiryReason' => [
+                            'english' => "Invalid Mandatory Field [$key]",
+                            'indonesia' => "Isian wajib [$key] tidak valid"
+                        ]
+                    ]
+                ], 400);
             }
         
             // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
@@ -325,48 +335,66 @@ class InquiryBCAController extends Controller
     /**
      * Membuat respons untuk data yang ditemukan.
      */
-    private function Mandatoryresponse($key,$validated, $user_data)
-{
-    $responseCode = '4002402';
-    $responseMessage = "Invalid Mandatory Field {$key}";
-    $inquiryStatus = '01';
-    $english = "Invalid Mandatory Field [$key]";
-    $indonesia = "Isian wajib [$key] tidak valid";
-    $code = 400;
+    private function Mandatoryresponse($validated, $user_data)
+    {
 
-    $customerNo = substr($validated['virtualAccountNo'], 5);
+        
+        if($user_data->status_pembayaran == '1'){
+            $responstatus = "Paid Bill";
+            $english = "Bill has been paid";
+            $indonesia = "Tagihan telah dibayar";
+            $inquiryStatus = "01";
+            $responseCode = "4042414";
+            $code = 404;
+        
+         }elseif ($user_data->nominal_tagihan == '2') {
+            $responseCode = "4042519";
+            $responstatus = "Invalid Bill/Virtual Account";
+            $english = "Bill has been expired";
+            $indonesia = "Tagihan telah kadaluarsa";
+            $code = 404;
+            Log::info('handlePaymentResponse "Paid Bill"');
+        }else{
+            $responstatus = "Successful";
+            $english = "Success";
+            $indonesia = "Sukses";
+            $inquiryStatus = "00";
+            $responseCode = "2002400";
+            $code = 200;
+         }
 
-    return response()->json([
-        "responseCode" => $responseCode,
-        "responseMessage" => $responseMessage,
-        "virtualAccountData" => [
-            "inquiryStatus" => $inquiryStatus,
-            "inquiryReason" => [
-                "english" => $english,
-                "indonesia" => $indonesia
-            ],
-            "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "customerNo" => $customerNo,
-            "virtualAccountNo" => "   " . $user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
-            "inquiryRequestId" => $validated['inquiryRequestId'],
-            "totalAmount" => [
-                "value" => $user_data->nominal_tagihan,
-                "currency" => "IDR"
-            ],
-            "subCompany" => "00000",
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => $user_data->nama_paket,
-                    "indonesia" => $user_data->nama_paket
+         
+        $customerNo = substr($validated['virtualAccountNo'], 5);
+        return response()->json([
+            "responseCode" => $responseCode,
+            "responseMessage" => $responstatus,
+            "virtualAccountData" => [
+                "inquiryStatus" => $inquiryStatus,
+                "inquiryReason" => [
+                    "english" => $english,
+                    "indonesia" => $indonesia
+                ],
+                "partnerServiceId" => "   ".$validated['partnerServiceId'],
+                "customerNo" => $customerNo,
+                "virtualAccountNo" => "   ".$user_data->id_invoice,
+                "virtualAccountName" => $user_data->nama_jamaah,
+                "inquiryRequestId" => $validated['inquiryRequestId'],
+                "totalAmount" => [
+                    "value" => $user_data->nominal_tagihan,
+                    "currency" => "IDR"
+                ],
+                "subCompany" => "00000",
+                "billDetails" => [],
+                "freeTexts" => [
+                    [
+                        "english" => $user_data->nama_paket,
+                        "indonesia" => $user_data->nama_paket
+                    ]
                 ]
-            ]
-        ],
-        "additionalInfo" => (object) []
-    ], $code);
-}
-
+            ],
+           "additionalInfo" => (object) []
+        ], $code);
+    }
     private function buildSuccessResponse($validated, $user_data)
     {
         // Cek status pembayaran
