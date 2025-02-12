@@ -150,10 +150,13 @@ class InquiryBCAController extends Controller
             
             
 
+        $validatedData = $request->all();
+        $mandatoryFields = $this->mandatoryFields();
+
             $virtualAccountNo = $request->virtualAccountNo;
             Log::info('Virtual Account No:', [$virtualAccountNo]);
               if(!preg_match('/^\d+$/', $virtualAccountNo)) {
-                    return $this->handleInvalidFieldFormat('virtualAccountNo', $virtualAccountNo);
+                    return $this->handleInvalidFieldFormat('virtualAccountNo', $validatedData);
                 }
      
     
@@ -170,9 +173,6 @@ class InquiryBCAController extends Controller
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
     
-        $validatedData = $request->all();
-        $mandatoryFields = $this->mandatoryFields();
-
         foreach ($mandatoryFields as $field) {
             if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
                 return response()->json([
@@ -185,7 +185,7 @@ class InquiryBCAController extends Controller
                             "indonesia" => "Isian wajib [$field] tidak valid"
                         ],
                         "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
-                        "customerNo" => isset($validatedData['virtualAccountNo']) ? substr($validatedData['virtualAccountNo'], 5) : '',
+                        "customerNo" => $validatedData['customerNo'] ?? "",
                         "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
                         "virtualAccountName" => $user_data->nama_jamaah ?? '',
                         "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? '',
@@ -217,7 +217,7 @@ class InquiryBCAController extends Controller
                             "indonesia" => "Isian format [$field] tidak valid"
                         ],
                         "partnerServiceId" => "   " . $validatedData['partnerServiceId'],
-                        "customerNo" => substr($validatedData['virtualAccountNo'], 5),
+                        "customerNo" => $validatedData['customerNo'] ?? "" ,
                         "virtualAccountNo" => "   " . $user_data->id_invoice,
                         "virtualAccountName" => $user_data->nama_jamaah,
                         "inquiryRequestId" => $validatedData['inquiryRequestId'],
@@ -260,22 +260,36 @@ class InquiryBCAController extends Controller
             'virtualAccountNo',
         ];
     }
-    public function handleInvalidFieldFormat($fieldName, $fieldValue)
+    public function handleInvalidFieldFormat($fieldName, $validatedData)
     {
         return response()->json([
-            'responseCode' => '4002501', // Kode untuk Invalid Field Format
-            'responseMessage' => 'Invalid Mandatory Field {virtualAccountNo}',
-            'virtualAccountData' => [
-                'paymentFlagStatus' => '01',
-                'paymentFlagReason' => [
-                    'english' => 'Any Value',
-                    'indonesia' => 'Any Value'
+            "responseCode" => '4002402',
+            "responseMessage" => "Invalid Mandatory Field {$fieldName}",
+            "virtualAccountData" => [
+                "inquiryStatus" => '01',
+                "inquiryReason" => [
+                    "english" => "Invalid Mandatory Field [$fieldName]",
+                    "indonesia" => "Isian wajib [$fieldName] tidak valid"
                 ],
-                'partnerServiceId' => '   14999',
-                'customerNo' => '040002',
-                'virtualAccountNo' => $fieldValue, // Mengembalikan nilai field yang bermasalah
-                'paymentRequestId' => 'Any Value'
-            ]
+                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
+                "customerNo" => $validatedData['customerNo'] ?? "",
+                "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
+                "virtualAccountName" => $user_data->nama_jamaah ?? '',
+                "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? '',
+                "totalAmount" => [
+                    "value" => $user_data->nominal_tagihan ?? 0,
+                    "currency" => "IDR"
+                ],
+                "subCompany" => "00000",
+                "billDetails" => [],
+                "freeTexts" => [
+                    [
+                        "english" => $user_data->nama_paket ?? '',
+                        "indonesia" => $user_data->nama_paket ?? ''
+                    ]
+                ]
+            ],
+            "additionalInfo" => (object) []
         ], 400);
     }
     
