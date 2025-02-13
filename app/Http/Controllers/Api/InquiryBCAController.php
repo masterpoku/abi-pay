@@ -398,88 +398,69 @@ class InquiryBCAController extends Controller
         "additionalInfo" => (object) []
     ], $code);
 }
-    private function buildSuccessResponse($validated, $user_data)
-    {
-        // Cek status pembayaran
-        if ($user_data->status_pembayaran == '1') {
-            $responstatus = "Paid Bill";
-            $english = "Bill has been paid";
-            $indonesia = "Tagihan telah dibayar";
-            $inquiryStatus = "01";
-            $responseCode = "4042414";
-            $code = 404;
-    
-        }else {
-            $responstatus = "Successful";
-            $english = "Success";
-            $indonesia = "Sukses";
-            $inquiryStatus = "00";
-            $responseCode = "2002400";
-            $code = 200;
-        }
-    
-        // Cek validasi amount setelah cek status pembayaran
-        // $paidAmount = isset($validated['paidAmount']['value']) ? (float)$validated['paidAmount']['value'] : 0;
-        // $totalAmount = isset($validated['totalAmount']['value']) ? (float)$validated['totalAmount']['value'] : 0;
-        // $nominalTagihan = (float)$user_data->nominal_tagihan;
-    
-        // Log::info('data validate: '.json_encode($validated));
-        // Log::info('paidAmount: '.$paidAmount);
-        // Log::info('nominalTagihan: '.$nominalTagihan);
-        // Log::info('totalAmount: '.$totalAmount);
-        // if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
-        //     return response()->json([
-        //         "responseCode" => "4042513",
-        //         "responseMessage" => "Invalid Amount",
-        //         "virtualAccountData" => [
-        //             "paymentFlagStatus" => "01",
-        //             "paymentFlagReason" => [
-        //                 "english" => "Invalid Amount",
-        //                 "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
-        //             ]
-        //         ]
-        //     ], 404);
-        // }
-        if ($user_data->nominal_tagihan == '2') {
-            $responseCode = "4042419";
-            $responstatus = "Invalid Bill/Virtual Account";
-            $english = "Bill has been expired";
-            $indonesia = "Tagihan telah kadaluarsa";
-            $inquiryStatus = "01";
-            $code = 404;
-            Log::info('handlePaymentResponse "Paid Bill"');
-        }
-        $customerNo = substr($validated['virtualAccountNo'], 5);
-        return response()->json([
-            "responseCode" => $responseCode,
-            "responseMessage" => $responstatus,
-            "virtualAccountData" => [
-                "inquiryStatus" => $inquiryStatus,
-                "inquiryReason" => [
-                    "english" => $english,
-                    "indonesia" => $indonesia
-                ],
-                "partnerServiceId" => "   " . $validated['partnerServiceId'],
-                "customerNo" => $customerNo,
-                "virtualAccountNo" => "   " . $user_data->id_invoice,
-                "virtualAccountName" => $user_data->nama_jamaah,
-                "inquiryRequestId" => $validated['inquiryRequestId'],
-                "totalAmount" => [
-                    "value" => $user_data->nominal_tagihan,
-                    "currency" => "IDR"
-                ],
-                "subCompany" => "00000",
-                "billDetails" => [],
-                "freeTexts" => [
-                    [
-                        "english" => $user_data->nama_paket,
-                        "indonesia" => $user_data->nama_paket
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object)[]
-        ], $code);
+private function buildSuccessResponse($validated, $user_data)
+{
+    // Default response untuk sukses
+    $responstatus = "Successful";
+    $english = "Success";
+    $indonesia = "Sukses";
+    $inquiryStatus = "00";
+    $responseCode = "2002400";
+    $code = 200;
+
+    // Cek jika tagihan kadaluarsa
+    if ($user_data->nominal_tagihan == '2') {  
+        $responseCode = "4042419";
+        $responstatus = "Invalid Bill/Virtual Account";
+        $english = "Bill has been expired";
+        $indonesia = "Tagihan telah kadaluarsa";
+        $inquiryStatus = "01";
+        $code = 404;
+        Log::info('handlePaymentResponse "Invalid Bill/Virtual Account"');
     }
+    // Cek jika tagihan sudah dibayar (hanya jika tidak kadaluarsa)
+    elseif ($user_data->status_pembayaran == '1') {  
+        $responstatus = "Paid Bill";
+        $english = "Bill has been paid";
+        $indonesia = "Tagihan telah dibayar";
+        $inquiryStatus = "01";
+        $responseCode = "4042414";
+        $code = 404;
+        Log::info('handlePaymentResponse "Paid Bill"');
+    }
+
+    $customerNo = substr($validated['virtualAccountNo'], 5);
+    return response()->json([
+        "responseCode" => $responseCode,
+        "responseMessage" => $responstatus,
+        "virtualAccountData" => [
+            "inquiryStatus" => $inquiryStatus,
+            "inquiryReason" => [
+                "english" => $english,
+                "indonesia" => $indonesia
+            ],
+            "partnerServiceId" => $validated['partnerServiceId'],
+            "customerNo" => $customerNo,
+            "virtualAccountNo" => $user_data->id_invoice,
+            "virtualAccountName" => $user_data->nama_jamaah,
+            "inquiryRequestId" => $validated['inquiryRequestId'],
+            "totalAmount" => [
+                "value" => $user_data->nominal_tagihan,
+                "currency" => "IDR"
+            ],
+            "subCompany" => "00000",
+            "billDetails" => [],
+            "freeTexts" => [
+                [
+                    "english" => $user_data->nama_paket,
+                    "indonesia" => $user_data->nama_paket
+                ]
+            ]
+        ],
+        "additionalInfo" => (object)[]
+    ], $code);
+}
+
     
     /**
      * Membuat respons untuk data yang tidak ditemukan.
