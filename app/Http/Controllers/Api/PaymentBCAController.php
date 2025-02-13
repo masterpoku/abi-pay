@@ -441,25 +441,32 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         $code = 404;
         Log::info('handlePaymentResponse "Paid Bill"');
     }
-     // Cek validasi amount setelah cek status pembayaran
-     $paidAmount = $request->input('paidAmount.value');
-     $totalAmount = $request->input('totalAmount.value');
-     $nominalTagihan = (float) $user_data->nominal_tagihan;
-     Log::info('Amounts:', ['paidAmount' => $paidAmount, 'totalAmount' => $totalAmount, 'nominalTagihan' => $nominalTagihan]);
- 
-     if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
-         return response()->json([
-             "responseCode" => "4042513",
-             "responseMessage" => "Invalid Amount",
-             "virtualAccountData" => [
-                 "paymentFlagStatus" => "01",
-                 "paymentFlagReason" => [
-                     "english" => "Invalid Amount",
-                     "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
-                 ]
-             ]
-         ], 404);
-     }
+        // Cek validasi amount setelah cek status pembayaran
+        $paidAmount = $request->input('paidAmount.value');
+        $totalAmount = $request->input('totalAmount.value');
+        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', ''); // Paksa format jadi ada .00
+
+        Log::info('Amounts:', [
+            'paidAmount' => $paidAmount, 
+            'totalAmount' => $totalAmount, 
+            'nominalTagihan' => $nominalTagihan
+        ]);
+
+        // Validasi amount tanpa mengubah request
+        if ($paidAmount !== $nominalTagihan || $totalAmount !== $nominalTagihan) {
+            return response()->json([
+                "responseCode" => "4042513",
+                "responseMessage" => "Invalid Amount",
+                "virtualAccountData" => [
+                    "paymentFlagStatus" => "01",
+                    "paymentFlagReason" => [
+                        "english" => "Invalid Amount",
+                        "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+                    ]
+                ]
+            ], 404);
+        }
+
  
     // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
     if ($code == 200 && !$existingRecord) {
