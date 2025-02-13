@@ -421,10 +421,10 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
 
         // Cek validasi amount setelah cek status pembayaran
         $paidAmount = (float) $request->input('paidAmount.value');
-        $paidAmount = $paidAmount == (int) $paidAmount ? (int) $paidAmount : number_format($paidAmount, 2, '.', '');
         $totalAmount = (float) $request->input('totalAmount.value');
-        $totalAmount = $totalAmount == (int) $totalAmount ? (int) $totalAmount : number_format($totalAmount, 2, '.', '');
-        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', ''); // Paksa format jadi ada .00
+
+        // Pastikan nominalTagihan dari database ada format .00
+        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
 
         Log::info('Amounts:', [
             'paidAmount' => $paidAmount, 
@@ -433,7 +433,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         ]);
 
         // Validasi amount tanpa mengubah request
-        if ((string) $paidAmount !== (string) $nominalTagihan || (string) $totalAmount !== (string) $nominalTagihan) {
+        if (bccomp($paidAmount, $nominalTagihan, 2) !== 0 || bccomp($totalAmount, $nominalTagihan, 2) !== 0) {
             return response()->json([
                 "responseCode" => "4042513",
                 "responseMessage" => "Invalid Amount",
@@ -446,6 +446,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                 ]
             ], 404);
         }
+
 
         // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
         if ($code == 200 && !$existingRecord) {
