@@ -419,33 +419,47 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             }
         }
 
-        // Cek validasi amount setelah cek status pembayaran
-        $paidAmount = (float) $request->input('paidAmount.value');
-        $totalAmount = (float) $request->input('totalAmount.value');
+        // Fungsi pengganti bccomp() manual
+            function bccomp_manual($left, $right, $scale = 2) {
+                $left = number_format((float)$left, $scale, '.', '');
+                $right = number_format((float)$right, $scale, '.', '');
 
-        // Pastikan nominalTagihan dari database ada format .00
-        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
+                if ($left > $right) {
+                    return 1;  // $left lebih besar dari $right
+                } elseif ($left < $right) {
+                    return -1; // $left lebih kecil dari $right
+                }
+                return 0; // Sama
+            }
 
-        Log::info('Amounts:', [
-            'paidAmount' => $paidAmount, 
-            'totalAmount' => $totalAmount, 
-            'nominalTagihan' => $nominalTagihan
-        ]);
+            // Cek validasi amount setelah cek status pembayaran
+            $paidAmount = (float) $request->input('paidAmount.value');
+            $totalAmount = (float) $request->input('totalAmount.value');
 
-        // Validasi amount tanpa mengubah request
-        if (bccomp($paidAmount, $nominalTagihan, 2) !== 0 || bccomp($totalAmount, $nominalTagihan, 2) !== 0) {
-            return response()->json([
-                "responseCode" => "4042513",
-                "responseMessage" => "Invalid Amount",
-                "virtualAccountData" => [
-                    "paymentFlagStatus" => "01",
-                    "paymentFlagReason" => [
-                        "english" => "Invalid Amount",
-                        "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+            // Pastikan nominalTagihan dari database ada format .00
+            $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
+
+            Log::info('Amounts:', [
+                'paidAmount' => $paidAmount, 
+                'totalAmount' => $totalAmount, 
+                'nominalTagihan' => $nominalTagihan
+            ]);
+
+            // Validasi amount tanpa mengubah request
+            if (bccomp_manual($paidAmount, $nominalTagihan, 2) !== 0 || bccomp_manual($totalAmount, $nominalTagihan, 2) !== 0) {
+                return response()->json([
+                    "responseCode" => "4042513",
+                    "responseMessage" => "Invalid Amount",
+                    "virtualAccountData" => [
+                        "paymentFlagStatus" => "01",
+                        "paymentFlagReason" => [
+                            "english" => "Invalid Amount",
+                            "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
+                        ]
                     ]
-                ]
-            ], 404);
-        }
+                ], 404);
+            }
+
 
 
         // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
