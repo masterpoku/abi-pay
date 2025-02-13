@@ -354,7 +354,17 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
 
 private function buildSuccessResponse($request,$validated, $user_data, $externalId)
 {
-        $customerNo = substr($validated['virtualAccountNo'], 5); // Mengambil nomor pelanggan
+        // Fungsi pengganti bccomp() manual
+        function bccomp_manual($left, $right, $scale = 2) {
+            $left = number_format((float)$left, $scale, '.', '');
+            $right = number_format((float)$right, $scale, '.', '');
+            return ($left <=> $right); // Menggunakan spaceship operator (PHP 7+)
+        }
+
+        $now = now(); // Simpan waktu supaya konsisten di seluruh eksekusi
+
+        // Ambil customerNo dari virtualAccountNo
+        $customerNo = substr($validated['virtualAccountNo'], 5);
         Log::info('buildSuccessResponse validated:', $validated);
 
         // Default response jika pembayaran belum dilakukan
@@ -365,7 +375,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         $responflag = "00";
         $code = 200;
 
-        // Validasi external_id sebelum digunakan
+        // Cek validasi external_id lebih awal
         $externalId = $externalId ?? null;
         if (!$externalId) {
             $responseCode = "4042518";
@@ -419,60 +429,40 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             }
         }
 
-        // Fungsi pengganti bccomp() manual
-            function bccomp_manual($left, $right, $scale = 2) {
-                $left = number_format((float)$left, $scale, '.', '');
-                $right = number_format((float)$right, $scale, '.', '');
+        // Cek validasi amount setelah cek status pembayaran
+        $paidAmount = (float) $request->input('paidAmount.value');
+        $totalAmount = (float) $request->input('totalAmount.value');
 
-                if ($left > $right) {
-                    return 1;  // $left lebih besar dari $right
-                } elseif ($left < $right) {
-                    return -1; // $left lebih kecil dari $right
-                }
-                return 0; // Sama
-            }
+        // Pastikan nominalTagihan dari database ada format .00
+        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
 
-            // Cek validasi amount setelah cek status pembayaran
-            $paidAmount = (float) $request->input('paidAmount.value');
-            $totalAmount = (float) $request->input('totalAmount.value');
+        Log::info('Amounts:', [
+            'paidAmount' => $paidAmount, 
+            'totalAmount' => $totalAmount, 
+            'nominalTagihan' => $nominalTagihan
+        ]);
 
-            // Pastikan nominalTagihan dari database ada format .00
-            $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
+        // Validasi amount tanpa mengubah request
+        if (bccomp_manual($paidAmount, $nominalTagihan, 2) !== 0 || bccomp_manual($totalAmount, $nominalTagihan, 2) !== 0) {
+            $responseCode = "4042513";
+            $responstatus = "Invalid Amount";
+            $english = "Invalid Amount";
+            $indonesia = "Jumlah pembayaran tidak sesuai dengan tagihan";
+            $responflag = "01";
+            $code = 404;
+        }
 
-            Log::info('Amounts:', [
-                'paidAmount' => $paidAmount, 
-                'totalAmount' => $totalAmount, 
-                'nominalTagihan' => $nominalTagihan
-            ]);
-
-            // Validasi amount tanpa mengubah request
-            if (bccomp_manual($paidAmount, $nominalTagihan, 2) !== 0 || bccomp_manual($totalAmount, $nominalTagihan, 2) !== 0) {
-                return response()->json([
-                    "responseCode" => "4042513",
-                    "responseMessage" => "Invalid Amount",
-                    "virtualAccountData" => [
-                        "paymentFlagStatus" => "01",
-                        "paymentFlagReason" => [
-                            "english" => "Invalid Amount",
-                            "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
-                        ]
-                    ]
-                ], 404);
-            }
-
-
-
-        // **Jika tidak ada konflik dan external_id belum ada di database, insert baru**
+        // Jika tidak ada konflik dan external_id belum ada di database, insert baru
         if ($code == 200 && !$existingRecord) {
             DB::table('external_ids')->insert([
                 'external_id' => $externalId,
                 'payment_request_id' => $validated['paymentRequestId'],
-                'date' => now()->toDateString(),
-                'created_at' => now(),
+                'date' => $now->toDateString(),
+                'created_at' => $now,
             ]);
         }
 
-        // **Update status pembayaran hanya jika belum lunas & respon sukses**
+        // Update status pembayaran hanya jika belum lunas & respon sukses
         if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
             DB::table('tagihan_pembayaran')
                 ->where('id_invoice', $validated['virtualAccountNo'])
@@ -480,9 +470,10 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                     'status_pembayaran' => '1',
                     'external_id' => $externalId,
                     'payment_request_id' => $validated['paymentRequestId'],
-                    'updated_at' => now(),
+                    'updated_at' => $now,
                 ]);
         }
+
 
     return response()->json([
         "responseCode" => $responseCode,
