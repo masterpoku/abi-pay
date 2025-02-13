@@ -186,7 +186,7 @@ class InquiryBCAController extends Controller
                         ],
                         "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
                         "customerNo" => $validatedData['customerNo'] ?? "",
-                        "virtualAccountNo" => $virtualAccountNo ?? "",
+                        "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->nama_jamaah ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                         "totalAmount" => [
@@ -206,7 +206,7 @@ class InquiryBCAController extends Controller
                 ], 400);
             }
 
-            if (!is_numeric($validatedData[$field]) || is_array($validatedData[$field])) {
+            if ($field === 'virtualAccountNo' && (!is_numeric($validatedData[$field]) || is_array($validatedData[$field]))) {
                 return response()->json([
                     "responseCode" => '4002401',
                     "responseMessage" => "Invalid Field Format {$field}",
@@ -218,7 +218,7 @@ class InquiryBCAController extends Controller
                         ],
                         "partnerServiceId" => "   " . $validatedData['partnerServiceId']    ?? "",
                         "customerNo" => $validatedData['customerNo'] ?? "" ,
-                        "virtualAccountNo" => "   " . $user_data->id_invoice ?? "",
+                        "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->nama_jamaah ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
                         "totalAmount" => [
@@ -409,14 +409,7 @@ class InquiryBCAController extends Controller
             $responseCode = "4042414";
             $code = 404;
     
-        } elseif ($user_data->nominal_tagihan == '2') {
-            $responseCode = "4042519";
-            $responstatus = "Invalid Bill/Virtual Account";
-            $english = "Bill has been expired";
-            $indonesia = "Tagihan telah kadaluarsa";
-            $code = 404;
-            Log::info('handlePaymentResponse "Paid Bill"');
-        } else {
+        }else {
             $responstatus = "Successful";
             $english = "Success";
             $indonesia = "Sukses";
@@ -447,7 +440,15 @@ class InquiryBCAController extends Controller
         //         ]
         //     ], 404);
         // }
-    
+        if ($user_data->nominal_tagihan == '2') {
+            $responseCode = "4042419";
+            $responstatus = "Invalid Bill/Virtual Account";
+            $english = "Bill has been expired";
+            $indonesia = "Tagihan telah kadaluarsa";
+            $inquiryStatus = "01";
+            $code = 404;
+            Log::info('handlePaymentResponse "Paid Bill"');
+        }
         $customerNo = substr($validated['virtualAccountNo'], 5);
         return response()->json([
             "responseCode" => $responseCode,
