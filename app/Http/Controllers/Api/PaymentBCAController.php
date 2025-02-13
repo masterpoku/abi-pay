@@ -419,7 +419,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                     $responflag = "01";
                     $code = 404;
                     Log::info('handlePaymentResponse "Paid Bill"');
-                } elseif ($user_data->status_pembayaran == '2' || $user_data->status_pembayaran == '5') {
+                } elseif ($user_data->status_pembayaran == '2') {
                     $responseCode = "4042519";
                     $responstatus = "Invalid Bill/Virtual Account";
                     $english = "Bill has been expired";
