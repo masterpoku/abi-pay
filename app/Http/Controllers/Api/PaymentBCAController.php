@@ -392,8 +392,8 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             } elseif ($existingRecord?->payment_request_id == $validated['paymentRequestId']) {
                 $responseCode = "4042518";
                 $responstatus = "Inconsistent Request";
-                $english = "Inconsistent Request";
-                $indonesia = "Permintaan tidak konsisten";
+                $english = "Success";
+                $indonesia = "Sukses";
                 $responflag = "01";
                 $code = 404;
                 Log::info('handlePaymentResponse "Inconsistent Request"');
