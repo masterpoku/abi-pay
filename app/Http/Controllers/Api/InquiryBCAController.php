@@ -400,34 +400,35 @@ class InquiryBCAController extends Controller
 }
 private function buildSuccessResponse($validated, $user_data)
 {
-    // Default response untuk sukses
+   // Cek jika tagihan kadaluarsa (DIEKSEKUSI PALING AWAL)
+   if ($user_data->nominal_tagihan == '2') {  
+    $responseCode = "4042419";
+    $responstatus = "Invalid Bill/Virtual Account";
+    $english = "Bill has been expired";
+    $indonesia = "Tagihan telah kadaluarsa";
+    $inquiryStatus = "01";
+    $code = 404;
+    Log::info('handlePaymentResponse "Invalid Bill/Virtual Account"');
+} 
+// Cek jika tagihan sudah dibayar (JIKA TIDAK KADALUARSA)
+elseif ($user_data->status_pembayaran == '1') {  
+    $responseCode = "4042414";
+    $responstatus = "Paid Bill";
+    $english = "Bill has been paid";
+    $indonesia = "Tagihan telah dibayar";
+    $inquiryStatus = "01";
+    $code = 404;
+    Log::info('handlePaymentResponse "Paid Bill"');
+} 
+// Kalau tidak kadaluarsa & tidak dibayar, berarti sukses
+else {  
+    $responseCode = "2002400";
     $responstatus = "Successful";
     $english = "Success";
     $indonesia = "Sukses";
     $inquiryStatus = "00";
-    $responseCode = "2002400";
     $code = 200;
-
-    // Cek jika tagihan kadaluarsa
-    if ($user_data->nominal_tagihan == '2') {  
-        $responseCode = "4042419";
-        $responstatus = "Invalid Bill/Virtual Account";
-        $english = "Bill has been expired";
-        $indonesia = "Tagihan telah kadaluarsa";
-        $inquiryStatus = "01";
-        $code = 404;
-        Log::info('handlePaymentResponse "Invalid Bill/Virtual Account"');
-    }
-    // Cek jika tagihan sudah dibayar (hanya jika tidak kadaluarsa)
-    elseif ($user_data->status_pembayaran == '1') {  
-        $responstatus = "Paid Bill";
-        $english = "Bill has been paid";
-        $indonesia = "Tagihan telah dibayar";
-        $inquiryStatus = "01";
-        $responseCode = "4042414";
-        $code = 404;
-        Log::info('handlePaymentResponse "Paid Bill"');
-    }
+}
 
     $customerNo = substr($validated['virtualAccountNo'], 5);
     return response()->json([
