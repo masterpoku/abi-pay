@@ -441,9 +441,9 @@ else {
                 "english" => $english,
                 "indonesia" => $indonesia
             ],
-            "partnerServiceId" => $validated['partnerServiceId'],
+            "partnerServiceId" => "   ".$validated['partnerServiceId'],
             "customerNo" => $customerNo,
-            "virtualAccountNo" => $user_data->id_invoice,
+            "virtualAccountNo" => "   ".$user_data->id_invoice,
             "virtualAccountName" => $user_data->nama_jamaah,
             "inquiryRequestId" => $validated['inquiryRequestId'],
             "totalAmount" => [
