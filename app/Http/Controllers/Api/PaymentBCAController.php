@@ -354,7 +354,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
 
 private function buildSuccessResponse($request,$validated, $user_data, $externalId)
 {
-        // Fungsi pengganti bccomp() manual
+       
         function bccomp_manual($left, $right, $scale = 2) {
             $left = number_format((float)$left, $scale, '.', '');
             $right = number_format((float)$right, $scale, '.', '');
@@ -410,23 +410,26 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             }
 
             // Jika status pembayaran sudah lunas atau expired
-            if ($user_data->status_pembayaran == '1') {
-                $responseCode = "4042514";
-                $responstatus = "Paid Bill";
-                $english = "Bill has been paid";
-                $indonesia = "Tagihan telah dibayar";
-                $responflag = "01";
-                $code = 404;
-                Log::info('handlePaymentResponse "Paid Bill"');
-            } elseif ($user_data->status_pembayaran == '2' || $user_data->status_pembayaran == '5') {
-                $responseCode = "4042519";
-                $responstatus = "Invalid Bill/Virtual Account";
-                $english = "Bill has been expired";
-                $indonesia = "Tagihan telah kadaluarsa";
-                $responflag = "01";
-                $code = 404;
-                Log::info('handlePaymentResponse "Expired Bill"');
+            if ($responseCode == "2002500") {
+                if ($user_data->status_pembayaran == '1') {
+                    $responseCode = "4042514";
+                    $responstatus = "Paid Bill";
+                    $english = "Bill has been paid";
+                    $indonesia = "Tagihan telah dibayar";
+                    $responflag = "01";
+                    $code = 404;
+                    Log::info('handlePaymentResponse "Paid Bill"');
+                } elseif ($user_data->status_pembayaran == '2' || $user_data->status_pembayaran == '5') {
+                    $responseCode = "4042519";
+                    $responstatus = "Invalid Bill/Virtual Account";
+                    $english = "Bill has been expired";
+                    $indonesia = "Tagihan telah kadaluarsa";
+                    $responflag = "01";
+                    $code = 404;
+                    Log::info('handlePaymentResponse "Expired Bill"');
+                }
             }
+            
         }
 
         // Cek validasi amount setelah cek status pembayaran
