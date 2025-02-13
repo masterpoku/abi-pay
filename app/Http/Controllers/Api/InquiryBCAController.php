@@ -401,7 +401,8 @@ class InquiryBCAController extends Controller
 private function buildSuccessResponse($validated, $user_data)
 {
    // Cek jika tagihan kadaluarsa (DIEKSEKUSI PALING AWAL)
-   if ($user_data->nominal_tagihan == '2') {  
+
+   if ($user_data->status_pembayaran == '2') {  
     $responseCode = "4042419";
     $responstatus = "Invalid Bill/Virtual Account";
     $english = "Bill has been expired";
