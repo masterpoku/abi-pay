@@ -422,7 +422,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         // Cek validasi amount setelah cek status pembayaran
         $paidAmount = $request->input('paidAmount.value');
         $totalAmount = $request->input('totalAmount.value');
-        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', ''); // Paksa format jadi ada .00
+        $nominalTagihan = $user_data->nominal_tagihan; // Paksa format jadi ada .00
 
         Log::info('Amounts:', [
             'paidAmount' => $paidAmount, 
