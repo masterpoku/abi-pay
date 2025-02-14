@@ -239,13 +239,39 @@ class InquiryBCAController extends Controller
             }
         }
         
-    
         if ($validated['partnerServiceId'] !== '14999') {
             return response()->json([
-                'responseCode' => '4012502',
-                'responseMessage' => 'Invalid Partner Service ID',
-            ], 401);
+                "responseCode" => "4002401",
+                "responseMessage" => "Invalid Partner Service ID",
+                "virtualAccountData" => [
+                    "inquiryStatus" => "01",
+                    "inquiryReason" => [
+                        "english" => "Invalid Partner Service ID",
+                        "indonesia" => "ID Layanan Mitra Tidak Valid"
+                    ],
+                    "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? ""),
+                    "customerNo" => isset($validated['customerNo']) ? $validated['customerNo'] : "",
+                    "virtualAccountNo" => "   " . ($validated['virtualAccountNo'] ?? ""),
+                    "virtualAccountName" => "",
+                    "inquiryRequestId" => isset($validated['inquiryRequestId']) ? $validated['inquiryRequestId'] : "",
+                    "totalAmount" => [
+                        "value" => "",
+                        "currency" => ""
+                    ],
+                    "subCompany" => "",
+                    "billDetails" => [],
+                    "freeTexts" => [
+                        [
+                            "english" => "",
+                            "indonesia" => ""
+                        ]
+                    ]
+                ],
+                "additionalInfo" => (object) []
+            ], 400);
         }
+        
+        
     
         // Jika semua validasi lolos
         return $this->buildSuccessResponse($validated, $user_data);
@@ -447,7 +473,7 @@ else {
             "virtualAccountName" => $user_data->nama_jamaah,
             "inquiryRequestId" => $validated['inquiryRequestId'],
             "totalAmount" => [
-                "value" => $user_data->nominal_tagihan,
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''),
                 "currency" => "IDR"
             ],
             "subCompany" => "00000",
@@ -467,7 +493,7 @@ else {
     /**
      * Membuat respons untuk data yang tidak ditemukan.
      */
-    private function buildNotFoundResponse( $validated)
+    private function buildNotFoundResponse($validated)
     {
 
         
@@ -479,18 +505,17 @@ else {
         ];
        
     
-        $customerNo = substr($validated['virtualAccountNo'], 5);
         return [
             "responseCode" => $responseCode,
             "responseMessage" => $responseMessage,
             "virtualAccountData" => [
                 "inquiryStatus" => "01",
                 "inquiryReason" => $conflictReason,
-                "partnerServiceId" => "   ".$validated['partnerServiceId'],
-                "customerNo" => $customerNo,
-                "virtualAccountNo" => "   ".$validated['virtualAccountNo'],
+                "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
+                "customerNo" => $validated['customerNo'] ?? "",
+                "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
                 "virtualAccountName" => "",
-                "inquiryRequestId" => $validated['inquiryRequestId'],
+                "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
                 "totalAmount" => [
                     "value" => "",
                     "currency" => ""
