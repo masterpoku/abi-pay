@@ -242,12 +242,12 @@ class InquiryBCAController extends Controller
         if ($validated['partnerServiceId'] !== '14999') {
             return response()->json([
                 "responseCode" => "4002401",
-                "responseMessage" => "Invalid Field Format {partnerServiceId}",
+                "responseMessage" => "Invalid Field Format {virtualAccountNo}",
                 "virtualAccountData" => [
                     "inquiryStatus" => "01",
                     "inquiryReason" => [
-                        "english" => "Invalid Field Format [partnerServiceId]",
-                        "indonesia" => "Isian format [partnerServiceId] tidak valid"
+                        "english" => "Invalid Field Format [virtualAccountNo]",
+                        "indonesia" => "Isian format [virtualAccountNo] tidak valid"
                     ],
                     "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? ""),
                     "customerNo" => isset($validated['customerNo']) ? $validated['customerNo'] : "",
