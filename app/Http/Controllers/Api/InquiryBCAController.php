@@ -176,7 +176,7 @@ class InquiryBCAController extends Controller
         foreach ($mandatoryFields as $field) {
             if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
                 return response()->json([
-                    "responseCode" => '4002402',
+                    "responseCode" => '4002401',
                     "responseMessage" => "Invalid Mandatory Field {$field}",
                     "virtualAccountData" => [
                         "inquiryStatus" => '01',
@@ -289,7 +289,7 @@ class InquiryBCAController extends Controller
     public function handleInvalidFieldFormat($fieldName, $validatedData)
     {
         return response()->json([
-            "responseCode" => '4002402',
+            "responseCode" => '4002401',
             "responseMessage" => "Invalid Mandatory Field {$fieldName}",
             "virtualAccountData" => [
                 "inquiryStatus" => '01',
@@ -457,7 +457,7 @@ else {
     $code = 200;
 
     if (!is_numeric($validated['customerNo'])) {
-        $responseCode = "4002402";
+        $responseCode = "4002401";
         $responstatus = "Invalid Mandatory Field customerNo";
         $english = "Invalid Mandatory Field [customerNo]";
         $indonesia = "Isian wajib [customerNo] tidak valid";
