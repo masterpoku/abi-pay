@@ -289,7 +289,7 @@ class InquiryBCAController extends Controller
     public function handleInvalidFieldFormat($fieldName, $validatedData)
     {
         return response()->json([
-            "responseCode" => '4002602',
+            "responseCode" => '4002402',
             "responseMessage" => "Invalid Mandatory Field {$fieldName}",
             "virtualAccountData" => [
                 "inquiryStatus" => '01',
@@ -455,9 +455,18 @@ else {
     $indonesia = "Sukses";
     $inquiryStatus = "00";
     $code = 200;
+
+    if (!is_numeric($validated['customerNo'])) {
+        $responseCode = "4002402";
+        $responstatus = "Invalid Mandatory Field VirtualAccountNo";
+        $english = "Invalid Mandatory Field [VirtualAccountNo]";
+        $indonesia = "Isian wajib [VirtualAccountNo] tidak valid";
+        $inquiryStatus = "01";
+        $code = 400;
+    }   
+
 }
 
-    $customerNo = substr($validated['virtualAccountNo'], 5);
     return response()->json([
         "responseCode" => $responseCode,
         "responseMessage" => $responstatus,
@@ -468,8 +477,8 @@ else {
                 "indonesia" => $indonesia
             ],
             "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
-            "customerNo" => $validated['customerNo'] ?? $customerNo,
-            "virtualAccountNo" => "   ".$user_data->id_invoice,
+            "customerNo" => $validated['customerNo'] ?? "",
+            "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
             "virtualAccountName" => $user_data->nama_jamaah,
             "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
             "totalAmount" => [

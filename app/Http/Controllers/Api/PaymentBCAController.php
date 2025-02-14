@@ -258,8 +258,8 @@ EOF;
                         'virtualAccountData' => [
                             'paymentStatus' => '01',
                             'paymentReason' => [
-                                'english' => "Invalid Field Format [virtualAccountNo]",
-                                'indonesia' => "Isian format [virtualAccountNo] tidak valid"
+                                'english' => "Invalid Field Format [{$key}]",
+                                'indonesia' => "Isian format [{$key}] tidak valid"
                             ]
                         ]
                     ], 400);
