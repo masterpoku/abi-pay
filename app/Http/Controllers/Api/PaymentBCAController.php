@@ -355,17 +355,8 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
 private function buildSuccessResponse($request,$validated, $user_data, $externalId)
 {
        
-        function bccomp_manual($left, $right, $scale = 2) {
-            $left = number_format((float)$left, $scale, '.', '');
-            $right = number_format((float)$right, $scale, '.', '');
-            return ($left <=> $right); // Menggunakan spaceship operator (PHP 7+)
-        }
-
         $now = now(); // Simpan waktu supaya konsisten di seluruh eksekusi
 
-        // Ambil customerNo dari virtualAccountNo
-        $customerNo = substr($validated['virtualAccountNo'], 5);
-        // Log::info('buildSuccessResponse validated:', $validated);
 
         // Default response jika pembayaran belum dilakukan
         $responseCode = "2002500";
@@ -431,10 +422,17 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             }
             
         }
+        
+        function bccomp_manual($left, $right, $scale = 2) {
+            $left = number_format((float)$left, $scale, '.', '');
+            $right = number_format((float)$right, $scale, '.', '');
+            return ($left <=> $right); // Menggunakan spaceship operator (PHP 7+)
+        }
+        
 
         // Cek validasi amount setelah cek status pembayaran
-        $paidAmount = (float) $request->input('paidAmount.value');
-        $totalAmount = (float) $request->input('totalAmount.value');
+        $paidAmount = number_format((float) $request->input('paidAmount.value'), 2, '.', '');
+        $totalAmount = number_format((float) $request->input('totalAmount.value'), 2, '.', '');
 
         // Pastikan nominalTagihan dari database ada format .00
         $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
@@ -446,6 +444,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         ]);
 
         // Validasi amount tanpa mengubah request
+      // Validasi amount tanpa mengubah request
         if (bccomp_manual($paidAmount, $nominalTagihan, 2) !== 0 || bccomp_manual($totalAmount, $nominalTagihan, 2) !== 0) {
             $responseCode = "4042513";
             $responstatus = "Invalid Amount";

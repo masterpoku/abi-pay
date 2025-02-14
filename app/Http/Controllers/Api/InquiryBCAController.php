@@ -463,9 +463,12 @@ else {
         $indonesia = "Isian wajib [customerNo] tidak valid";
         $inquiryStatus = "01";
         $code = 400;
-    }   
+    }
+
 
 }
+
+
 
     return response()->json([
         "responseCode" => $responseCode,
