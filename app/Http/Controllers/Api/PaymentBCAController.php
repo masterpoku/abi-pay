@@ -422,7 +422,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             }
             
         }
-        
+
         function bccomp_manual($left, $right, $scale = 2) {
             $left = number_format((float)$left, $scale, '.', '');
             $right = number_format((float)$right, $scale, '.', '');
@@ -436,12 +436,15 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
 
         // Pastikan nominalTagihan dari database ada format .00
         $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
-
+        // Log untuk debugging
         Log::info('Amounts:', [
             'paidAmount' => $paidAmount, 
             'totalAmount' => $totalAmount, 
-            'nominalTagihan' => $nominalTagihan
+            'nominalTagihan' => $nominalTagihan,
+            'comparePaid' => bccomp_manual($paidAmount, $nominalTagihan, 2),
+            'compareTotal' => bccomp_manual($totalAmount, $nominalTagihan, 2),
         ]);
+
 
         // Validasi amount tanpa mengubah request
       // Validasi amount tanpa mengubah request
