@@ -467,11 +467,11 @@ else {
                 "english" => $english,
                 "indonesia" => $indonesia
             ],
-            "partnerServiceId" => "   ".$validated['partnerServiceId'],
-            "customerNo" => $customerNo,
+            "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
+            "customerNo" => $validated['customerNo'] ?? $customerNo,
             "virtualAccountNo" => "   ".$user_data->id_invoice,
             "virtualAccountName" => $user_data->nama_jamaah,
-            "inquiryRequestId" => $validated['inquiryRequestId'],
+            "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
             "totalAmount" => [
                 "value" => number_format($user_data->nominal_tagihan, 2, '.', ''),
                 "currency" => "IDR"

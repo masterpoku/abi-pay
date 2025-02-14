@@ -490,7 +490,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             "customerNo" => $customerNo,
             "virtualAccountNo" => "   " . $user_data->id_invoice,
             "virtualAccountName" => $user_data->nama_jamaah, // Nama customer dari data
-            "paymentRequestId" => $validated['paymentRequestId'],
+            "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
                 "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
                 "currency" => "IDR"
@@ -499,8 +499,8 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                 "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
                 "currency" => "IDR"
             ],
-            "trxDateTime" => $validated['trxDateTime'],
-            "referenceNo" => $validated['referenceNo'], // Nomor referensi statis atau di-generate
+            "trxDateTime" => $validated['trxDateTime'] ?? "",
+            "referenceNo" => $validated['referenceNo'] ?? "", // Nomor referensi statis atau di-generate
             "paymentFlagStatus" => $responflag, // Status sukses
             "billDetails" => [], // Detail tagihan kosong (bisa diisi jika diperlukan)
             "freeTexts" => [
