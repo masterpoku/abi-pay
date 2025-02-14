@@ -591,9 +591,9 @@ private function buildNotFoundResponse($validated, $externalId)
         "responseMessage" => $responseMessage,
         "virtualAccountData" => [
             "paymentFlagReason" => $conflictReason,
-            "partnerServiceId" => "   ".($validated['partnerServiceId'] ?? ""),
-            "customerNo" => $customerNo,
-            "virtualAccountNo" => "   ".($validated['virtualAccountNo'] ?? ""),
+            "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
+            "customerNo" => $validated['customerNo'] ?? "",
+            "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
             "virtualAccountName" => "",
             "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
@@ -639,21 +639,21 @@ private function mandatoryFields()
                     "english" => "Invalid Mandatory Field [$fieldName]",
                     "indonesia" => "Isian wajib [$fieldName] tidak valid"
                 ],
-                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ''),
+                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
                 "customerNo" => $validatedData['customerNo'] ?? "",
-                "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
-                "virtualAccountName" => $user_data->nama_jamaah ?? '',
-                "paymentRequestId" => $validatedData['inquiryRequestId'] ?? '',
+                "virtualAccountNo" => "   " . ($validatedData['virtualAccountNo'] ?? ""),
+                "virtualAccountName" => "",
+                "paymentRequestId" => $validatedData['inquiryRequestId'] ?? "",
                 "totalAmount" => [
-                    "value" => $user_data->nominal_tagihan ?? 0,
+                    "value" => $validatedData['totalAmount']['value'] ?? "",
                     "currency" => "IDR"
                 ],
                 "subCompany" => "00000",
                 "billDetails" => [],
                 "freeTexts" => [
                     [
-                        "english" => $user_data->nama_paket ?? '',
-                        "indonesia" => $user_data->nama_paket ?? ''
+                        "english" => "",
+                        "indonesia" => ""
                     ]
                 ]
             ],

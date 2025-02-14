@@ -222,7 +222,7 @@ class InquiryBCAController extends Controller
                         "virtualAccountName" => $user_data->nama_jamaah ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
                         "totalAmount" => [
-                            "value" => $user_data->nominal_tagihan  ?? "",
+                            "value" => $validatedData['totalAmount']['value']  ?? "",
                             "currency" => "IDR"
                         ],
                         "subCompany" => "00000",
@@ -250,12 +250,12 @@ class InquiryBCAController extends Controller
                         "indonesia" => "Isian format [partnerServiceId] tidak valid"
                     ],
                     "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? ""),
-                    "customerNo" => isset($validated['customerNo']) ? $validated['customerNo'] : "",
+                    "customerNo" => $validated['customerNo'] ?? "",
                     "virtualAccountNo" => "   " . ($validated['virtualAccountNo'] ?? ""),
                     "virtualAccountName" => "",
-                    "inquiryRequestId" => isset($validated['inquiryRequestId']) ? $validated['inquiryRequestId'] : "",
+                    "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
                     "totalAmount" => [
-                        "value" => "",
+                        "value" => $validatedData['totalAmount']['value'] ?? "",
                         "currency" => ""
                     ],
                     "subCompany" => "",
@@ -297,21 +297,21 @@ class InquiryBCAController extends Controller
                     "english" => "Invalid Mandatory Field [$fieldName]",
                     "indonesia" => "Isian wajib [$fieldName] tidak valid"
                 ],
-                "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
+                "partnerServiceId" => "   " . $validatedData['partnerServiceId'] ?? "",
                 "customerNo" => $validatedData['customerNo'] ?? "",
-                "virtualAccountNo" => isset($user_data->id_invoice) ? "   " . $user_data->id_invoice : '',
-                "virtualAccountName" => $user_data->nama_jamaah ?? "",
+                "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
+                "virtualAccountName" =>  "",
                 "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                 "totalAmount" => [
-                    "value" => $user_data->nominal_tagihan ?? "",
+                    "value" => $validatedData['totalAmount']['value']  ?? "",
                     "currency" => "IDR"
                 ],
                 "subCompany" => "00000",
                 "billDetails" => [],
                 "freeTexts" => [
                     [
-                        "english" => $user_data->nama_paket ?? '',
-                        "indonesia" => $user_data->nama_paket ?? ''
+                        "english" => "",
+                        "indonesia" => ""
                     ]
                 ]
             ],
