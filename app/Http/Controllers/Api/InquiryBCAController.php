@@ -16,7 +16,7 @@ class InquiryBCAController extends Controller
 {
     public function index(Request $request)
     {
-        Log::info('PaymentVController index REQUEST:', $request->all());
+        // Log::info('PaymentVController index REQUEST:', $request->all());
         return response()->json(['message' => 'Welcome to payment API'], 200);
     }
 
@@ -106,8 +106,8 @@ class InquiryBCAController extends Controller
 
   
         // Log the headers for debugging
-        Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
-        Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
+        // Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
+        // Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
 
        
         // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
@@ -154,7 +154,7 @@ class InquiryBCAController extends Controller
         $mandatoryFields = $this->mandatoryFields();
 
             $virtualAccountNo = $request->virtualAccountNo;
-            Log::info('Virtual Account No:', [$virtualAccountNo]);
+            // Log::info('Virtual Account No:', [$virtualAccountNo]);
               if(!preg_match('/^\d+$/', $virtualAccountNo)) {
                     return $this->handleInvalidFieldFormat('virtualAccountNo', $validatedData);
                 }
@@ -229,8 +229,8 @@ class InquiryBCAController extends Controller
                         "billDetails" => [],
                         "freeTexts" => [
                             [
-                                "english" => $user_data->nama_paket,
-                                "indonesia" => $user_data->nama_paket
+                                "english" => $user_data->nama_paket ?? "",
+                                "indonesia" => $user_data->nama_paket ?? ""
                             ]
                         ]
                     ],
@@ -356,7 +356,7 @@ class InquiryBCAController extends Controller
         $cok = hash('sha256', $bodyToHash);
         
         $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $cok . ":" . $isoTime;
-        Log::info('String to sign: '.$stringToSign);
+        // Log::info('String to sign: '.$stringToSign);
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
 		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
         return $signature;
@@ -366,8 +366,8 @@ class InquiryBCAController extends Controller
         $is_valid = false;
         // Log::info('Body anjay: '.$bodyToHash);
         $signatureStr = $this->generateServiceSignature($client_secret, $method,$url, $auth_token, $isoTime, $bodyToHash);
-        Log::info('SignatureStr: '.$signatureStr);
-        Log::info('Signature: '.$signature);
+        // Log::info('SignatureStr: '.$signatureStr);
+        // Log::info('Signature: '.$signature);
         
         if(strcmp($signatureStr, $signature) == 0){
             $is_valid = true;

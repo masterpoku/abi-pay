@@ -365,7 +365,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
 
         // Ambil customerNo dari virtualAccountNo
         $customerNo = substr($validated['virtualAccountNo'], 5);
-        Log::info('buildSuccessResponse validated:', $validated);
+        // Log::info('buildSuccessResponse validated:', $validated);
 
         // Default response jika pembayaran belum dilakukan
         $responseCode = "2002500";
@@ -487,7 +487,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                 "indonesia" => $indonesia
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "customerNo" => $customerNo,
+            "customerNo" => $validated['customerNo'] ?? "", // Nomor customer dari data.
             "virtualAccountNo" => "   " . $user_data->id_invoice,
             "virtualAccountName" => $user_data->nama_jamaah, // Nama customer dari data
             "paymentRequestId" => $validated['paymentRequestId'] ?? "",
