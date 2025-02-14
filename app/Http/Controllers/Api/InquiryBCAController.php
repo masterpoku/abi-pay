@@ -289,7 +289,7 @@ class InquiryBCAController extends Controller
     public function handleInvalidFieldFormat($fieldName, $validatedData)
     {
         return response()->json([
-            "responseCode" => '4002402',
+            "responseCode" => '4002602',
             "responseMessage" => "Invalid Mandatory Field {$fieldName}",
             "virtualAccountData" => [
                 "inquiryStatus" => '01',
