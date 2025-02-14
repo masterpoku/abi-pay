@@ -458,9 +458,9 @@ else {
 
     if (!is_numeric($validated['customerNo'])) {
         $responseCode = "4002402";
-        $responstatus = "Invalid Mandatory Field VirtualAccountNo";
-        $english = "Invalid Mandatory Field [VirtualAccountNo]";
-        $indonesia = "Isian wajib [VirtualAccountNo] tidak valid";
+        $responstatus = "Invalid Mandatory Field customerNo";
+        $english = "Invalid Mandatory Field [customerNo]";
+        $indonesia = "Isian wajib [customerNo] tidak valid";
         $inquiryStatus = "01";
         $code = 400;
     }   
