@@ -281,10 +281,10 @@ EOF;
             // Cek apakah invoice sudah ada    
             $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
     
-            $existingPayment = DB::table('tagihan_pembayaran')
-                ->where('external_id', $externalId)
-                ->where('payment_request_id', $validated['paymentRequestId'])
-                ->first();
+            // $existingPayment = DB::table('tagihan_pembayaran')
+            //     ->where('external_id', $externalId)
+            //     ->where('payment_request_id', $validated['paymentRequestId'])
+            //     ->first();
     
             return $this->handlePaymentResponse($request,$userData, $validated, $externalId);
         } catch (Exception $e) {
@@ -464,6 +464,12 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                 'payment_request_id' => $validated['paymentRequestId'],
                 'date' => $now->toDateString(),
                 'created_at' => $now,
+            ]);
+            DB::table('tagihan_pembayaran')
+            ->where('id_invoice', $user_data->id_invoice)
+            ->update([
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
             ]);
         }
 

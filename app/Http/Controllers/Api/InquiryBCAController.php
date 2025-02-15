@@ -50,12 +50,12 @@ class InquiryBCAController extends Controller
     
             if (!$exists) {
                 // HIT PERTAMA -> Simpan ke database dan tetap sukses
-                DB::table('external_ids')->insert([
-                    'external_id' => $externalId,
-                    'payment_request_id' => $inquiryRequestId,
-                    'date' => now()->toDateString(),
-                    'created_at' => now(),
-                ]);
+                // DB::table('external_ids')->insert([
+                //     'external_id' => $externalId,
+                //     'payment_request_id' => $inquiryRequestId,
+                //     'date' => now()->toDateString(),
+                //     'created_at' => now(),
+                // ]);
     
                 // Update tagihan_pembayaran
                 DB::table('tagihan_pembayaran')
