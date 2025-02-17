@@ -190,11 +190,11 @@ EOF;
         return $is_valid === 1;
     }
 
+    // public function flagPayment(Request $request) {
+    //     Log::info('flagPayment Request Data:', $request->all());
+    //     Log::info('flagPayment Request Header:', $request->headers->all());
+    // }
     public function flagPayment(Request $request) {
-        Log::info('flagPayment Request Data:', $request->all());
-        Log::info('flagPayment Request Header:', $request->headers->all());
-    }
-    public function flagPayment1(Request $request) {
         Log::info('flagPayment Request Data:', $request->all());
         Log::info('flagPayment Request Header:', $request->headers->all());
         
