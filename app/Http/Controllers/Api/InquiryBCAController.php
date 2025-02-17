@@ -122,7 +122,7 @@ class InquiryBCAController extends Controller
        
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
-        if (now()->diffInMinutes($requestTime) > 9000) {
+        if (now()->diffInMinutes($requestTime) > 5) {
             return response()->json([
                 'responseCode' => '4012503',
                 'responseMessage' => 'Request timestamp is invalid or expired',
@@ -136,16 +136,16 @@ class InquiryBCAController extends Controller
         ], 401);
     }
         // Validasi Signature
-        // if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+        if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
             
             
 
             
-        //         return response()->json([
-        //             'responseCode' => '4012400',
-        //             'responseMessage' => 'Unauthorized. [Signature]',
-        //         ], 401);
-        // }
+                return response()->json([
+                    'responseCode' => '4012400',
+                    'responseMessage' => 'Unauthorized. [Signature]',
+                ], 401);
+        }
   
             
             
