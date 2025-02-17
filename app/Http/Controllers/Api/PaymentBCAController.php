@@ -368,7 +368,7 @@ $nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
 Log::info('Validasi Amount:', [
     'paidAmount' => $paidAmount,
     'totalAmount' => $totalAmount,
-    'nominalTagihan' => $user_data->nominal_tagihan,
+    'nominalTagihan' => $user_data->nominal_tagihan.".00",
 ]);
 
 // If the amount does not match, return an Invalid Amount response
