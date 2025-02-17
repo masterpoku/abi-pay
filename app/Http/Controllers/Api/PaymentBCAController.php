@@ -155,14 +155,14 @@ class PaymentBCAController extends Controller
                 return response()->json(['message' => 'Public key not configured'], 500);
             }
     
-            // // Validasi signature
-            // $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
-            // if (!$isValid) {
-            //     return response()->json([
-            //         'responseCode' => '4012500',
-            //         'responseMessage' => 'Unauthorized. [Signature]'
-            //     ], 401);
-            // }
+            // Validasi signature
+            $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
+            if (!$isValid) {
+                return response()->json([
+                    'responseCode' => '4012500',
+                    'responseMessage' => 'Unauthorized. [Signature]'
+                ], 401);
+            }
     
             // Jika validasi berhasil, lanjutkan ke proses permintaan token
             return $this->requestAccessToken($request);
@@ -268,7 +268,15 @@ EOF;
                 
             }
             
-            $validated = $request->all();
+            $validated = $request->validate([
+                'partnerServiceId' => 'required',
+                'customerNo' => 'required',
+                'virtualAccountNo' => 'required|regex:/^\d+$/',
+                'channelCode' => 'required',
+                'trxDateTime' => 'required',
+                'paymentRequestId' => 'required',
+                'referenceNo' => 'required',
+            ]);
     
             // Cek apakah invoice sudah ada    
             $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
@@ -344,197 +352,164 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
     ], 409);
 }
 
-private function buildSuccessResponse($request, $validated, $user_data, $externalId)
+private function buildSuccessResponse($request,$validated, $user_data, $externalId)
 {
-    $now = now(); // Simpan waktu supaya konsisten di seluruh eksekusi
-
-    // Default response sukses
-    $response = [
-        "responseCode" => "2002500",
-        "responseMessage" => "Successful",
-        "paymentFlagReason" => [
-            "english" => "Success",
-            "indonesia" => "Sukses"
-        ],
-        "paymentFlagStatus" => "00",
-        "code" => 200
-    ];
-// Cek validasi amount lebih awal sebelum yang lain
-$paidAmount = $request->input('paidAmount.value');
-$totalAmount = $request->input('totalAmount.value');
-$nominalTagihan = $user_data->nominal_tagihan;
-
-// Log for debugging
-Log::info('Validasi Amount:', [
-    'paidAmount' => md5((string) $paidAmount),
-    'totalAmount' => md5((string) $totalAmount),
-    'nominalTagihan' => md5((string) $user_data->nominal_tagihan),
-]);
-
-// If the amount does not match, return an Invalid Amount response
-if (md5((string) $user_data->nominal_tagihan) != md5((string) $paidAmount) || md5((string) $user_data->nominal_tagihan) != md5((string) $totalAmount)) {
-    return response()->json([
-        "responseCode" => "4042513",
-        "responseMessage" => "Invalid Amount",
-        "virtualAccountData" => [
-            "paymentFlagReason" => [
-                "english" => "Invalid Amount",
-                "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
-            ],
-            "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "customerNo" => $validated['customerNo'] ?? "",
-            "virtualAccountNo" => "   " . $user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
-            "paymentRequestId" => $validated['paymentRequestId'] ?? "",
-            "paidAmount" => [
-                "value" => $paidAmount, // Tetap ambil dari request
-                "currency" => "IDR"
-            ],
-            "totalAmount" => [
-                "value" => $totalAmount, // Tetap ambil dari request
-                "currency" => "IDR"
-            ],
-            "trxDateTime" => $validated['trxDateTime'] ?? "",
-            "referenceNo" => $validated['referenceNo'] ?? "",
-            "paymentFlagStatus" => "01",
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => "Free text",
-                    "indonesia" => "Tulisan bebas"
-                ]
-            ]
-        ],
-        "additionalInfo" => (object) []
-    ], 404);
-}
+       
+        $now = now(); // Simpan waktu supaya konsisten di seluruh eksekusi
 
 
-    // Cek validasi external_id lebih awal
-    if (!$externalId) {
-        $response = [
-            "responseCode" => "4042518",
-            "responseMessage" => "Inconsistent Request",
-            "paymentFlagReason" => [
-                "english" => "Inconsistent Request",
-                "indonesia" => "Permintaan tidak konsisten"
-            ],
-            "paymentFlagStatus" => "01",
-            "code" => 404
-        ];
-    } else {
-        // Cek apakah external_id atau payment_request_id sudah ada
-        $existingRecord = DB::table('external_ids')
-            ->where('external_id', $externalId)
-            ->orWhere('payment_request_id', $validated['paymentRequestId'])
-            ->first();
+        // Default response jika pembayaran belum dilakukan
+        $responseCode = "2002500";
+        $responstatus = "Successful";
+        $english = "Success";
+        $indonesia = "Sukses";
+        $responflag = "00";
+        $code = 200;
 
-        if ($existingRecord?->external_id == $externalId) {
-            $response = [
-                "responseCode" => "4092500",
-                "responseMessage" => "Conflict",
-                "paymentFlagReason" => [
-                    "english" => "Cannot use the same X-EXTERNAL-ID",
-                    "indonesia" => "Tidak bisa menggunakan X-EXTERNAL-ID yang sama"
-                ],
-                "paymentFlagStatus" => "01",
-                "code" => 409
-            ];
-            Log::info('handlePaymentResponse "Conflict"');
-        } elseif ($existingRecord?->payment_request_id == $validated['paymentRequestId']) {
-            $response = [
-                "responseCode" => "4042518",
-                "responseMessage" => "Inconsistent Request",
-                "paymentFlagReason" => [
-                    "english" => "Success",
-                    "indonesia" => "Sukses"
-                ],
-                "paymentFlagStatus" => "01",
-                "code" => 404
-            ];
-            Log::info('handlePaymentResponse "Inconsistent Request"');
+        // Cek validasi external_id lebih awal
+        $externalId = $externalId ?? null;
+        if (!$externalId) {
+            $responseCode = "4042518";
+            $responstatus = "Inconsistent Request";
+            $english = "Inconsistent Request";
+            $indonesia = "Permintaan tidak konsisten";
+            $responflag = "01";
+            $code = 404;
+        } else {
+            // Cek apakah external_id atau payment_request_id sudah ada
+            $existingRecord = DB::table('external_ids')
+                ->where('external_id', $externalId)
+                ->orWhere('payment_request_id', $validated['paymentRequestId'])
+                ->first();
+
+            if ($existingRecord?->external_id == $externalId) {
+                $responseCode = "4092500";
+                $responstatus = "Conflict";
+                $english = "Cannot use the same X-EXTERNAL-ID";
+                $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
+                $responflag = "01";
+                $code = 409;
+                Log::info('handlePaymentResponse "Conflict"');
+            } elseif ($existingRecord?->payment_request_id == $validated['paymentRequestId']) {
+                $responseCode = "4042518";
+                $responstatus = "Inconsistent Request";
+                $english = "Success";
+                $indonesia = "Sukses";
+                $responflag = "01";
+                $code = 404;
+                Log::info('handlePaymentResponse "Inconsistent Request"');
+            }
+
+            // Jika status pembayaran sudah lunas atau expired
+            if ($responseCode == "2002500") {
+                if ($user_data->status_pembayaran == '1') {
+                    $responseCode = "4042514";
+                    $responstatus = "Paid Bill";
+                    $english = "Bill has been paid";
+                    $indonesia = "Tagihan telah dibayar";
+                    $responflag = "01";
+                    $code = 404;
+                    Log::info('handlePaymentResponse "Paid Bill"');
+                } elseif ($user_data->status_pembayaran == '2') {
+                    $responseCode = "4042519";
+                    $responstatus = "Invalid Bill/Virtual Account";
+                    $english = "Bill has been expired";
+                    $indonesia = "Tagihan telah kadaluarsa";
+                    $responflag = "01";
+                    $code = 404;
+                    Log::info('handlePaymentResponse "Expired Bill"');
+                }
+            }
+            
         }
-    }
 
-    // Jika status pembayaran sudah lunas atau expired, override response
-    if ($response["responseCode"] == "2002500") {
-        if ($user_data->status_pembayaran == '1') {
-            $response = [
-                "responseCode" => "4042514",
-                "responseMessage" => "Paid Bill",
-                "paymentFlagReason" => [
-                    "english" => "Bill has been paid",
-                    "indonesia" => "Tagihan telah dibayar"
-                ],
-                "paymentFlagStatus" => "01",
-                "code" => 404
-            ];
-            Log::info('handlePaymentResponse "Paid Bill"');
-        } elseif ($user_data->status_pembayaran == '2') {
-            $response = [
-                "responseCode" => "4042519",
-                "responseMessage" => "Invalid Bill/Virtual Account",
-                "paymentFlagReason" => [
-                    "english" => "Bill has been expired",
-                    "indonesia" => "Tagihan telah kadaluarsa"
-                ],
-                "paymentFlagStatus" => "01",
-                "code" => 404
-            ];
-            Log::info('handlePaymentResponse "Expired Bill"');
+        function bccomp_manual($left, $right, $scale = 2) {
+            $left = number_format((float)$left, $scale, '.', '');
+            $right = number_format((float)$right, $scale, '.', '');
+            return ($left <=> $right); // Menggunakan spaceship operator (PHP 7+)
         }
-    }
+        
 
-    // Jika tidak ada konflik dan external_id belum ada di database, insert baru
-    if ($response["code"] == 200 && !$existingRecord) {
-        DB::table('external_ids')->insert([
-            'external_id' => $externalId,
-            'payment_request_id' => $validated['paymentRequestId'],
-            'date' => $now->toDateString(),
-            'created_at' => $now,
+        // Cek validasi amount setelah cek status pembayaran
+        $paidAmount =$request->input('paidAmount.value');
+        $totalAmount =$request->input('totalAmount.value');
+
+        // Pastikan nominalTagihan dari database ada format .00
+        $nominalTagihan = $user_data->nominal_tagihan;
+        // Log untuk debugging
+        Log::info('Amounts:', [
+            'paidAmount' => $paidAmount, 
+            'totalAmount' => $totalAmount, 
+            'nominalTagihan' => $nominalTagihan,
+            
         ]);
-        DB::table('tagihan_pembayaran')
+
+
+        // Validasi amount tanpa mengubah request
+      // Validasi amount tanpa mengubah request
+        if (md5($paidAmount) !== md5($nominalTagihan) || md5($totalAmount) !== md5($nominalTagihan)) {
+            $responseCode = "4042513";
+            $responstatus = "Invalid Amount";
+            $english = "Invalid Amount";
+            $indonesia = "Jumlah pembayaran tidak sesuai dengan tagihan";
+            $responflag = "01";
+            $code = 404;
+        }
+
+        // Jika tidak ada konflik dan external_id belum ada di database, insert baru
+        if ($code == 200 && !$existingRecord) {
+            DB::table('external_ids')->insert([
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
+                'date' => $now->toDateString(),
+                'created_at' => $now,
+            ]);
+            DB::table('tagihan_pembayaran')
             ->where('id_invoice', $user_data->id_invoice)
             ->update([
                 'external_id' => $externalId,
                 'payment_request_id' => $validated['paymentRequestId'],
             ]);
-    }
+        }
 
-    // Update status pembayaran jika belum lunas & respon sukses
-    if ($response["paymentFlagStatus"] == "00" && $user_data->status_pembayaran == '0') {
-        DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
-            ->update([
-                'status_pembayaran' => '1',
-                'external_id' => $externalId,
-                'payment_request_id' => $validated['paymentRequestId'],
-                'updated_at' => $now,
-            ]);
-    }
+        // Update status pembayaran hanya jika belum lunas & respon sukses
+        if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
+            DB::table('tagihan_pembayaran')
+                ->where('id_invoice', $validated['virtualAccountNo'])
+                ->update([
+                    'status_pembayaran' => '1',
+                    'external_id' => $externalId,
+                    'payment_request_id' => $validated['paymentRequestId'],
+                    'updated_at' => $now,
+                ]);
+        }
+
 
     return response()->json([
-        "responseCode" => $response["responseCode"],
-        "responseMessage" => $response["responseMessage"],
+        "responseCode" => $responseCode,
+        "responseMessage" => $responstatus,
         "virtualAccountData" => [
-            "paymentFlagReason" => $response["paymentFlagReason"],
+            "paymentFlagReason" => [
+                "english" => $english,
+                "indonesia" => $indonesia
+            ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "customerNo" => $validated['customerNo'] ?? "",
+            "customerNo" => $validated['customerNo'] ?? "", // Nomor customer dari data.
             "virtualAccountNo" => "   " . $user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
+            "virtualAccountName" => $user_data->nama_jamaah, // Nama customer dari data
             "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
-                "value" => $nominalTagihan,
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
                 "currency" => "IDR"
             ],
             "totalAmount" => [
-                "value" => $nominalTagihan,
+                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
                 "currency" => "IDR"
             ],
             "trxDateTime" => $validated['trxDateTime'] ?? "",
-            "referenceNo" => $validated['referenceNo'] ?? "",
-            "paymentFlagStatus" => $response["paymentFlagStatus"],
-            "billDetails" => [],
+            "referenceNo" => $validated['referenceNo'] ?? "", // Nomor referensi statis atau di-generate
+            "paymentFlagStatus" => $responflag, // Status sukses
+            "billDetails" => [], // Detail tagihan kosong (bisa diisi jika diperlukan)
             "freeTexts" => [
                 [
                     "english" => "Free text",
@@ -542,10 +517,9 @@ if (md5((string) $user_data->nominal_tagihan) != md5((string) $paidAmount) || md
                 ]
             ]
         ],
-        "additionalInfo" => (object) []
-    ], $response["code"]);
+        "additionalInfo" => (object) [] // Informasi tambahan kosong
+    ], $code);
 }
-
 
 private function buildNotFoundResponse($validated, $externalId)
 {
