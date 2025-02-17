@@ -136,16 +136,16 @@ class InquiryBCAController extends Controller
         ], 401);
     }
         // Validasi Signature
-        if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+        // if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
             
             
 
             
-                return response()->json([
-                    'responseCode' => '4012400',
-                    'responseMessage' => 'Unauthorized. [Signature]',
-                ], 401);
-        }
+        //         return response()->json([
+        //             'responseCode' => '4012400',
+        //             'responseMessage' => 'Unauthorized. [Signature]',
+        //         ], 401);
+        // }
   
             
             
