@@ -362,19 +362,17 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
 // Cek validasi amount lebih awal sebelum yang lain
 $paidAmount = $request->input('paidAmount.value');
 $totalAmount = $request->input('totalAmount.value');
-
-// Format nominal tagihan dengan .00
 $nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
 
-// Log buat debugging
+// Log for debugging
 Log::info('Validasi Amount:', [
     'paidAmount' => $paidAmount,
     'totalAmount' => $totalAmount,
-    'nominalTagihan' => $nominalTagihan,
+    'nominalTagihan' => $user_data->nominal_tagihan,
 ]);
 
-// Jika amount tidak sesuai, langsung return response Invalid Amount
-if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
+// If the amount does not match, return an Invalid Amount response
+if ($user_data->nominal_tagihan != $paidAmount || $user_data->nominal_tagihan != $totalAmount) {
     return response()->json([
         "responseCode" => "4042513",
         "responseMessage" => "Invalid Amount",
