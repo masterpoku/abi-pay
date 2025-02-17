@@ -431,24 +431,20 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         
 
         // Cek validasi amount setelah cek status pembayaran
-        $paidAmount = number_format((float) $request->input('paidAmount.value'), 2, '.', '');
-        $totalAmount = number_format((float) $request->input('totalAmount.value'), 2, '.', '');
+        $paidAmount = $request->input('paidAmount.value');
+        $totalAmount = $request->input('totalAmount.value');
 
         // Pastikan nominalTagihan dari database ada format .00
-        $nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
+        $nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
         // Log untuk debugging
         Log::info('Amounts:', [
             'paidAmount' => $paidAmount, 
             'totalAmount' => $totalAmount, 
             'nominalTagihan' => $nominalTagihan,
-            'comparePaid' => bccomp_manual($paidAmount, $nominalTagihan, 2),
-            'compareTotal' => bccomp_manual($totalAmount, $nominalTagihan, 2),
         ]);
 
-
         // Validasi amount tanpa mengubah request
-      // Validasi amount tanpa mengubah request
-        if (bccomp_manual($paidAmount, $nominalTagihan, 2) !== 0 || bccomp_manual($totalAmount, $nominalTagihan, 2) !== 0) {
+        if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
             $responseCode = "4042513";
             $responstatus = "Invalid Amount";
             $english = "Invalid Amount";
