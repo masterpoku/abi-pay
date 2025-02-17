@@ -369,8 +369,8 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
     if (!$externalId) {
         $responseCode = "4042518";
         $responstatus = "Inconsistent Request";
-        $english = "Inconsistent Request";
-        $indonesia = "Permintaan tidak konsisten";
+        $english = "Success";
+        $indonesia = "Sukses";
         $responflag = "01";
         $code = 404;
     } else {
@@ -443,8 +443,8 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
     if ($existingExternalId) {
         $responseCode = "4042518";
         $responstatus = "Inconsistent Request";
-        $english = "Inconsistent Request";
-        $indonesia = "Permintaan tidak konsisten";
+        $english = "Success";
+        $indonesia = "Sukses";
         $responflag = "01";
         $code = 404;
     } else {
