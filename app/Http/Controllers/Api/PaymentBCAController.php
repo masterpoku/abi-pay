@@ -190,10 +190,7 @@ EOF;
         return $is_valid === 1;
     }
 
-    // public function flagPayment(Request $request) {
-    //     Log::info('flagPayment Request Data:', $request->all());
-    //     Log::info('flagPayment Request Header:', $request->headers->all());
-    // }
+
     public function flagPayment(Request $request) {
         Log::info('flagPayment Request Data:', $request->all());
         Log::info('flagPayment Request Header:', $request->headers->all());
@@ -210,9 +207,9 @@ EOF;
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
     
-            // if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
-            //     return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Signature]"], 401);
-            // }
+            if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+                return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Signature]"], 401);
+            }
     
             if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
                 return response()->json(["responseCode" => "4012501", "responseMessage" => "Invalid Token (B2B)"], 401);
