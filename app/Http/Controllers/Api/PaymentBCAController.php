@@ -381,7 +381,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
                 ->where('external_id', $externalId)
                 ->orWhere('payment_request_id', $validated['paymentRequestId'])
                 ->first();
-
+            Log::info($existingRecord);
             if ($existingRecord?->external_id == $externalId) {
                 $responseCode = "4092500";
                 $responstatus = "Conflict";
