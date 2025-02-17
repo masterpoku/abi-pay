@@ -122,7 +122,7 @@ class InquiryBCAController extends Controller
        
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         $requestTime = \Carbon\Carbon::parse($isoTime);
-        if (now()->diffInMinutes($requestTime) > 5) {
+        if (now()->diffInMinutes($requestTime) > 9000) {
             return response()->json([
                 'responseCode' => '4012503',
                 'responseMessage' => 'Request timestamp is invalid or expired',
