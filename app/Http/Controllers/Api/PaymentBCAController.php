@@ -416,30 +416,28 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         }
 
 
-      // Ambil data amount langsung dari request tanpa diubah
-$paidAmount = $request->input('paidAmount.value');
-$totalAmount = $request->input('totalAmount.value');
+        // Cek validasi amount setelah cek status pembayaran
+        $paidAmount = $request->input('paidAmount.value');
+        $totalAmount = $request->input('totalAmount.value');
 
-// Format nominalTagihan ke .00
-$nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
+        // Pastikan nominalTagihan dari database ada format .00
+        $nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
+        // Log untuk debugging
+        Log::info('Amounts:', [
+            'paidAmount' => $paidAmount, 
+            'totalAmount' => $totalAmount, 
+            'nominalTagihan' => $nominalTagihan,
+        ]);
 
-// Log buat debugging
-Log::info('Amounts:', [
-    'paidAmount' => $paidAmount, 
-    'totalAmount' => $totalAmount, 
-    'nominalTagihan' => $nominalTagihan,
-]);
-
-// Cek validasi amount tanpa mengubah request
-if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
-    return response()->json([
-        "responseCode" => "4042513",
-        "responseMessage" => "Invalid Amount",
-        "virtualAccountData" => [],
-        "additionalInfo" => (object) []
-    ], 404);
-}
-
+        // Validasi amount tanpa mengubah request
+        if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
+            $responseCode = "4042513";
+            $responstatus = "Invalid Amount";
+            $english = "Invalid Amount";
+            $indonesia = "Jumlah pembayaran tidak sesuai dengan tagihan";
+            $responflag = "01";
+            $code = 404;
+        }
 
         // Jika tidak ada konflik dan external_id belum ada di database, insert baru
         if ($code == 200 && !$existingRecord) {
