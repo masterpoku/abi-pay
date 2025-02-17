@@ -207,9 +207,9 @@ EOF;
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
     
-            if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
-                return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Signature]"], 401);
-            }
+            // if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+            //     return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Signature]"], 401);
+            // }
     
             if (!$this->validateHeaders($authToken, $clientSecret, $method, $url, $isoTime, $bodyToHash, $signature)) {
                 return response()->json(["responseCode" => "4012501", "responseMessage" => "Invalid Token (B2B)"], 401);
@@ -422,13 +422,6 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             }
             
         }
-
-        function bccomp_manual($left, $right, $scale = 2) {
-            $left = number_format((float)$left, $scale, '.', '');
-            $right = number_format((float)$right, $scale, '.', '');
-            return ($left <=> $right); // Menggunakan spaceship operator (PHP 7+)
-        }
-        
 
         // Cek validasi amount setelah cek status pembayaran
         $paidAmount =$request->input('paidAmount.value');
