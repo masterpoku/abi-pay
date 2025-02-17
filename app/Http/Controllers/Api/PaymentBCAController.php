@@ -499,11 +499,11 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             "virtualAccountName" => $user_data->nama_jamaah, // Nama customer dari data
             "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
-                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
+                "value" =>  $paidAmount, // Format nominal tagihan
                 "currency" => "IDR"
             ],
             "totalAmount" => [
-                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''), // Format nominal tagihan
+                "value" =>  $totalAmount, // Format nominal tagihan
                 "currency" => "IDR"
             ],
             "trxDateTime" => $validated['trxDateTime'] ?? "",
