@@ -381,7 +381,6 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
             ->first();
         Log::info(json_encode($existingRecord));
 
-        // Handle conflict jika external_id sudah ada
         if ($existingRecord?->external_id == $externalId && $existingRecord?->payment_request_id != $validated['paymentRequestId']) {
             $responseCode = "4092500";
             $responstatus = "Conflict";
@@ -394,9 +393,9 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
         // Handle inconsistent request jika payment_request_id sudah ada
         elseif ($existingRecord?->payment_request_id == $validated['paymentRequestId']) {
             $responseCode = "4042518";
-            $responstatus = "Inconsistent Request";
-            $english = "Inconsistent Request";
-            $indonesia = "Permintaan tidak konsisten";
+            $responstatus = "Conflict";
+            $english = "Cannot use the same X-EXTERNAL-ID";
+            $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
             $responflag = "01";
             $code = 404;
             Log::info('Inconsistent Request: payment_request_id already exists');
