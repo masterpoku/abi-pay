@@ -415,35 +415,31 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             
         }
 
-        function bccomp_manual($left, $right, $scale = 2) {
-            $left = number_format((float)$left, $scale, '.', '');
-            $right = number_format((float)$right, $scale, '.', '');
-            return ($left <=> $right); // Menggunakan spaceship operator (PHP 7+)
-        }
-        
 
-        // Cek validasi amount setelah cek status pembayaran
-        $paidAmount = $request->input('paidAmount.value');
-        $totalAmount = $request->input('totalAmount.value');
+      // Ambil data amount langsung dari request tanpa diubah
+$paidAmount = $request->input('paidAmount.value');
+$totalAmount = $request->input('totalAmount.value');
 
-        // Pastikan nominalTagihan dari database ada format .00
-        $nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
-        // Log untuk debugging
-        Log::info('Amounts:', [
-            'paidAmount' => $paidAmount, 
-            'totalAmount' => $totalAmount, 
-            'nominalTagihan' => $nominalTagihan,
-        ]);
+// Format nominalTagihan ke .00
+$nominalTagihan = number_format((float) $user_data->nominal_tagihan, 2, '.', '');
 
-        // Validasi amount tanpa mengubah request
-        if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
-            $responseCode = "4042513";
-            $responstatus = "Invalid Amount";
-            $english = "Invalid Amount";
-            $indonesia = "Jumlah pembayaran tidak sesuai dengan tagihan";
-            $responflag = "01";
-            $code = 404;
-        }
+// Log buat debugging
+Log::info('Amounts:', [
+    'paidAmount' => $paidAmount, 
+    'totalAmount' => $totalAmount, 
+    'nominalTagihan' => $nominalTagihan,
+]);
+
+// Cek validasi amount tanpa mengubah request
+if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
+    return response()->json([
+        "responseCode" => "4042513",
+        "responseMessage" => "Invalid Amount",
+        "virtualAccountData" => [],
+        "additionalInfo" => (object) []
+    ], 404);
+}
+
 
         // Jika tidak ada konflik dan external_id belum ada di database, insert baru
         if ($code == 200 && !$existingRecord) {
