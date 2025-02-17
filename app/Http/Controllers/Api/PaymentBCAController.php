@@ -369,13 +369,13 @@ $nominalTagihan = $user_data->nominal_tagihan;
 
 // Log for debugging
 Log::info('Validasi Amount:', [
-    'paidAmount' => $paidAmount,
-    'totalAmount' => $totalAmount,
-    'nominalTagihan' => $user_data->nominal_tagihan,
+    'paidAmount' => (string) $paidAmount,
+    'totalAmount' => (string) $totalAmount,
+    'nominalTagihan' => (string) $user_data->nominal_tagihan,
 ]);
 
 // If the amount does not match, return an Invalid Amount response
-if ($user_data->nominal_tagihan!= $paidAmount || $user_data->nominal_tagihan != $totalAmount) {
+if ((string) $user_data->nominal_tagihan != (string) $paidAmount || (string) $user_data->nominal_tagihan != (string) $totalAmount) {
     return response()->json([
         "responseCode" => "4042513",
         "responseMessage" => "Invalid Amount",
