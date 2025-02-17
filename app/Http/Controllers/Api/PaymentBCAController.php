@@ -445,8 +445,7 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
         $code = 404;
     }
 
-    // Insert or update data berdasarkan kondisi
-    if ($code === 200 && !$existingRecord) {
+
         // Insert external_id jika belum ada
         DB::table('external_ids')->insert([
             'external_id' => $externalId,
@@ -462,7 +461,7 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
                 'external_id' => $externalId,
                 'payment_request_id' => $validated['paymentRequestId'],
             ]);
-    }
+    
 
     // Update status pembayaran hanya jika belum lunas & respon sukses
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
