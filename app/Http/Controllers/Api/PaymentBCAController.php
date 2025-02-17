@@ -268,15 +268,7 @@ EOF;
                 
             }
             
-            $validated = $request->validate([
-                'partnerServiceId' => 'required',
-                'customerNo' => 'required',
-                'virtualAccountNo' => 'required|regex:/^\d+$/',
-                'channelCode' => 'required',
-                'trxDateTime' => 'required',
-                'paymentRequestId' => 'required',
-                'referenceNo' => 'required',
-            ]);
+            $validated = $request->all();
     
             // Cek apakah invoice sudah ada    
             $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
