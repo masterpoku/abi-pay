@@ -203,7 +203,7 @@ EOF;
             $isoTime = $request->header('X-TIMESTAMP');
             $signature = $request->header('X-SIGNATURE');
             $bodyToHash = $request->getContent();
-            $externalId = $request->header('X-EXTERNAL-ID');
+            $externalId = $request->header('X-EXTERNAL-ID')??'00';
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
     
