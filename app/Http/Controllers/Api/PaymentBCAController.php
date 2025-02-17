@@ -376,7 +376,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
             $responflag = "01";
             $code = 404;
         } else {
-            // Cek apakah external_id atau payment_request_id sudah ada
+            Log::info('buildSuccessResponse "Cek apakah external_id atau payment_request_id sudah ada"');
             $existingRecord = DB::table('external_ids')
                 ->where('external_id', $externalId)
                 ->orWhere('payment_request_id', $validated['paymentRequestId'])
