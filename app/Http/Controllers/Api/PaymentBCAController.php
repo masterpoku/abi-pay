@@ -450,7 +450,7 @@ private function buildSuccessResponse($request,$validated, $user_data, $external
         }
 
         // Jika tidak ada konflik dan external_id belum ada di database, insert baru
-        if ($code == 200 && !$existingRecord) {
+        if ($code === 200 || $code === 404) {
             DB::table('external_ids')->insert([
                 'external_id' => $externalId,
                 'payment_request_id' => $validated['paymentRequestId'],
