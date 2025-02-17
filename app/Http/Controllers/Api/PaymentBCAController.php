@@ -356,104 +356,108 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
 {
     $now = now(); // Simpan waktu supaya konsisten di seluruh eksekusi
 
-    // Default response jika pembayaran belum dilakukan
-    $responseCode = "2002500";
-    $responstatus = "Successful";
-    $english = "Success";
-    $indonesia = "Sukses";
-    $responflag = "00";
-    $code = 200;
+// Default response jika pembayaran belum dilakukan
+$responseCode = "2002500";
+$responstatus = "Successful";
+$english = "Success";
+$indonesia = "Sukses";
+$responflag = "00";
+$code = 200;
 
-    // Cek validasi external_id lebih awal
-    $externalId = $externalId ?? null;
-    if (!$externalId) {
-        $responseCode = "4042518";
-        $responstatus = "Inconsistent Request";
+// Cek validasi external_id lebih awal
+$externalId = $externalId ?? null;
+if (!$externalId) {
+    $responseCode = "4042518";
+    $responstatus = "Inconsistent Request";
+    $responflag = "01";
+    $code = 404;
+} else {
+    Log::info('Cek apakah external_id atau payment_request_id sudah ada');
+    $existingRecord = DB::table('external_ids')
+        ->where('external_id', $externalId)
+        ->orWhere('payment_request_id', $validated['paymentRequestId'])
+        ->first();
+    Log::info(json_encode($existingRecord));
+
+    if ($existingRecord?->external_id == $externalId && $existingRecord?->payment_request_id != $validated['paymentRequestId']) {
+        $responseCode = "4092500";
+        $responstatus = "Conflict";
+        $english = "Cannot use the same X-EXTERNAL-ID";
+        $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
         $responflag = "01";
-        $code = 404;
-    } else {
-        Log::info('Cek apakah external_id atau payment_request_id sudah ada');
-        $existingRecord = DB::table('external_ids')
-            ->where('external_id', $externalId)
-            ->orWhere('payment_request_id', $validated['paymentRequestId'])
-            ->first();
-        Log::info(json_encode($existingRecord));
+        $code = 409;
+        Log::info('Conflict: Cannot use the same X-EXTERNAL-ID');
+    } 
 
-        if ($existingRecord?->external_id == $externalId && $existingRecord?->payment_request_id != $validated['paymentRequestId']) {
-            $responseCode = "4092500";
-            $responstatus = "Conflict";
+    // Cek status pembayaran
+    if ($responseCode == "2002500") {
+        if ($user_data->status_pembayaran == '1') {
+            $responseCode = "4042514";
+            $responstatus = "Paid Bill";
+            $english = "Bill has been paid";
+            $indonesia = "Tagihan telah dibayar";
             $responflag = "01";
-            $code = 409;
-            Log::info('Conflict: Cannot use the same X-EXTERNAL-ID');
-        } 
-
-        // Cek status pembayaran
-        if ($responseCode == "2002500") {
-            if ($user_data->status_pembayaran == '1') {
-                $responseCode = "4042514";
-                $responstatus = "Paid Bill";
-                $responflag = "01";
-                $code = 404;
-                Log::info('Paid Bill: Payment already completed');
-            } elseif ($user_data->status_pembayaran == '2') {
-                $responseCode = "4042519";
-                $responstatus = "Invalid Bill/Virtual Account";
-                $responflag = "01";
-                $code = 404;
-                Log::info('Expired Bill: Payment request expired');
-            }
+            $code = 404;
+            Log::info('Paid Bill: Payment already completed');
+        } elseif ($user_data->status_pembayaran == '2') {
+            $responseCode = "4042519";
+            $responstatus = "Invalid Bill/Virtual Account";
+            $english = "Bill has expired";
+            $indonesia = "Tagihan telah kadaluarsa";
+            $responflag = "01";
+            $code = 404;
+            Log::info('Expired Bill: Payment request expired');
         }
     }
+}
 
-    // Validasi jumlah pembayaran
-    $paidAmount = $request->input('paidAmount.value');
-    $totalAmount = $request->input('totalAmount.value');
-    $nominalTagihan = $user_data->nominal_tagihan;
+// Validasi jumlah pembayaran
+$paidAmount = $request->input('paidAmount.value');
+$totalAmount = $request->input('totalAmount.value');
+$nominalTagihan = $user_data->nominal_tagihan;
 
-    Log::info('Validating amounts:', [
-        'paidAmount' => $paidAmount, 
-        'totalAmount' => $totalAmount, 
-        'nominalTagihan' => $nominalTagihan,
+Log::info('Validating amounts:', [
+    'paidAmount' => $paidAmount, 
+    'totalAmount' => $totalAmount, 
+    'nominalTagihan' => $nominalTagihan,
+]);
+
+// Validasi jika amount tidak sesuai
+if (md5($paidAmount) !== md5($nominalTagihan) || md5($totalAmount) !== md5($nominalTagihan)) {
+    $responseCode = "4042513";
+    $responstatus = "Invalid Amount";
+    $english = "Invalid Amount";
+    $indonesia = "Jumlah pembayaran tidak sesuai dengan tagihan";
+    $responflag = "01";
+    $code = 404;
+}
+
+// Insert external_id jika belum ada
+$existingExternalId = DB::table('external_ids')
+    ->where('external_id', $externalId)
+    ->exists();
+
+if ($existingExternalId) {
+    $responseCode = "4042518";
+    $responstatus = "Inconsistent Request";
+    $responflag = "01";
+    $code = 404;
+} else {
+    DB::table('external_ids')->insert([
+        'external_id' => $externalId,
+        'payment_request_id' => $validated['paymentRequestId'],
+        'date' => $now->toDateString(),
+        'created_at' => $now,
     ]);
-
-    // Validasi jika amount tidak sesuai
-    if (md5($paidAmount) !== md5($nominalTagihan) || md5($totalAmount) !== md5($nominalTagihan)) {
-        $responseCode = "4042513";
-        $responstatus = "Invalid Amount";
-        $responflag = "01";
-        $code = 404;
-    }
-
-    // Insert external_id jika belum ada
-    $existingExternalId = DB::table('external_ids')
-        ->where('external_id', $externalId)
-        ->exists();
-
-    if ($existingExternalId) {
-        $responseCode = "4042518";
-        $responstatus = "Inconsistent Request";
-        $responflag = "01";
-        $code = 404;
-    } else {
-        DB::table('external_ids')->insert([
+    
+    // Update data tagihan_pembayaran
+    DB::table('tagihan_pembayaran')
+        ->where('id_invoice', $user_data->id_invoice)
+        ->update([
             'external_id' => $externalId,
             'payment_request_id' => $validated['paymentRequestId'],
-            'date' => $now->toDateString(),
-            'created_at' => $now,
         ]);
-
-               // Update data tagihan_pembayaran
-               DB::table('tagihan_pembayaran')
-               ->where('id_invoice', $user_data->id_invoice)
-               ->update([
-                   'external_id' => $externalId,
-                   'payment_request_id' => $validated['paymentRequestId'],
-               ]);
-       
-    }
-
-        
- 
+}
 
     // Update status pembayaran hanya jika belum lunas & respon sukses
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
