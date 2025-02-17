@@ -359,34 +359,58 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
         "paymentFlagStatus" => "00",
         "code" => 200
     ];
+// Cek validasi amount lebih awal sebelum yang lain
+$paidAmount = $request->input('paidAmount.value');
+$totalAmount = $request->input('totalAmount.value');
 
-    // Cek validasi amount duluan
-    $paidAmount = $request->input('paidAmount.value');
-    $totalAmount = $request->input('totalAmount.value');
+// Format nominal tagihan dengan .00
+$nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
 
-    // Format nominal tagihan dengan .00
-    $nominalTagihan = number_format((float)$user_data->nominal_tagihan, 2, '.', '');
+// Log buat debugging
+Log::info('Validasi Amount:', [
+    'paidAmount' => $paidAmount,
+    'totalAmount' => $totalAmount,
+    'nominalTagihan' => $nominalTagihan,
+]);
 
-    // Log buat debugging
-    Log::info('Amounts:', [
-        'paidAmount' => $paidAmount,
-        'totalAmount' => $totalAmount,
-        'nominalTagihan' => $nominalTagihan,
-    ]);
-
-    // Validasi amount
-    if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
-        $response = [
-            "responseCode" => "4042513",
-            "responseMessage" => "Invalid Amount",
+// Jika amount tidak sesuai, langsung return response Invalid Amount
+if ($nominalTagihan != $paidAmount || $nominalTagihan != $totalAmount) {
+    return response()->json([
+        "responseCode" => "4042513",
+        "responseMessage" => "Invalid Amount",
+        "virtualAccountData" => [
             "paymentFlagReason" => [
                 "english" => "Invalid Amount",
                 "indonesia" => "Jumlah pembayaran tidak sesuai dengan tagihan"
             ],
+            "partnerServiceId" => "   " . $validated['partnerServiceId'],
+            "customerNo" => $validated['customerNo'] ?? "",
+            "virtualAccountNo" => "   " . $user_data->id_invoice,
+            "virtualAccountName" => $user_data->nama_jamaah,
+            "paymentRequestId" => $validated['paymentRequestId'] ?? "",
+            "paidAmount" => [
+                "value" => $paidAmount, // Tetap ambil dari request
+                "currency" => "IDR"
+            ],
+            "totalAmount" => [
+                "value" => $totalAmount, // Tetap ambil dari request
+                "currency" => "IDR"
+            ],
+            "trxDateTime" => $validated['trxDateTime'] ?? "",
+            "referenceNo" => $validated['referenceNo'] ?? "",
             "paymentFlagStatus" => "01",
-            "code" => 404
-        ];
-    }
+            "billDetails" => [],
+            "freeTexts" => [
+                [
+                    "english" => "Free text",
+                    "indonesia" => "Tulisan bebas"
+                ]
+            ]
+        ],
+        "additionalInfo" => (object) []
+    ], 404);
+}
+
 
     // Cek validasi external_id lebih awal
     if (!$externalId) {
