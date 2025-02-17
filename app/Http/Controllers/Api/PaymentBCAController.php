@@ -390,16 +390,7 @@ private function buildSuccessResponse($request, $validated, $user_data, $externa
             $code = 409;
             Log::info('Conflict: Cannot use the same X-EXTERNAL-ID');
         } 
-        // Handle inconsistent request jika payment_request_id sudah ada
-        elseif ($existingRecord?->payment_request_id == $validated['paymentRequestId']) {
-            $responseCode = "4042518";
-            $responstatus = "Conflict";
-            $english = "Cannot use the same X-EXTERNAL-ID";
-            $indonesia = "Tidak bisa menggunakan X-EXTERNAL-ID yang sama";
-            $responflag = "01";
-            $code = 404;
-            Log::info('Inconsistent Request: payment_request_id already exists');
-        }
+     
 
         // Cek status pembayaran
         if ($responseCode == "2002500") {
