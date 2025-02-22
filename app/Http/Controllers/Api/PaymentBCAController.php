@@ -70,9 +70,9 @@ class PaymentBCAController extends Controller
             if (isset($responseArray['error'])) {
                 return response()->json(['message' => $responseArray['error_description'] ?? 'Error occurred'], 500);
             }
-            Log::info("Access Token: " . $responseArray['access_token']);
+            Log::info("Access Token: " . $responseArray['accessToken']);
             DB::table('token')->insert([
-                'token' => $responseArray['access_token'],
+                'token' => $responseArray['accessToken'],
                 'created_at' => DB::raw('CURRENT_TIMESTAMP')
             ]);
             
@@ -80,7 +80,7 @@ class PaymentBCAController extends Controller
             return response()->json([
                 'responseCode' => '2007300',
                 'responseMessage' => 'Successful',
-                'accessToken' => $responseArray['access_token'],
+                'accessToken' => $responseArray['accessToken'],
                 'tokenType' => 'bearer',
                 'expiresIn' => 900
             ], 200);
