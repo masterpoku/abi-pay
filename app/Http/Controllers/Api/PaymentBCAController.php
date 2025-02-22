@@ -66,6 +66,8 @@ class PaymentBCAController extends Controller
             // Konversi respons JSON menjadi array
             $responseArray = json_decode($response, true);
     
+            // Log array respons
+            Log::info('Response array:', $responseArray);
             // Periksa jika ada error dalam respons
             if (isset($responseArray['error'])) {
                 return response()->json(['message' => $responseArray['error_description'] ?? 'Error occurred'], 500);
