@@ -85,7 +85,7 @@ class PaymentBCAController extends Controller
         Log::info('Request Header:', $request->headers->all());
         try {
             // Ambil header dari request
-            $clientId = $request->header('X-CLIENT-KEY');
+            $clientId = $request->header('CHANNEL-ID');
             $signature = $request->header('X-SIGNATURE');
             $timeStamp = $request->header('X-TIMESTAMP');
             $clientKey = env('BCA_CLIENT_KEY');
