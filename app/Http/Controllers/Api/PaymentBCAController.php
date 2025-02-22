@@ -15,46 +15,35 @@ class PaymentBCAController extends Controller
     
     public function requestAccessToken(Request $request)
     {
+        Log::info('Request Header:', $request->headers->all());
         try {
-            // Endpoint URL untuk mendapatkan access token
-            $url = 'https://sandbox.bca.co.id/api/oauth/token';
-    
+
             // Ambil header dari request
             $timeStamp = $request->header('X-TIMESTAMP');
             $signature = $request->header('X-SIGNATURE');
     
             // Data dari client key dan secret (sebaiknya disimpan di .env)
             $clientKey = env('BCA_CLIENT_KEY');
-            $clientSecret = env('BCA_CLIENT_SECRET');
-    
-            // Encode Client ID dan Secret ke Base64
-            $authString = base64_encode($clientKey . ':' . $clientSecret);
-    
-            // Body request untuk mendapatkan token
-            $requestBody = [
-                'grant_type' => 'client_credentials',
-            ];
-    
-            // Header untuk request
+            // $clientSecret = env('BCA_CLIENT_SECRET');
+            $url = "https://devapi.klikbca.com/openapi/v1.0/access-token/b2b";
             $headers = [
-                'Authorization: Basic ' . $authString,
-                'Content-Type: application/x-www-form-urlencoded',
-                'X-TIMESTAMP: ' . $timeStamp,
-                'X-SIGNATURE: ' . $signature,
+                "Accept: application/json",
+                "Content-Type: application/json",
+                "X-TIMESTAMP: $timeStamp",
+                "X-CLIENT-KEY: $clientKey",
+                "X-SIGNATURE: $signature"
             ];
-    
-            // Inisialisasi cURL
-            $ch = curl_init($url);
-    
-            // Konfigurasi cURL
+        
+            $data = json_encode(["grantType" => "client_credentials"]);
+        
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($requestBody));
-    
-            // Kirim permintaan dan ambil respons
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        
             $response = curl_exec($ch);
-    
             // Periksa jika ada kesalahan pada cURL
             if ($response === false) {
                 throw new Exception("cURL Error: " . curl_error($ch));
@@ -65,14 +54,15 @@ class PaymentBCAController extends Controller
     
             // Konversi respons JSON menjadi array
             $responseArray = json_decode($response, true);
-    
+            Log::info('Response Array:', $responseArray);
+
             // Periksa jika ada error dalam respons
             if (isset($responseArray['error'])) {
                 return response()->json(['message' => $responseArray['error_description'] ?? 'Error occurred'], 500);
             }
-            Log::info("Access Token: " . $responseArray['access_token']);
+            Log::info("Access Token: " . $responseArray['accessToken']);
             DB::table('token')->insert([
-                'token' => $responseArray['access_token'],
+                'token' => $responseArray['accessToken'],
                 'created_at' => DB::raw('CURRENT_TIMESTAMP')
             ]);
             
@@ -80,7 +70,7 @@ class PaymentBCAController extends Controller
             return response()->json([
                 'responseCode' => '2007300',
                 'responseMessage' => 'Successful',
-                'accessToken' => $responseArray['access_token'],
+                'accessToken' => $responseArray['accessToken'],
                 'tokenType' => 'bearer',
                 'expiresIn' => 900
             ], 200);
