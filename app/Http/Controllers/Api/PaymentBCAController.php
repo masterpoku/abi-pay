@@ -210,7 +210,7 @@ EOF;
             Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
             Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
     
-            if ($channelId && $partnerId && ((int) $channelId !== 95231 || (int) $partnerId !== 14999)) {
+            if ($channelId && $partnerId && ((int) $channelId !== 95051 || (int) $partnerId !== 14999)) {
                 return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Unknown client]"] ,401);
             }
     
