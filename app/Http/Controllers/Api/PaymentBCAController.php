@@ -88,7 +88,7 @@ class PaymentBCAController extends Controller
             $clientId = $request->header('CHANNEL-ID');
             $signature = $request->header('X-SIGNATURE');
             $timeStamp = $request->header('X-TIMESTAMP');
-            $clientKey = env('BCA_CHANNEL_ID');
+            $clientKey = "95051";
     
             // Validasi keberadaan header
             if (!$clientId || !$signature || !$timeStamp) {
