@@ -1,14 +1,13 @@
 <?php
 
-use App\Http\Controllers\Api\bca\requestAccessToken;
-use App\Http\Controllers\Api\bca\RequestToken;
 use App\Http\Controllers\Api\InquiryBCAController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PaymentBCAController;
 use App\Http\Controllers\Api\PaymentBSIController;
 use App\Http\Controllers\JwtAuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\TagihanApiController;
+
 use Illuminate\Support\Facades\Route;
 
 
@@ -73,3 +72,12 @@ Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayme
 Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
 
 Route::post('v1.0/validate-bearer', [InquiryBCAController::class, 'validateAndInsertExternalId']);
+
+
+
+// Route::get('/tagihan', [TagihanApiController::class, 'index']);
+Route::post('/tagihan', [TagihanApiController::class, 'store']);
+Route::get('/tagihan/{id}', [TagihanApiController::class, 'show']);
+Route::put('/tagihan/{id}', [TagihanApiController::class, 'update']);
+Route::delete('/tagihan/{id}', [TagihanApiController::class, 'destroy']);
+

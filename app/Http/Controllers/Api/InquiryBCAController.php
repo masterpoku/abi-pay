@@ -58,8 +58,10 @@ class InquiryBCAController extends Controller
                 // ]);
     
                 // Update tagihan_pembayaran
-                DB::table('tagihan_pembayaran')
-                    ->where('id_invoice', $virtualAccountNo)
+                DB::table('tagihan')
+                    ->where('virtual_account_no', 'LIKE', $virtualAccountNo)
+                    ->where('external_id', $externalId)
+                    ->where('payment_request_id', $inquiryRequestId)
                     ->update([
                         'external_id' => $externalId,
                         'payment_request_id' => $inquiryRequestId,
@@ -164,9 +166,8 @@ class InquiryBCAController extends Controller
         $validated = $request->all();
     
         // Ambil data dari database berdasarkan virtualAccountNo
-        $user_data = DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo']) // Mencocokkan berdasarkan virtualAccountNo
-            ->orderByDesc('tanggal_invoice')
+        $user_data = DB::table('tagihan')
+            ->where('virtual_account_no', 'LIKE', $validated['virtualAccountNo'])
             ->first();
     
         if (!$user_data) {
