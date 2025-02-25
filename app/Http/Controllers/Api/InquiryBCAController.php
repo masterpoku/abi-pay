@@ -194,7 +194,7 @@ class InquiryBCAController extends Controller
                         "customerNo" => $validatedData['customerNo'] ?? "",
                         "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->virtual_account_name ?? "",
-                        "virtualAccountEmail" => $user_data->virtual_account_email ?? "",
+                        "virtualAccountEmail" => "admin@abitour.id",
                         "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                         "totalAmount" => [
@@ -228,7 +228,7 @@ class InquiryBCAController extends Controller
                         "customerNo" => $validatedData['customerNo'] ?? "" ,
                         "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->virtual_account_name ?? "",
-                        "virtualAccountEmail" => $user_data->virtual_account_email ?? "",
+                        "virtualAccountEmail" => "admin@abitour.id",
                         "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
                         "totalAmount" => [
@@ -421,7 +421,7 @@ class InquiryBCAController extends Controller
             "customerNo" => $customerNo,
             "virtualAccountNo" => "   " . $user_data->virtual_account_no,
             "virtualAccountName" => $user_data->virtual_account_name,
-            "virtualAccountEmail" => $user_data->virtual_account_email,
+            "virtualAccountEmail" => "admin@abitour.id",
             "virtualAccountPhone" => $user_data->virtual_account_phone,
             "inquiryRequestId" => $validated['inquiryRequestId'],
             "totalAmount" => [
@@ -499,7 +499,7 @@ else {
             "customerNo" => $validated['customerNo'] ?? "",
             "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
             "virtualAccountName" => $user_data->virtual_account_name ?? "",
-            "virtualAccountEmail" => $user_data->virtual_account_email ?? "",
+            "virtualAccountEmail" => "admin@abitour.id",
             "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
             "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
             "totalAmount" => [
