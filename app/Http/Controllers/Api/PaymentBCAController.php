@@ -256,9 +256,9 @@ EOF;
             $validated = $request->all();
     
             // Cek apakah invoice sudah ada    
-            $userData = DB::table('tagihan_pembayaran')->where('id_invoice', $validated['virtualAccountNo'])->first();
+            $userData = DB::table('tagihan')->where('virtual_account_no', $validated['virtualAccountNo'])->first();
     
-            // $existingPayment = DB::table('tagihan_pembayaran')
+            // $existingPayment = DB::table('tagihan')
             //     ->where('external_id', $externalId)
             //     ->where('payment_request_id', $validated['paymentRequestId'])
             //     ->first();
@@ -391,7 +391,7 @@ if (!$externalId) {
 // Validasi jumlah pembayaran
 $paidAmount = $request->input('paidAmount.value');
 $totalAmount = $request->input('totalAmount.value');
-$nominalTagihan = $user_data->nominal_tagihan;
+$nominalTagihan = $user_data->total_amount;
 
 Log::info('Validating amounts:', [
     'paidAmount' => $paidAmount, 
@@ -427,9 +427,9 @@ if ($existingExternalId) {
         'created_at' => $now,
     ]);
     
-    // Update data tagihan_pembayaran
-    DB::table('tagihan_pembayaran')
-        ->where('id_invoice', $user_data->id_invoice)
+    // Update data tagihan
+    DB::table('tagihan')
+        ->where('virtual_account_no', $user_data->virtual_account_no)
         ->update([
             'external_id' => $externalId,
             'payment_request_id' => $validated['paymentRequestId'],
@@ -438,8 +438,8 @@ if ($existingExternalId) {
 
     // Update status pembayaran hanya jika belum lunas & respon sukses
     if ($responflag == "00" && $user_data->status_pembayaran == '0' && $responseCode == "2002500") {
-        DB::table('tagihan_pembayaran')
-            ->where('id_invoice', $validated['virtualAccountNo'])
+        DB::table('tagihan')
+            ->where('virtual_account_no', $validated['virtualAccountNo'])
             ->update([
                 'status_pembayaran' => '1',
                 'external_id' => $externalId,
@@ -459,8 +459,8 @@ if ($existingExternalId) {
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
             "customerNo" => $validated['customerNo'] ?? "",
-            "virtualAccountNo" => "   " . $user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
+            "virtualAccountNo" => "   " . $user_data->virtual_account_no,
+            "virtualAccountName" => $user_data->virtual_account_name,
             "paymentRequestId" => $validated['paymentRequestId'] ?? "",
             "paidAmount" => [
                 "value" =>  $paidAmount,

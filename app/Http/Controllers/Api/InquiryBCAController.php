@@ -188,18 +188,18 @@ class InquiryBCAController extends Controller
                         "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
                         "customerNo" => $validatedData['customerNo'] ?? "",
                         "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
-                        "virtualAccountName" => $user_data->nama_jamaah ?? "",
+                        "virtualAccountName" => $user_data->virtual_account_name ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                         "totalAmount" => [
-                            "value" => $user_data->nominal_tagihan ?? "",
+                            "value" => $user_data->total_amount ?? "",
                             "currency" => "IDR"
                         ],
                         "subCompany" => "00000",
                         "billDetails" => [],
                         "freeTexts" => [
                             [
-                                "english" => $user_data->nama_paket ?? "",
-                                "indonesia" => $user_data->nama_paket ?? ""
+                                "english" => $user_data->free_texts ?? "",
+                                "indonesia" => $user_data->free_texts ?? ""
                             ]
                         ]
                     ],
@@ -220,7 +220,7 @@ class InquiryBCAController extends Controller
                         "partnerServiceId" => "   " . $validatedData['partnerServiceId']    ?? "",
                         "customerNo" => $validatedData['customerNo'] ?? "" ,
                         "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
-                        "virtualAccountName" => $user_data->nama_jamaah ?? "",
+                        "virtualAccountName" => $user_data->virtual_account_name ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
                         "totalAmount" => [
                             "value" => $validatedData['totalAmount']['value']  ?? "",
@@ -230,8 +230,8 @@ class InquiryBCAController extends Controller
                         "billDetails" => [],
                         "freeTexts" => [
                             [
-                                "english" => $user_data->nama_paket ?? "",
-                                "indonesia" => $user_data->nama_paket ?? ""
+                                "english" => $user_data->free_texts ?? "",
+                                "indonesia" => $user_data->free_texts ?? ""
                             ]
                         ]
                     ],
@@ -406,19 +406,19 @@ class InquiryBCAController extends Controller
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
             "customerNo" => $customerNo,
-            "virtualAccountNo" => "   " . $user_data->id_invoice,
-            "virtualAccountName" => $user_data->nama_jamaah,
+            "virtualAccountNo" => "   " . $user_data->virtual_account_no,
+            "virtualAccountName" => $user_data->virtual_account_name,
             "inquiryRequestId" => $validated['inquiryRequestId'],
             "totalAmount" => [
-                "value" => $user_data->nominal_tagihan,
+                "value" => $user_data->total_amount,
                 "currency" => "IDR"
             ],
             "subCompany" => "00000",
             "billDetails" => [],
             "freeTexts" => [
                 [
-                    "english" => $user_data->nama_paket,
-                    "indonesia" => $user_data->nama_paket
+                    "english" => $user_data->free_texts,
+                    "indonesia" => $user_data->free_texts
                 ]
             ]
         ],
@@ -483,18 +483,18 @@ else {
             "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
             "customerNo" => $validated['customerNo'] ?? "",
             "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
-            "virtualAccountName" => $user_data->nama_jamaah,
+            "virtualAccountName" => $user_data->virtual_account_name ?? "",
             "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
             "totalAmount" => [
-                "value" => number_format($user_data->nominal_tagihan, 2, '.', ''),
+                "value" => number_format($user_data->total_amount, 2, '.', ''),
                 "currency" => "IDR"
             ],
             "subCompany" => "00000",
             "billDetails" => [],
             "freeTexts" => [
                 [
-                    "english" => $user_data->nama_paket,
-                    "indonesia" => $user_data->nama_paket
+                    "english" => $user_data->free_texts,
+                    "indonesia" => $user_data->free_texts
                 ]
             ]
         ],
