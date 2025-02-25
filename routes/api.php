@@ -75,7 +75,7 @@ Route::post('v1.0/validate-bearer', [InquiryBCAController::class, 'validateAndIn
 
 
 
-// Route::get('/tagihan', [TagihanApiController::class, 'index']);
+Route::get('/tagihan', [InquiryController::class, 'index']);
 Route::post('/tagihan', [TagihanApiController::class, 'store']);
 Route::get('/tagihan/{id}', [TagihanApiController::class, 'show']);
 Route::put('/tagihan/{id}', [TagihanApiController::class, 'update']);
