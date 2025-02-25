@@ -59,25 +59,24 @@ Route::prefix('bca')->group(function () {
     Route::get('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'index']);
     Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayment']);
     Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
-
+    Route::get('/v1.0/transfer-va/create-va', [InquiryController::class, 'index']);
     
 });
 
 
-Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'RequestToken']);
-Route::get('v1.0/access-token/b2b', [InquiryController::class, 'index']);
+// Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'RequestToken']);
+// Route::get('v1.0/access-token/b2b', [InquiryController::class, 'index']);
 
-Route::post('v1.0/access-token/test', [PaymentBCAController::class, 'requestAccessToken']);
-Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayment']);
-Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
+// Route::post('v1.0/access-token/test', [PaymentBCAController::class, 'requestAccessToken']);
+// Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayment']);
+// Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
 
-Route::post('v1.0/validate-bearer', [InquiryBCAController::class, 'validateAndInsertExternalId']);
+// Route::post('v1.0/validate-bearer', [InquiryBCAController::class, 'validateAndInsertExternalId']);
 
 
 
-Route::get('/tagihan', [InquiryController::class, 'index']);
-Route::post('/tagihan', [TagihanApiController::class, 'store']);
-Route::get('/tagihan/{id}', [TagihanApiController::class, 'show']);
-Route::put('/tagihan/{id}', [TagihanApiController::class, 'update']);
-Route::delete('/tagihan/{id}', [TagihanApiController::class, 'destroy']);
+// Route::post('/tagihan', [TagihanApiController::class, 'store']);
+// Route::get('/tagihan/{id}', [TagihanApiController::class, 'show']);
+// Route::put('/tagihan/{id}', [TagihanApiController::class, 'update']);
+// Route::delete('/tagihan/{id}', [TagihanApiController::class, 'destroy']);
 
