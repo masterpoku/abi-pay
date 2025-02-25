@@ -60,8 +60,7 @@ Route::prefix('bca')->group(function () {
     Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayment']);
     Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
     Route::get('/v1.0/transfer-va/create-va', [InquiryController::class, 'index']);
-    
-Route::post('/v1.0/transfer-va/create-va', [TagihanApiController::class, 'store']);
+    Route::post('/v1.0/transfer-va/create-va', [TagihanApiController::class, 'store']);
 });
 
 
