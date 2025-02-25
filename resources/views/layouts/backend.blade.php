@@ -82,10 +82,16 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Pages</span>
                     </li>
-                    <li class="menu-item {{ request()->is('payment*') ? 'active' : '' }}">
+                    <li class="menu-item {{ request()->is('payment/index') ? 'active' : '' }}">
                         <a href="{{ route('payment.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-time"></i>
                             <div data-i18n="Blast Message">History Pembayaran</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->is('payments/index') ? 'active' : '' }}">
+                        <a href="{{ route('payments.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-time"></i>
+                            <div data-i18n="Blast Message">History BCA Pembayaran</div>
                         </a>
                     </li>
                     <li class="menu-item {{ request()->is('report*') ? 'active' : '' }}">

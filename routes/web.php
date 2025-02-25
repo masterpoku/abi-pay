@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/detail/{id}', [PaymentController::class, 'show'])->name('payment.show');
     Route::put('/payment/update/{id}', [PaymentController::class, 'update'])->name('payment.update');
     Route::delete('/payment/destroy/{id}', [PaymentController::class, 'destroy'])->name('payment.destroy');
+
+    Route::get('/payments', [PaymentsController::class, 'index'])->name('payments.index');
+
+
+
 
     Route::get('/report', [ReportController::class, 'index'])->name('report.index');
     Route::get('/report/export-pdf', [ReportController::class, 'exportPdf'])->name('report.exportPdf');
