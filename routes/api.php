@@ -61,6 +61,7 @@ Route::prefix('bca')->group(function () {
     Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
     Route::get('/v1.0/transfer-va/create-va', [InquiryController::class, 'index']);
     
+Route::post('/v1.0/transfer-va/create-va', [TagihanApiController::class, 'store']);
 });
 
 
@@ -75,7 +76,6 @@ Route::prefix('bca')->group(function () {
 
 
 
-// Route::post('/tagihan', [TagihanApiController::class, 'store']);
 // Route::get('/tagihan/{id}', [TagihanApiController::class, 'show']);
 // Route::put('/tagihan/{id}', [TagihanApiController::class, 'update']);
 // Route::delete('/tagihan/{id}', [TagihanApiController::class, 'destroy']);
