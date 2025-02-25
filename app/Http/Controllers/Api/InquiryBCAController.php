@@ -41,7 +41,10 @@ class InquiryBCAController extends Controller
         $externalId = $request->header('X-EXTERNAL-ID');
         $inquiryRequestId = $request->input('inquiryRequestId');
         $virtualAccountNo = $request->input('virtualAccountNo');
-        $virtualAccountPhone = $request->input('virtualAccountPhone');
+        $customerNo = $request->input('customerNo');
+        $customerPhone = $request->input('virtualAccountPhone');
+    
+ 
         // Cek apakah X-EXTERNAL-ID sudah ada di database pada hari ini
             $exists = DB::table('external_ids')
                 ->where('external_id', $externalId)
@@ -80,9 +83,11 @@ class InquiryBCAController extends Controller
                         'indonesia' => 'Tidak bisa menggunakan X-EXTERNAL-ID yang sama',
                     ],
                     "partnerServiceId" => "   ".$request->input('partnerServiceId'),
-                    "virtualAccountPhone" => $virtualAccountPhone,
+                    "customerNo" => $customerNo,
                     "virtualAccountNo" => "   ".$virtualAccountNo,
                     "virtualAccountName" => '',
+                    "virtualAccountEmail" => '',
+                    "virtualAccountPhone" => $customerPhone,
                     "inquiryRequestId" => $inquiryRequestId,
                     'totalAmount' => [
                         'value' => '',
@@ -186,9 +191,11 @@ class InquiryBCAController extends Controller
                             "indonesia" => "Isian wajib [$field] tidak valid"
                         ],
                         "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
-                        "virtualAccountPhone" => $validatedData['virtualAccountPhone'] ?? "",
+                        "customerNo" => $validatedData['customerNo'] ?? "",
                         "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->virtual_account_name ?? "",
+                        "virtualAccountEmail" => $user_data->virtual_account_email ?? "",
+                        "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                         "totalAmount" => [
                             "value" => $user_data->total_amount ?? "",
@@ -218,9 +225,11 @@ class InquiryBCAController extends Controller
                             "indonesia" => "Isian format [$field] tidak valid"
                         ],
                         "partnerServiceId" => "   " . $validatedData['partnerServiceId']    ?? "",
-                        "virtualAccountPhone" => $validatedData['virtualAccountPhone'] ?? "" ,
+                        "customerNo" => $validatedData['customerNo'] ?? "" ,
                         "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->virtual_account_name ?? "",
+                        "virtualAccountEmail" => $user_data->virtual_account_email ?? "",
+                        "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
                         "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
                         "totalAmount" => [
                             "value" => $validatedData['totalAmount']['value']  ?? "",
@@ -251,9 +260,11 @@ class InquiryBCAController extends Controller
                         "indonesia" => "Isian format [partnerServiceId] tidak valid"
                     ],
                     "partnerServiceId" => "   " . ($validated['partnerServiceId'] ?? ""),
-                    "virtualAccountPhone" => $validated['virtualAccountPhone'] ?? "",
+                    "customerNo" => $validated['customerNo'] ?? "",
                     "virtualAccountNo" => "   " . ($validated['virtualAccountNo'] ?? ""),
                     "virtualAccountName" => "",
+                    "virtualAccountEmail" => "",
+                    "virtualAccountPhone" => "",
                     "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
                     "totalAmount" => [
                         "value" => $validatedData['totalAmount']['value'] ?? "",
@@ -283,7 +294,7 @@ class InquiryBCAController extends Controller
     {
         return [
             'partnerServiceId',
-            'virtualAccountPhone',
+            'customerNo',
             'virtualAccountNo',
         ];
     }
@@ -299,9 +310,11 @@ class InquiryBCAController extends Controller
                     "indonesia" => "Isian wajib [$fieldName] tidak valid"
                 ],
                 "partnerServiceId" => "   " . $validatedData['partnerServiceId'] ?? "",
-                "virtualAccountPhone" => $validatedData['virtualAccountPhone'] ?? "",
+                "customerNo" => $validatedData['customerNo'] ?? "",
                 "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
                 "virtualAccountName" =>  "",
+                "virtualAccountEmail" => "",
+                "virtualAccountPhone" => "",
                 "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                 "totalAmount" => [
                     "value" => $validatedData['totalAmount']['value']  ?? "",
@@ -393,7 +406,7 @@ class InquiryBCAController extends Controller
     $indonesia = "Isian wajib [$key] tidak valid";
     $code = 400;
 
-    $virtualAccountPhone = substr($validated['virtualAccountPhone'], 5);
+    $customerNo = substr($validated['virtualAccountNo'], 5);
 
     return response()->json([
         "responseCode" => $responseCode,
@@ -405,9 +418,11 @@ class InquiryBCAController extends Controller
                 "indonesia" => $indonesia
             ],
             "partnerServiceId" => "   " . $validated['partnerServiceId'],
-            "virtualAccountPhone" => $virtualAccountPhone,
+            "customerNo" => $customerNo,
             "virtualAccountNo" => "   " . $user_data->virtual_account_no,
             "virtualAccountName" => $user_data->virtual_account_name,
+            "virtualAccountEmail" => $user_data->virtual_account_email,
+            "virtualAccountPhone" => $user_data->virtual_account_phone,
             "inquiryRequestId" => $validated['inquiryRequestId'],
             "totalAmount" => [
                 "value" => $user_data->total_amount,
@@ -457,11 +472,11 @@ else {
     $inquiryStatus = "00";
     $code = 200;
 
-    if (!is_numeric($validated['virtualAccountPhone'])) {
+    if (!is_numeric($validated['customerNo'])) {
         $responseCode = "4002401";
-        $responstatus = "Invalid Mandatory Field virtualAccountPhone";
-        $english = "Invalid Mandatory Field [virtualAccountPhone]";
-        $indonesia = "Isian wajib [virtualAccountPhone] tidak valid";
+        $responstatus = "Invalid Mandatory Field customerNo";
+        $english = "Invalid Mandatory Field [customerNo]";
+        $indonesia = "Isian wajib [customerNo] tidak valid";
         $inquiryStatus = "01";
         $code = 400;
     }
@@ -481,9 +496,11 @@ else {
                 "indonesia" => $indonesia
             ],
             "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
-            "virtualAccountPhone" => $validated['virtualAccountPhone'] ?? "",
+            "customerNo" => $validated['customerNo'] ?? "",
             "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
             "virtualAccountName" => $user_data->virtual_account_name ?? "",
+            "virtualAccountEmail" => $user_data->virtual_account_email ?? "",
+            "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
             "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
             "totalAmount" => [
                 "value" => number_format($user_data->total_amount, 2, '.', ''),
@@ -525,9 +542,11 @@ else {
                 "inquiryStatus" => "01",
                 "inquiryReason" => $conflictReason,
                 "partnerServiceId" => "   ".$validated['partnerServiceId'] ?? "",
-                "virtualAccountPhone" => $validated['virtualAccountPhone'] ?? "",
+                "customerNo" => $validated['customerNo'] ?? "",
                 "virtualAccountNo" => "   ".$validated['virtualAccountNo'] ?? "",
                 "virtualAccountName" => "",
+                "virtualAccountEmail" => "",
+                "virtualAccountPhone" => "",
                 "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
                 "totalAmount" => [
                     "value" => "",
