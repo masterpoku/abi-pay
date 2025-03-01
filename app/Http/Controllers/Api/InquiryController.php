@@ -13,14 +13,13 @@ use Illuminate\Support\Facades\Validator;
 
 class InquiryController extends Controller
 {
-    private $biller_name;
+
     private $secret_key;
     private $allowed_collecting_agents;
     private $allowed_channels;
 
     public function __construct()
     {
-        $this->biller_name = env('BILLER_NAME', 'ABITOUR');
         $this->secret_key = env('SECRET_KEY', 'asdas');
         $this->allowed_collecting_agents = ['BSM'];
         $this->allowed_channels = ['TELLER', 'IBANK', 'ATM', 'MBANK', 'FLAGGING'];
