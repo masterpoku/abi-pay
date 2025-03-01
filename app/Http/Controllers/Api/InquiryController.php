@@ -33,7 +33,11 @@ class InquiryController extends Controller
 
     public function inquiry(Request $request)
 {
-    Log::info('REQUEST Inquiry:', $request->all());
+    Log::info('inquiry store REQUEST:', [
+        'headers' => $request->headers->all(),
+        'body' => $request->all(),
+    ]);
+    
 
     // Ambil JSON body
     $data = $request->json()->all();
