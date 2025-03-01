@@ -20,7 +20,10 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('PaymentController store REQUEST:', $request->all());
+        Log::info('PaymentController store REQUEST:', [
+            'headers' => $request->headers->all(),
+            'body' => $request->all(),
+        ]);
         
         // Mengubah nilai status_pembayaran menjadi 0 jika null dan validasi data
         $validatedData = $request->validate([

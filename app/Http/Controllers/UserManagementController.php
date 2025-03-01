@@ -34,14 +34,14 @@ class UserManagementController extends Controller
             $user = User::find($request->id);
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->password = bcrypt($request->password);
+            $user->password = Hash::make($request->password);
             $user->save();
         } else {
             // Create new user
             $user = new User();
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->password = bcrypt($request->password);
+            $user->password = Hash::make($request->password);
             $user->save();
         }
 
@@ -66,39 +66,39 @@ class UserManagementController extends Controller
         return view('data.users', compact('user'));
     }
 
-    // Update the specified user in the database
     public function update(Request $request, $id)
     {
         // Cari user berdasarkan ID
         $user = User::findOrFail($id);
-
+    
         // Validasi input dari request
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255', // Menambahkan validasi string dan maksimal 255 karakter
-            'email' => 'required|email|max:255|unique:users,email,' . $id, // Validasi email unik, kecuali untuk user yang sedang diupdate
-            'password' => 'nullable|min:8|confirmed', // Validasi password jika diisi
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $id,
+            'password' => 'nullable|min:8|confirmed', // Password opsional, minimal 8 karakter, harus cocok dengan password_confirmation
         ]);
-
+    
         // Cek apakah validasi gagal
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput(); // Kembalikan jika gagal validasi
+            return redirect()->back()->withErrors($validator)->withInput();
         }
-
+    
         // Update data user
         $user->name = $request->name;
         $user->email = $request->email;
-
+    
         // Jika password diisi, update password
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
-
+    
         // Simpan perubahan
         $user->save();
-
+    
         // Redirect ke daftar user dengan pesan sukses
         return redirect()->route('users.index')->with('success', 'User updated successfully');
     }
+    
     // Remove the specified user from the database
 
 }
