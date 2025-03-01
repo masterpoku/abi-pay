@@ -48,7 +48,7 @@ class InquiryController extends Controller
     $nomorPembayaran = $data['nomorPembayaran'] ?? null;
     $tanggalTransaksi = $data['tanggalTransaksi'] ?? null;
     $idTransaksi = $data['idTransaksi'] ?? null;
-    $clientChecksum = $data['checksum256'] ?? null;
+    $clientChecksum = $data['checksum'] ?? null;
 
     // Cek apakah semua field wajib ada
     if (!$kodeBank || !$kodeChannel || !$nomorPembayaran || !$tanggalTransaksi || !$idTransaksi) {
@@ -66,7 +66,7 @@ class InquiryController extends Controller
     // Hitung ulang checksum pakai secret key
 // Hitung ulang checksum SHA-1
     $computedChecksumSHA1 = sha1($data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"]);
-
+    Log::info('Checksum SHA-1: ' . $computedChecksumSHA1);
     // Bandingkan checksum yang dikirim dengan yang dihitung
     if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
         return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
