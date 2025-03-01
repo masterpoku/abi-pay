@@ -20,7 +20,7 @@ class InquiryController extends Controller
 
     public function __construct()
     {
-        $this->secret_key = env('SECRET_KEY', 'asdas');
+        $this->secret_key = env('SECRET_KEY', 'CND7gy4Fwo6hajUznM0elsR9OukT2HYmiPx18vEf');
         $this->allowed_collecting_agents = ['BSM'];
         $this->allowed_channels = ['TELLER', 'IBANK', 'ATM', 'MBANK', 'FLAGGING'];
     }
