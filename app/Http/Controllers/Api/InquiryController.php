@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use DateTime;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Validator;
 
 class InquiryController extends Controller
 {
@@ -63,7 +61,7 @@ class InquiryController extends Controller
         return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
     }
 
-    // Hitung ulang checksum pakai secret key
+    
 // Hitung ulang checksum SHA-1
     $computedChecksumSHA1 = sha1($data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"]);
     Log::info('Checksum SHA-1: ' . $computedChecksumSHA1);
