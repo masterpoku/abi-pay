@@ -21,8 +21,8 @@ class PaymentBSIController extends Controller
 
     public function __construct()
     {
-        $this->biller_name = env('BILLER_NAME', 'MALANGGLEERRR');
-        $this->secret_key = env('SECRET_KEY', '!jK%5XGX-M0)8_NIXb1Ldjj{u2>9L');
+        $this->biller_name = env('BILLER_NAME');
+        $this->secret_key = env('SECRET_KEY');
         $this->allowed_collecting_agents = ['BSM'];
         $this->allowed_channels = ['TELLER', 'IBANK', 'ATM', 'MBANK', 'FLAGGING'];
     }
