@@ -131,6 +131,11 @@ class PaymentBSIController extends Controller
             'checksumString' => $computedChecksum
         ]);
 
+        if ($clientChecksum !== $computedChecksum) {
+            log::info('Checksum tidak valid');
+        }else{
+            log::info('Checksum valid');
+        }
 
         DB::beginTransaction();
 
