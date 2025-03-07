@@ -32,9 +32,9 @@
                         <th>No</th>
                         <th>Partner Service ID</th>
                         <th>Customer No</th>
-                        <th>VA No</th>
+                        <th>Virtual Account</th>
                         <th>Nama</th>
-                        <th>Email</th>
+                        <th>Paket</th>
                         <th>Nominal</th>
                         <th>Metode</th>
                         <th>Tanggal Expired</th>
@@ -50,7 +50,8 @@
                         <td>{{ $payment->customer_no }}</td>
                         <td>{{ $payment->virtual_account_no }}</td>
                         <td>{{ $payment->virtual_account_name }}</td>
-                        <td>{{ $payment->virtual_account_email }}</td>
+                        <td>{{ $payment->free_texts }}</td>
+                        <!-- <td>{{ $payment->virtual_account_email }}</td> -->
                         <td>{{ number_format($payment->total_amount, 2) }}</td>
                         <td>{{ $payment->virtual_account_trx_type }}</td>
                         <td>{{ $payment->expired_date }}</td>

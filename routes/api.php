@@ -15,18 +15,22 @@ Route::post('/login', [JwtAuthController::class, 'login']);
 
 Route::post('/payment', [PaymentBSIController::class, 'handleRequest']);
 Route::post('/inqury', [InquiryController::class, 'inquiry']);
+Route::post('/payments', [PaymentController::class, 'store']);
+
+
+
+
 Route::get('/callback/{id}', [PaymentBSIController::class, 'callback']);
 
 Route::get('/payment', [InquiryController::class, 'index']);
 Route::get('/inqury', [InquiryController::class, 'index']);
 Route::get('/payments', [PaymentController::class, 'index']);
-Route::post('/payments', [PaymentController::class, 'store']);
-Route::get('/payments/{id}', [PaymentController::class, 'show']);
-Route::put('/payments/{id}', [PaymentController::class, 'update']);
+// Route::get('/payments/{id}', [PaymentController::class, 'show']);
+// Route::put('/payments/{id}', [PaymentController::class, 'update']);
 
-Route::get('/payments/{id}/status', [PaymentController::class, 'status']);
-Route::group(['middleware' => 'jwt.auth'], function () {
-});
+// Route::get('/payments/{id}/status', [PaymentController::class, 'status']);
+// Route::group(['middleware' => 'jwt.auth'], function () {
+// });
 
 
 

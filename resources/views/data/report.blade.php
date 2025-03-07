@@ -107,8 +107,8 @@
                         <td>{{ $payment->channel_pembayaran }}</td>
                         <td>{{ $payment->waktu_transaksi ? $payment->waktu_transaksi : '' }}</td> <!-- Menampilkan Tanggal Invoice jika tidak kosong -->
                         <td>
-                            <span class="badge {{ $payment->status_pembayaran === 'SUKSES' ? 'bg-success' : 'bg-danger' }}">
-                                {{ $payment->status_pembayaran === 'SUKSES' ? 'Sukses' : 'Gagal' }}
+                            <span class="badge {{ $payment->status_pembayaran === '0' ? 'bg-warning' : ($payment->status_pembayaran === '1' ? 'bg-success' : 'bg-danger') }}">
+                                {{ ['PENDING', 'SUKSES', 'EXPIRED'][$payment->status_pembayaran] }}
                             </span>
                         </td>
 
