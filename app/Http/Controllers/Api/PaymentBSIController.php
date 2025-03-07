@@ -142,15 +142,15 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-            $client = new \GuzzleHttp\Client();
-            $signature = md5($tagihan->id_invoice);
-            $url = $this->baseurl;
+            // $client = new \GuzzleHttp\Client();
+            // $signature = md5($tagihan->id_invoice);
+            // $url = $this->baseurl;
 
-            $client->post($url, [
-                'json' => [
-                    'signature' => $signature,
-                ],
-            ]);
+            // $client->post($url, [
+            //     'json' => [
+            //         'signature' => $signature,
+            //     ],
+            // ]);
 
             return response()->json([
                 'rc' => 'OK',
