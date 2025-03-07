@@ -119,7 +119,7 @@ class PaymentBSIController extends Controller
     private function processPayment($data, $tagihan)
     {
         Log::info('processPayment REQUEST:', $data);
-        $clientChecksum = $data['checksum256'] ?? $data['checksum'] ?? null;
+        $clientChecksum = $data['checksum'] ?? null;
         if (!$clientChecksum) {
             return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
         }
@@ -130,6 +130,7 @@ class PaymentBSIController extends Controller
             'clientChecksum' => $clientChecksum,
             'checksumString' => $computedChecksum
         ]);
+
 
         DB::beginTransaction();
 
