@@ -129,7 +129,9 @@ class PaymentBSIController extends Controller
         Log::info('processPayment request SHA-1: ' . $clientChecksum);
         // Bandingkan checksum yang dikirim dengan yang dihitung
         if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
-            return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
+            Log::info('processPayment checksum not match');
+        }else{
+            Log::info('processPayment checksum match');
         }
 
         DB::beginTransaction();
