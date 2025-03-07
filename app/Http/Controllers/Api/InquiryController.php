@@ -58,7 +58,8 @@ class InquiryController extends Controller
 
     // Validasi checksum
     if (!$clientChecksum) {
-        return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
+        // return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
+
     }
 
     
@@ -68,7 +69,7 @@ class InquiryController extends Controller
     Log::info('request SHA-1: ' . $clientChecksum);
     // Bandingkan checksum yang dikirim dengan yang dihitung
     if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
-        return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
+        // return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
     }
 
     // Cek kode bank
