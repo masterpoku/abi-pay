@@ -36,8 +36,20 @@ class PaymentBSIController extends Controller
     public function handleRequest(Request $request)
     {
         Log::info('REQUEST handleRequest:', $request->all());
-
+       
         $data = $request->json()->all();
+        $clientChecksum = $data['checksum'] ?? null;
+
+        if (!$clientChecksum) {
+            return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
+        }
+
+        $checksumString = $data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"];
+        $computedChecksum = sha1($checksumString);
+        if ($computedChecksum !== $clientChecksum) {
+            return response()->json(['rc' => 'ERR-INVALID-CHECKSUM', 'msg' => 'Invalid checksum'], 400);
+        }
+
 
         // Validate required parameters
         if (!$this->validateParameters($data)) {
@@ -98,6 +110,7 @@ class PaymentBSIController extends Controller
             ]);
         }
 
+        
         if ($tagihan->status_pembayaran === '1') {
 
             return response()->json([

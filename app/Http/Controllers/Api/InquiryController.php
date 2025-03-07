@@ -64,7 +64,8 @@ class InquiryController extends Controller
     
 // Hitung ulang checksum SHA-1
     $computedChecksumSHA1 = sha1($data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"]);
-    Log::info('Checksum SHA-1: ' . $computedChecksumSHA1);
+    Log::info('generated SHA-1: ' . $computedChecksumSHA1);
+    Log::info('request SHA-1: ' . $clientChecksum);
     // Bandingkan checksum yang dikirim dengan yang dihitung
     if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
         return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
