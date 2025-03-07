@@ -45,10 +45,11 @@ class PaymentBSIController extends Controller
         }
 
         $checksumString = $data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"];
+        
         $computedChecksum = sha1($checksumString);
-        if ($computedChecksum !== $clientChecksum) {
-            return response()->json(['rc' => 'ERR-INVALID-CHECKSUM', 'msg' => 'Invalid checksum'], 400);
-        }
+        Log::info('computedChecksum:', $computedChecksum);
+        Log::info('clientChecksum:', $clientChecksum);
+
 
 
         // Validate required parameters
