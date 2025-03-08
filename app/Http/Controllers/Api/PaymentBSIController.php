@@ -14,8 +14,7 @@ class PaymentBSIController extends Controller
     private $secret_key;
     private $allowed_collecting_agents;
     private $allowed_channels;
-    private $baseurl = "https://admin.abitour.id/api/payments/call";
-    // private $baseurl = "http://192.168.1.38:8000/api/payments/call";
+    private $baseurl ;
 
 
     public function __construct()
@@ -23,6 +22,7 @@ class PaymentBSIController extends Controller
         $this->biller_name = env('BILLER_NAME');
         $this->secret_key = env('SECRET_KEY');
         $this->allowed_collecting_agents = ['BSM'];
+        $this->baseurl = env('BASE_URL');
         $this->allowed_channels = ['TELLER', 'IBANK', 'ATM', 'MBANK', 'FLAGGING'];
     }
 
