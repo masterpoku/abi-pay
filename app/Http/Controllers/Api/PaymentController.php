@@ -60,7 +60,7 @@ class PaymentController extends Controller
                 'server_signature' => $server_signature
             ]);
     
-            return response()->json(["message" => "Unauthorized: Invalid Signature"], 401);
+            // return response()->json(["message" => "Unauthorized: Invalid Signature"], 401);
         }
     
         // Membuat tagihan pembayaran baru
