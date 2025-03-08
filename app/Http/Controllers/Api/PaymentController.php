@@ -18,14 +18,20 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Welcome to payment API'], 200);
     }
 
+
     public function store(Request $request)
     {
         Log::info('PaymentController store REQUEST:', [
             'headers' => $request->headers->all(),
             'body' => $request->all(),
         ]);
-        
-        // Mengubah nilai status_pembayaran menjadi 0 jika null dan validasi data
+    
+        $secret_key = env('KEY_SHA1');
+    
+        // Ambil signature dari header request
+        $client_signature = $request->header('X-Signature');
+    
+        // Validasi payload
         $validatedData = $request->validate([
             'id_invoice' => 'required|int',
             'user_id' => 'required|int',
@@ -39,18 +45,33 @@ class PaymentController extends Controller
             'waktu_transaksi' => 'nullable|date',
             'tanggal_invoice' => 'nullable|date',
         ]);
-
+    
         // Mengubah null pada status_pembayaran menjadi 0
         $validatedData['status_pembayaran'] = $validatedData['status_pembayaran'] ?? 0;
-
+    
+        // Buat ulang signature di server untuk validasi
+        $payload = json_encode($validatedData, JSON_UNESCAPED_UNICODE);
+        $server_signature = hash_hmac('sha1', $payload, $secret_key);
+    
+        // Cek apakah signature dari client cocok dengan yang dihitung server
+        if ($client_signature !== $server_signature) {
+            Log::warning("Invalid signature", [
+                'client_signature' => $client_signature,
+                'server_signature' => $server_signature
+            ]);
+    
+            // return response()->json(["message" => "Unauthorized: Invalid Signature"], 401);
+        }
+    
         // Membuat tagihan pembayaran baru
         $tagihanPembayaran = TagihanPembayaran::create($validatedData);
-
+    
         return response()->json([
             'message' => 'Tagihan Pembayaran berhasil dibuat',
             'data' => $tagihanPembayaran
         ], 201);
     }
+    
 
 
 
