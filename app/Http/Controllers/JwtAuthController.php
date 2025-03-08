@@ -17,7 +17,7 @@ class JwtAuthController extends Controller
             'password' => 'required'
         ]);
 
-        Log::info('Credentials:', $credentials);
+        // Log::info('Credentials:', $credentials);
 
         // Coba autentikasi user dan buat token JWT
         if (!$token = JWTAuth::attempt($credentials)) {
