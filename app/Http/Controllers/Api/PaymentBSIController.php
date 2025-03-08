@@ -165,7 +165,7 @@ class PaymentBSIController extends Controller
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            $response = curl_exec($ch);
+            $response = json_decode(curl_exec($ch), true);
             Log::info('send to callback Payment Response:', $response);
             curl_close($ch);
 
