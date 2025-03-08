@@ -147,15 +147,26 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-            $client = new \GuzzleHttp\Client();
-            $signature = md5($tagihan->id_invoice);
-            $url = $this->baseurl;
+            $secret_key = env('SECRET_KEY');
+            $destiny = $tagihan->id_invoice;
 
-            $client->post($url, [
-                'json' => [
-                    'signature' => $signature,
-                ],
-            ]);
+            // Generate signature
+            $signature = hash_hmac('sha256', $destiny, $secret_key);
+
+            // Payload request
+            $payload = [
+                'signature' => $signature,
+                'destiny' => $destiny
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $this->baseurl);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            $response = curl_exec($ch);
+            curl_close($ch);
 
             return response()->json([
                 'rc' => 'OK',
