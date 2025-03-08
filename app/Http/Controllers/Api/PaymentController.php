@@ -17,8 +17,32 @@ class PaymentController extends Controller
         Log::info('PaymentController index REQUEST:', $request->all());
         return response()->json(['message' => 'Welcome to payment API'], 200);
     }
-    public function validatePayment(Request $request)
+   
+
+    public function store(Request $request)
     {
+        Log::info('PaymentController store REQUEST:', [
+            'headers' => $request->headers->all(),
+            'body' => $request->all(),
+        ]);
+        
+        // Validasi payload
+        $validatedData = $request->validate([
+            'id_invoice' => 'required|int',
+            'user_id' => 'required|int',
+            'nama_jamaah' => 'required|string|max:255',
+            'nama_paket' => 'required|string|max:255',
+            'nama_agen' => 'required|string|max:255',
+            'nominal_tagihan' => 'required|numeric',
+            'informasi' => 'nullable|string',
+            'status_pembayaran' => 'nullable',
+            'channel_pembayaran' => 'nullable|string',
+            'waktu_transaksi' => 'nullable|date',
+            'tanggal_invoice' => 'nullable|date',
+        ]);
+    
+        // Mengubah null pada status_pembayaran menjadi 0
+        $validatedData['status_pembayaran'] = $validatedData['status_pembayaran'] ?? 0;
         $secret_key = env('KEY_SHA1'); // Kunci rahasia
 
         // Ambil signature dari header
@@ -41,39 +65,6 @@ class PaymentController extends Controller
                 'error' => 'Signature tidak valid'
             ], 403);
         }
-
-        // Jika signature valid, lanjutkan pemrosesan pembayaran
-        return response()->json([
-            'message' => 'Signature valid, pembayaran diproses',
-            'data' => $payload
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-        Log::info('PaymentController store REQUEST:', [
-            'headers' => $request->headers->all(),
-            'body' => $request->all(),
-        ]);
-        $this->validatePayment($request);
-        // Validasi payload
-        $validatedData = $request->validate([
-            'id_invoice' => 'required|int',
-            'user_id' => 'required|int',
-            'nama_jamaah' => 'required|string|max:255',
-            'nama_paket' => 'required|string|max:255',
-            'nama_agen' => 'required|string|max:255',
-            'nominal_tagihan' => 'required|numeric',
-            'informasi' => 'nullable|string',
-            'status_pembayaran' => 'nullable',
-            'channel_pembayaran' => 'nullable|string',
-            'waktu_transaksi' => 'nullable|date',
-            'tanggal_invoice' => 'nullable|date',
-        ]);
-    
-        // Mengubah null pada status_pembayaran menjadi 0
-        $validatedData['status_pembayaran'] = $validatedData['status_pembayaran'] ?? 0;
-
     
         // Membuat tagihan pembayaran baru
         $tagihanPembayaran = TagihanPembayaran::create($validatedData);
