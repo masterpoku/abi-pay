@@ -17,7 +17,37 @@ class PaymentController extends Controller
         Log::info('PaymentController index REQUEST:', $request->all());
         return response()->json(['message' => 'Welcome to payment API'], 200);
     }
+    public function validatePayment(Request $request)
+    {
+        $secret_key = "QEjFBtbDhd6ZlrZXJQh7XwbeVcomS9hy5Pdka3HK1GL7auFc0R9stoNduEtwG6YN"; // Kunci rahasia
 
+        // Ambil signature dari header
+        $requestSignature = $request->header('X-Signature');
+
+        // Ambil payload dari request
+        $payload = $request->all();
+        $jsonPayload = json_encode($payload);
+
+        // Generate signature baru untuk validasi
+        $generatedSignature = hash_hmac('sha1', $jsonPayload, $secret_key);
+
+        Log::info("Payload diterima: " . $jsonPayload);
+        Log::info("Signature dari client: " . $requestSignature);
+        Log::info("Signature yang dihasilkan: " . $generatedSignature);
+
+        // Validasi signature
+        if ($requestSignature !== $generatedSignature) {
+            return response()->json([
+                'error' => 'Signature tidak valid'
+            ], 403);
+        }
+
+        // Jika signature valid, lanjutkan pemrosesan pembayaran
+        return response()->json([
+            'message' => 'Signature valid, pembayaran diproses',
+            'data' => $payload
+        ]);
+    }
 
     public function store(Request $request)
     {
@@ -25,12 +55,7 @@ class PaymentController extends Controller
             'headers' => $request->headers->all(),
             'body' => $request->all(),
         ]);
-    
-        $secret_key = env('KEY_SHA1');
-    
-        // Ambil signature dari header request
-        $client_signature = $request->header('X-Signature');
-    
+        $this->validatePayment($request);
         // Validasi payload
         $validatedData = $request->validate([
             'id_invoice' => 'required|int',
@@ -48,20 +73,7 @@ class PaymentController extends Controller
     
         // Mengubah null pada status_pembayaran menjadi 0
         $validatedData['status_pembayaran'] = $validatedData['status_pembayaran'] ?? 0;
-    
-        // Buat ulang signature di server untuk validasi
-        $payload = json_encode($validatedData, JSON_UNESCAPED_UNICODE);
-        $server_signature = hash_hmac('sha1', $payload, $secret_key);
-    
-        // Cek apakah signature dari client cocok dengan yang dihitung server
-        if ($client_signature !== $server_signature) {
-            Log::warning("Invalid signature", [
-                'client_signature' => $client_signature,
-                'server_signature' => $server_signature
-            ]);
-    
-            // return response()->json(["message" => "Unauthorized: Invalid Signature"], 401);
-        }
+
     
         // Membuat tagihan pembayaran baru
         $tagihanPembayaran = TagihanPembayaran::create($validatedData);
