@@ -19,7 +19,7 @@ class PaymentController extends Controller
     }
     public function validatePayment(Request $request)
     {
-        $secret_key = "QEjFBtbDhd6ZlrZXJQh7XwbeVcomS9hy5Pdka3HK1GL7auFc0R9stoNduEtwG6YN"; // Kunci rahasia
+        $secret_key = env('KEY_SHA1'); // Kunci rahasia
 
         // Ambil signature dari header
         $requestSignature = $request->header('X-Signature');
