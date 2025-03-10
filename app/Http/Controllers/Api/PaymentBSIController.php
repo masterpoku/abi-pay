@@ -175,6 +175,7 @@ class PaymentBSIController extends Controller
                 'signature' => $signature,
                 'destiny' => $destiny
             ];
+            Log::info('send to callback Payment Payload:', $payload);
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $this->baseurl);
