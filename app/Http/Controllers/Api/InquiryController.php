@@ -115,7 +115,7 @@ class InquiryController extends Controller
     if ($invoice_data->status_pembayaran == 1) {
 
             $secret_key = env('SECRET_KEY');
-            $destiny = $invoice_data->id_invoice;
+            $destiny = $nomorPembayaran;
 
             // Generate signature
             $signature = hash_hmac('sha256', $destiny, $secret_key);
