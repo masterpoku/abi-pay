@@ -100,33 +100,11 @@ class PaymentBSIController extends Controller
 
         
         if ($tagihan->status_pembayaran === '1') {
-            
+
             return response()->json([
                 'rc' => 'ERR-ALREADY-PAID',
                 'msg' => 'Sudah Terbayar'
             ]);
-            $secret_key = env('SECRET_KEY');
-            $destiny = $tagihan->id_invoice;
-
-            // Generate signature
-            $signature = hash_hmac('sha256', $destiny, $secret_key);
-
-            // Payload request
-            $payload = [
-                'signature' => $signature,
-                'destiny' => $destiny
-            ];
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $this->baseurl);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            $response = json_decode(curl_exec($ch), true);
-            Log::info('send to callback Payment Response:', $response);
-            curl_close($ch);
-
         } else {
             return $this->processPayment($data, $tagihan);
         }
