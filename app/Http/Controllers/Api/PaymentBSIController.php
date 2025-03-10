@@ -114,16 +114,28 @@ class PaymentBSIController extends Controller
     // Handle payment processing
     private function processPayment($data, $tagihan)
     {
-        Log::info('processPayment REQUEST:', $data);
+        Log::info('processPayment REQUEST:', ['data' => $data]);
+
         $clientChecksum = $data['checksum'] ?? null;
         if (empty($clientChecksum)) {
-            return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
+            return response()->json([
+                'rc'  => 'ERR-MISSING-CHECKSUM',
+                'msg' => 'Checksum is required'
+            ], 400);
         }
-        Log::info('Client Checksum', ['checksum' => $clientChecksum]);
-
-        $checksumString = $data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"] . $data["totalNominal"] . $data["nomorJurnalPembukuan"];
+        
+        Log::info('Client Checksum:', ['checksum' => $clientChecksum]);
+        
+        $nomorPembayaran    = $data["nomorPembayaran"] ?? '';
+        $tanggalTransaksi   = $data["tanggalTransaksi"] ?? '';
+        $totalNominal       = $data["totalNominal"] ?? '';
+        $nomorJurnalPembukuan = $data["nomorJurnalPembukuan"] ?? '';
+        
+        $checksumString = $nomorPembayaran . $this->secret_key . $tanggalTransaksi . $totalNominal . $nomorJurnalPembukuan;
         $computedChecksum = sha1($checksumString);
-        Log::info('Checksum SHA1:', $computedChecksum);
+        
+        Log::info('Checksum SHA1:', ['computed_checksum' => $computedChecksum]);
+        
   
         if ($computedChecksum !== $data["checksum"]) {
             return response()->json([
