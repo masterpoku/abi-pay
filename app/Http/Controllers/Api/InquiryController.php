@@ -138,7 +138,7 @@ class InquiryController extends Controller
           
             curl_close($ch);
 
-            $responseData = json_decode($response, true);
+            $responseData = (array) $response;
             Log::info('send to callback Payment Response:'.$responseData);
         return response()->json([
             'rc' => 'ERR-ALREADY-PAID',
