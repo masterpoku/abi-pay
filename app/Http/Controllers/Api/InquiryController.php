@@ -57,6 +57,9 @@ class InquiryController extends Controller
     }
 
 
+    Log::info('request key: ' . $this->secret_key);
+    Log::info('request nomorPembayaran: ' . $data["nomorPembayaran"]);
+    Log::info('request tanggalTransaksi: ' . $data["tanggalTransaksi"]);
 
     
 // Hitung ulang checksum SHA-1
