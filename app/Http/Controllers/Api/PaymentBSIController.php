@@ -164,7 +164,7 @@ class PaymentBSIController extends Controller
 
             DB::commit();
 
-            $secret_key = env('SECRET_KEY');
+            $secret_key = env('KEY_SHA1');
             $destiny = $tagihan->id_invoice;
 
             // Generate signature
