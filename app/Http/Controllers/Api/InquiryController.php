@@ -61,9 +61,8 @@ class InquiryController extends Controller
     Log::info('request nomorPembayaran: ' . $data["nomorPembayaran"]);
     Log::info('request tanggalTransaksi: ' . $data["tanggalTransaksi"]);
 
-    
 // Hitung ulang checksum SHA-1
-    $computedChecksumSHA1 = sha1($data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"]);
+    $computedChecksumSHA1 = hash_hmac('sha256', $data["nomorPembayaran"] , $this->secret_key);
     Log::info('generated SHA: ' . $computedChecksumSHA1);
     Log::info('request SHA: ' . $clientChecksum);
     // Bandingkan checksum yang dikirim dengan yang dihitung
