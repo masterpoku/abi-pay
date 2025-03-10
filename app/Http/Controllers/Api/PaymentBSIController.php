@@ -86,6 +86,7 @@ class PaymentBSIController extends Controller
     // Process inquiry or payment
     private function processInquiryOrPayment($data)
     {
+        Log::info('processInquiryOrPayment REQUEST:', $data);
         $tagihan = DB::table('tagihan_pembayaran')
             ->where('id_invoice', $data['nomorPembayaran'])
             ->orderByDesc('tanggal_invoice')
