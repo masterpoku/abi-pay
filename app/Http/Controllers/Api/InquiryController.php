@@ -66,9 +66,9 @@ class InquiryController extends Controller
     Log::info('generated SHA: ' . $computedChecksumSHA1);
     Log::info('request SHA: ' . $clientChecksum);
     // Bandingkan checksum yang dikirim dengan yang dihitung
-    // if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
-    //     // return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
-    // }
+    if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
+        // return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
+    }
 
     // Cek kode bank
     if (!in_array($kodeBank, $this->allowed_collecting_agents)) {
@@ -125,6 +125,8 @@ class InquiryController extends Controller
                 'signature' => $signature,
                 'destiny' => $destiny
             ];
+
+            Log::info('send to callback Payment Payload:', $payload);
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, env('BASE_URL'));
