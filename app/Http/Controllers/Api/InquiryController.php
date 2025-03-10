@@ -133,8 +133,11 @@ class InquiryController extends Controller
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             $response = json_decode(curl_exec($ch), true);
-            Log::info('send to callback Payment Response:', $response);
+          
             curl_close($ch);
+
+            $responseData = json_decode($response, true);
+            Log::info('send to callback Payment Response:'.$responseData);
         return response()->json([
             'rc' => 'ERR-ALREADY-PAID',
             'msg' => 'Sudah Terbayar'
