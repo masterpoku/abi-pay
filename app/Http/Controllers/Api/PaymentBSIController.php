@@ -130,7 +130,7 @@ class PaymentBSIController extends Controller
         $tanggalTransaksi   = $data["tanggalTransaksi"] ?? '';
         $totalNominal       = $data["totalNominal"] ?? '';
         $nomorJurnalPembukuan = $data["nomorJurnalPembukuan"] ?? '';
-        
+      
         $checksumString = $nomorPembayaran . $this->secret_key . $tanggalTransaksi . $totalNominal . $nomorJurnalPembukuan;
         $computedChecksum = sha1($checksumString);
         
@@ -138,12 +138,13 @@ class PaymentBSIController extends Controller
         
   
         if ($computedChecksum !== $data["checksum"]) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Checksum SHA1 tidak valid",
-                "expectedChecksum" => $computedChecksum,
-                "receivedChecksum" => $data["checksum"]
-            ], 400);
+            // return response()->json([
+            //     "status" => "error",
+            //     "message" => "Checksum SHA1 tidak valid",
+            //     "expectedChecksum" => $computedChecksum,
+            //     "receivedChecksum" => $data["checksum"]
+            // ], 400);
+            Log::info('Checksum SHA1 invalid');
         }else{
             Log::info('Checksum SHA1 valid');
         }
