@@ -116,10 +116,10 @@ class PaymentBSIController extends Controller
     {
         Log::info('processPayment REQUEST:', $data);
         $clientChecksum = $data['checksum'] ?? null;
-        Log::info('Client Checksum', ['checksum' => $clientChecksum]);
-        if (!$clientChecksum) {
+        if (empty($clientChecksum)) {
             return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
         }
+        Log::info('Client Checksum', ['checksum' => $clientChecksum]);
 
         $checksumString = $data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"] . $data["totalNominal"] . $data["nomorJurnalPembukuan"];
         $computedChecksum = sha1($checksumString);
