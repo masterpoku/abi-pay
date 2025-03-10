@@ -56,17 +56,13 @@ class InquiryController extends Controller
         ], 400);
     }
 
-    // Validasi checksum
-    if (!$clientChecksum) {
-        // return response()->json(['rc' => 'ERR-MISSING-CHECKSUM', 'msg' => 'Checksum is required'], 400);
 
-    }
 
     
 // Hitung ulang checksum SHA-1
     $computedChecksumSHA1 = sha1($data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"]);
-    Log::info('generated SHA-1: ' . $computedChecksumSHA1);
-    Log::info('request SHA-1: ' . $clientChecksum);
+    Log::info('generated SHA: ' . $computedChecksumSHA1);
+    Log::info('request SHA: ' . $clientChecksum);
     // Bandingkan checksum yang dikirim dengan yang dihitung
     if (!hash_equals($computedChecksumSHA1, $clientChecksum)) {
         // return response()->json(['rc' => 'ERR-CHECKSUM', 'msg' => 'Invalid Checksum'], 403);
