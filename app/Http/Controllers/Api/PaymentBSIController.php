@@ -122,6 +122,8 @@ class PaymentBSIController extends Controller
 
         $checksumString = $data["nomorPembayaran"] . $this->secret_key . $data["tanggalTransaksi"] . $data["totalNominal"] . $data["nomorJurnalPembukuan"];
         $computedChecksum = sha1($checksumString);
+        Log::info('Checksum SHA1:', $computedChecksum);
+        Log::info('Client Checksum:', $clientChecksum);
         if ($computedChecksum !== $data["checksum"]) {
             return response()->json([
                 "status" => "error",
