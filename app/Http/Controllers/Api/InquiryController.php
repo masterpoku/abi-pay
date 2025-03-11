@@ -114,7 +114,7 @@ class InquiryController extends Controller
     // Cek jika tagihan sudah dibayar
     if ($invoice_data->status_pembayaran == 1) {
 
-            $secret_key = env('SECRET_KEY');
+            $secret_key = env('KEY_SHA1');
             $destiny = $nomorPembayaran;
 
             // Generate signature
