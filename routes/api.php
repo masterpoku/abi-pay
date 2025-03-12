@@ -3,8 +3,10 @@
 use App\Http\Controllers\Api\InquiryBCAController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\InquiryController;
+use App\Http\Controllers\Api\InquiryMandiriController;
 use App\Http\Controllers\Api\PaymentBCAController;
 use App\Http\Controllers\Api\PaymentBSIController;
+use App\Http\Controllers\Api\PaymentMandiriController;
 use App\Http\Controllers\JwtAuthController;
 use App\Http\Controllers\Api\TagihanApiController;
 
@@ -54,15 +56,34 @@ Route::get('/payments', [PaymentController::class, 'index']);
 
 Route::prefix('bca')->group(function () {
     // Route untuk mendapatkan Access Token
-    Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'RequestToken']);
     Route::get('v1.0/access-token/b2b', [InquiryController::class, 'index']);
-    Route::post('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'handleInquiry']);
     Route::get('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'index']);
-    Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayment']);
     Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
     Route::get('/v1.0/transfer-va/create-va', [InquiryController::class, 'index']);
+
+    Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'RequestToken']);
+    Route::post('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'handleInquiry']);
+    Route::post('v1.0/transfer-va/payment', [PaymentBCAController::class, 'flagPayment']);
     Route::post('/v1.0/transfer-va/create-va', [TagihanApiController::class, 'store']);
 });
+
+
+Route::prefix('mandiri')->group(function () {
+    // Route untuk mendapatkan Access Token
+    Route::get('v1.0/transfer-va/payment', [InquiryBCAController::class, 'index']);
+    Route::get('/v1.0/transfer-va/create-va', [InquiryController::class, 'index']);
+    Route::get('v1.0/access-token/b2b', [InquiryController::class, 'index']);
+    Route::get('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'index']);
+
+
+    Route::post('v1.0/access-token/b2b', [PaymentMandiriController::class, 'RequestToken']);
+    Route::post('v1.0/transfer-va/inquiry', [InquiryMandiriController::class, 'handleInquiry']);
+    Route::post('v1.0/transfer-va/payment', [PaymentMandiriController::class, 'flagPayment']);
+    Route::post('/v1.0/transfer-va/create-va', [TagihanApiController::class, 'store']);
+});
+
+
+
 
 
 // Route::post('v1.0/access-token/b2b', [PaymentBCAController::class, 'RequestToken']);
