@@ -193,6 +193,7 @@ EOF;
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
     
+            
             if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
                 return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Signature]"], 401);
             }
