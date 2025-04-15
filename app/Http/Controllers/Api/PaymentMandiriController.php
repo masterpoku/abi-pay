@@ -20,7 +20,7 @@ class PaymentMandiriController extends Controller
         
         try {
             // Endpoint URL untuk mendapatkan access token
-            $url = "https://devapi.klikbca.com/openapi/v1.0/access-token/b2b";
+            $url = "https://apidevportal.aspi-indonesia.or.id:44310/api/v1.0/access-token/b2b";
             $headers = [
                 "Accept: application/json",
                 "Content-Type: application/json",
