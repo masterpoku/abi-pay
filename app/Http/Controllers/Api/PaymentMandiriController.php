@@ -78,6 +78,8 @@ class PaymentMandiriController extends Controller
     }
     public function RequestToken(Request $request)
     {
+        Log::info('Request RequestToken:', $request->headers->all());
+
         try {
             // Ambil header dari request
             $clientId = $request->header('X-CLIENT-KEY');

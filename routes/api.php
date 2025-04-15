@@ -77,7 +77,7 @@ Route::prefix('mandiri')->group(function () {
     Route::get('v1.0/transfer-va/inquiry', [InquiryBCAController::class, 'index']);
 
 
-    Route::post('v1.0/access-token/b2b', [PaymentMandiriController::class, 'requestAccessToken']);
+    Route::post('v1.0/access-token/b2b', [PaymentMandiriController::class, 'RequestToken']);
     Route::post('v1.0/transfer-va/inquiry', [InquiryMandiriController::class, 'handleInquiry']);
     Route::post('v1.0/transfer-va/payment', [PaymentMandiriController::class, 'flagPayment']);
     Route::post('/v1.0/transfer-va/create-va', [TagihanApiController::class, 'store']);
