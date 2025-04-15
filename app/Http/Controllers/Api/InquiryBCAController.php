@@ -174,7 +174,8 @@ class InquiryBCAController extends Controller
         $user_data = DB::table('tagihan')
             ->where('virtual_account_no', 'LIKE', $validated['virtualAccountNo'])
             ->first();
-    
+            Log::info('User Data:', (array) $user_data);
+            
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
