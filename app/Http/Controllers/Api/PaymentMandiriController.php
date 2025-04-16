@@ -108,8 +108,8 @@ public function getAccessToken(Request $request)
     //     return response()->json(['error' => 'Invalid signature'], 401);
     // }
 
-    // Signature valid → Generate JWT access token
-    $privateKey = file_get_contents(storage_path('app/private_key.pem'));
+    // // Signature valid → Generate JWT access token
+    // $privateKey = file_get_contents(storage_path('app/private_key.pem'));
     $ttl = env('JWT_TTL', 3600); // 1 jam default
 
     $payload = [
@@ -119,7 +119,7 @@ public function getAccessToken(Request $request)
         'exp' => time() + $ttl,
     ];
 
-    $jwt = JWTAuth::encode($payload, $privateKey, 'RS256');
+    $jwt = JWTAuth::encode($payload, "tetststst", 'RS256');
 
     return response()->json([
         'access_token' => $jwt,
