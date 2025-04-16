@@ -107,7 +107,7 @@ class PaymentMandiriController extends Controller
 
     return response()->json([
         'access_token' => $token,
-        'expires_in' => 3600,
+        'expires_in' => 900,
     ]);
 }
 
