@@ -142,7 +142,7 @@ class PaymentMandiriController extends Controller
             if (!$this->isValidIso8601($timeStamp)) {
                 return response()->json([
                     'responseCode' => '4007301',
-                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]a'
                 ], 400);
             }
     
@@ -151,7 +151,7 @@ class PaymentMandiriController extends Controller
             if ($requestTime === false) {
                 return response()->json([
                     'responseCode' => '4007301',
-                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]b'
                 ], 400);
             }
     
