@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTFactory;
 
 class PaymentMandiriController extends Controller
 {
@@ -96,13 +96,13 @@ public function getAccessToken(Request $request)
     $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
 
 
-    if ($verified === 1) {
-        echo "✅ Signature VALID\n";
-    } elseif ($verified === 0) {
-        echo "❌ Signature TIDAK valid\n";
-    } else {
-        echo "💥 Error saat verifikasi\n";
-    }
+    // if ($verified === 1) {
+    //     echo "✅ Signature VALID\n";
+    // } elseif ($verified === 0) {
+    //     echo "❌ Signature TIDAK valid\n";
+    // } else {
+    //     echo "💥 Error saat verifikasi\n";
+    // }
 
     // if ($verified !== 1) {
     //     return response()->json(['error' => 'Invalid signature'], 401);
@@ -119,7 +119,7 @@ public function getAccessToken(Request $request)
         'exp' => time() + $ttl,
     ];
 
-    $jwt = JWTAuth::encode($payload, "tetststst", 'RS256');
+    $jwt = JWTFactory::encode($payload, "tetststst", 'RS256');
 
     return response()->json([
         'access_token' => $jwt,
