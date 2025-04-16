@@ -76,6 +76,41 @@ class PaymentMandiriController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+    public function getAccessToken(Request $request)
+{
+    $clientId = $request->header('X-CLIENT-KEY');
+    $timestamp = $request->header('X-TIMESTAMP');
+    $signatureBase64 = $request->header('X-SIGNATURE');
+
+    $data = "{$clientId}|{$timestamp}";
+    $signature = base64_decode($signatureBase64);
+
+    $public_key_str = env('MANDIRI_PUBLIC_KEY');
+    // Ambil public key dari env
+    $clientPublicKey = "-----BEGIN CERTIFICATE-----\n" . $public_key_str . "\n-----END CERTIFICATE-----";
+    if (!$clientPublicKey) {
+        return response()->json(['error' => 'Public key tidak ditemukan'], 401);
+    }
+
+    $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
+
+    if ($verified !== 1) {
+        return response()->json(['error' => 'Invalid signature'], 401);
+    }
+
+    // Token generation atau JWT atau non-JWT sesuai pilihan lu
+    $secret = env('ACCESS_TOKEN_SECRET', 'rahasiaGila');
+    $rand = bin2hex(random_bytes(10));
+    $payload = "{$clientId}|{$timestamp}|{$rand}";
+    $hmac = hash_hmac('sha256', $payload, $secret);
+    $token = base64_encode("{$hmac}|{$clientId}|{$timestamp}");
+
+    return response()->json([
+        'access_token' => $token,
+        'expires_in' => 3600,
+    ]);
+}
+
     public function RequestToken(Request $request)
     {
         Log::info('Request RequestToken:', $request->headers->all());
@@ -166,7 +201,7 @@ class PaymentMandiriController extends Controller
     {
         $public_key = <<<EOF
 -----BEGIN CERTIFICATE-----
-MIIDuDCCAqCgAwIBAgIEYeo0RDANBgkqhkiG9w0BAQsFADCBnTELMAkGA1UEBhMCSUQxEDAOBgNVBAgMB0pha2FydGExEDAOBgNVBAcMB0pha2FydGExJzAlBgNVBAoMHlBULiBCYW5rIE1hbmRpcmkgKFBlcnNlcm8pIFRiazEnMCUGA1UECwweUFQuIEJhbmsgTWFuZGlyaSAoUGVyc2VybykgVGJrMRgwFgYDVQQDDA9tYW5kaXJpLXVicC1kZXYwHhcNMjIwMTIxMDQxOTE2WhcNMjcwMTIxMDQxOTE2WjCBnTELMAkGA1UEBhMCSUQxEDAOBgNVBAgMB0pha2FydGExEDAOBgNVBAcMB0pha2FydGExJzAlBgNVBAoMHlBULiBCYW5rIE1hbmRpcmkgKFBlcnNlcm8pIFRiazEnMCUGA1UECwweUFQuIEJhbmsgTWFuZGlyaSAoUGVyc2VybykgVGJrMRgwFgYDVQQDDA9tYW5kaXJpLXVicC1kZXYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCVZu2WHd4z5tbefkAWPjbB10Lgvu1CpsuIIVtO/wrrvKeD2LArmYSf5QxeJGG8HYlVYVp8I8/EVqayJUbcyOd4aMLQFiCambDipecCfI7ecJ0K4+2ZneWOEq9JM91ZnGtwuLVdr1X/4/NvyGuNvmLAyfpJkU14yZliAUqJJ656jpM+WfY+hOpcLOzUe2wzx5RV7wYCyMl7/d1iX33afJc6kbbUaA27yjlPdY6m0+DoZ0NNaRNZS7jzfJFtVXLTg/PgvwMNlMO/5ZywBWIOfWsD+MHUC6P9QYrHai8ZwEf9r+GivlNsAFs4NTpw9MdPngrexJm29k1Xh4UMHV//jB1/AgMBAAEwDQYJKoZIhvcNAQELBQADggEBAA10MpWzWo5Azn2u25p2Z7JZ3KIFkUgnOkEvrEpK2lqAa75K5HoMKCGMsxlSJPeBuVC10EK3xwdZmQqA7vyfbrIgtfKhGCLwnJpBRloxhEEFl0QkDo1ohcgMn0nuMNtxW5alBb47tZ/sygXWy3JARjmvSf5MEi5jA7gjqhwJeDZorKPYv6LdhKlVs9Za10mMlB8y4A0lVlYx2Yw7C06j7Z7/EjdaTyZKnPHQr3EZmbXTyNt4rXTvlXzzS612B/43nY1Ho2qLXW0SHRq3dVD71roEWzyFg3g+FVUjAj4QzASuCnjG/1g8B37pYuCWHRczNW+jvlXtgiOFmUoAbL0xnuM=
+$public_key_str
 -----END CERTIFICATE-----
 EOF;
 
