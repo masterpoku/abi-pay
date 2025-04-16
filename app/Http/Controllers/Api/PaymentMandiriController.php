@@ -138,7 +138,7 @@ class PaymentMandiriController extends Controller
             if ($clientId !== $clientKey) {
                 return response()->json([
                     'responseCode' => '4017300',
-                    'responseMessage' => 'Unauthorized. [Unknown client]'
+                    'responseMessage' => 'Unauthorized. [Unknown client]a'
                 ], 401);
             }
     
@@ -248,7 +248,7 @@ EOF;
             Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
     
             if ($channelId && $partnerId && ((int) $channelId !== 6021 || (int) $partnerId !== 87648)) {
-                return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Unknown client]"] ,401);
+                return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Unknown client]s"] ,401);
             }
     
             $requestTime = \Carbon\Carbon::parse($isoTime);
