@@ -109,8 +109,8 @@ class InquiryMandiriController extends Controller
 
   
         // Log the headers for debugging
-        // Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
-        // Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
+        Log::info('CHANNEL-ID:', ['channelId' => $channelId]);
+        Log::info('X-PARTNER-ID:', ['partnerId' => $partnerId]);
 
        
         // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
