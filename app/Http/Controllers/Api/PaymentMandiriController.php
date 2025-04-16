@@ -104,7 +104,10 @@ class PaymentMandiriController extends Controller
     $payload = "{$clientId}|{$timestamp}|{$rand}";
     $hmac = hash_hmac('sha256', $payload, $secret);
     $token = base64_encode("{$hmac}|{$clientId}|{$timestamp}");
-
+    DB::table('token')->insert([
+        'token' =>$token,
+        'created_at' => DB::raw('CURRENT_TIMESTAMP')
+    ]);
     return response()->json([
         "responseCode" => "2007300",
         "responseMessage" => "Success",
