@@ -132,6 +132,8 @@ class InquiryMandiriController extends Controller
             ], 401);
         }
        // Validasi token
+        Log::info('Auth Token:', ['authToken' => $authToken]);
+        
        if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
         return response()->json([
             'responseCode' => '4012401', // Kode error jika token tidak valid
