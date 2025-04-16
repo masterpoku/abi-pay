@@ -115,7 +115,7 @@ class InquiryMandiriController extends Controller
        
         // Jika CHANNEL-ID dan X-PARTNER-ID ada, maka validasi
         if ($channelId && $partnerId) {
-            if ((int) $channelId !== 95231 || (int) $partnerId !== 14999) {
+            if ((int) $channelId !== 6021 || (int) $partnerId !== 81808) {
                 return response()->json([
                     'responseCode' => '4012400',
                     'responseMessage' => 'Unauthorized. [Unknown client]'
