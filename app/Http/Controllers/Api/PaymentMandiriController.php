@@ -104,9 +104,9 @@ public function getAccessToken(Request $request)
     //     echo "💥 Error saat verifikasi\n";
     // }
 
-    // if ($verified !== 1) {
-    //     return response()->json(['error' => 'Invalid signature'], 401);
-    // }
+    if ($verified !== 1) {
+        return response()->json(['error' => 'Invalid signature'], 401);
+    }
 
     // // Signature valid → Generate JWT access token
     // $privateKey = file_get_contents(storage_path('app/private_key.pem'));
