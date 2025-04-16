@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Tymon\JWTAuth\Facades\JWTFactory;
+
 
 class PaymentMandiriController extends Controller
 {
@@ -76,57 +76,6 @@ class PaymentMandiriController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
-
-public function getAccessToken(Request $request)
-{
-    $clientId = $request->input('X-CLIENT-KEY');
-    $timestamp = $request->input('X-TIMESTAMP');
-    $signatureBase64 = $request->input('X-SIGNATURE');
-
-    $data = "{$clientId}|{$timestamp}";
-    $signature = base64_decode($signatureBase64);
-
-    $publicKey = env('MANDIRI_PUBLIC_KEY');
-    $clientPublicKey = <<<EOF
-    -----BEGIN CERTIFICATE-----
-    MIIDuDCCAqCgAwIBAgIEYeo0RDANBgkqhkiG9w0BAQsFADCBnTELMAkGA1UEBhMCSUQxEDAOBgNVBAgMB0pha2FydGExEDAOBgNVBAcMB0pha2FydGExJzAlBgNVBAoMHlBULiBCYW5rIE1hbmRpcmkgKFBlcnNlcm8pIFRiazEnMCUGA1UECwweUFQuIEJhbmsgTWFuZGlyaSAoUGVyc2VybykgVGJrMRgwFgYDVQQDDA9tYW5kaXJpLXVicC1kZXYwHhcNMjIwMTIxMDQxOTE2WhcNMjcwMTIxMDQxOTE2WjCBnTELMAkGA1UEBhMCSUQxEDAOBgNVBAgMB0pha2FydGExEDAOBgNVBAcMB0pha2FydGExJzAlBgNVBAoMHlBULiBCYW5rIE1hbmRpcmkgKFBlcnNlcm8pIFRiazEnMCUGA1UECwweUFQuIEJhbmsgTWFuZGlyaSAoUGVyc2VybykgVGJrMRgwFgYDVQQDDA9tYW5kaXJpLXVicC1kZXYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCVZu2WHd4z5tbefkAWPjbB10Lgvu1CpsuIIVtO/wrrvKeD2LArmYSf5QxeJGG8HYlVYVp8I8/EVqayJUbcyOd4aMLQFiCambDipecCfI7ecJ0K4+2ZneWOEq9JM91ZnGtwuLVdr1X/4/NvyGuNvmLAyfpJkU14yZliAUqJJ656jpM+WfY+hOpcLOzUe2wzx5RV7wYCyMl7/d1iX33afJc6kbbUaA27yjlPdY6m0+DoZ0NNaRNZS7jzfJFtVXLTg/PgvwMNlMO/5ZywBWIOfWsD+MHUC6P9QYrHai8ZwEf9r+GivlNsAFs4NTpw9MdPngrexJm29k1Xh4UMHV//jB1/AgMBAAEwDQYJKoZIhvcNAQELBQADggEBAA10MpWzWo5Azn2u25p2Z7JZ3KIFkUgnOkEvrEpK2lqAa75K5HoMKCGMsxlSJPeBuVC10EK3xwdZmQqA7vyfbrIgtfKhGCLwnJpBRloxhEEFl0QkDo1ohcgMn0nuMNtxW5alBb47tZ/sygXWy3JARjmvSf5MEi5jA7gjqhwJeDZorKPYv6LdhKlVs9Za10mMlB8y4A0lVlYx2Yw7C06j7Z7/EjdaTyZKnPHQr3EZmbXTyNt4rXTvlXzzS612B/43nY1Ho2qLXW0SHRq3dVD71roEWzyFg3g+FVUjAj4QzASuCnjG/1g8B37pYuCWHRczNW+jvlXtgiOFmUoAbL0xnuM=
-    -----END CERTIFICATE-----
-    EOF;
-    $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
-
-
-    // if ($verified === 1) {
-    //     echo "✅ Signature VALID\n";
-    // } elseif ($verified === 0) {
-    //     echo "❌ Signature TIDAK valid\n";
-    // } else {
-    //     echo "💥 Error saat verifikasi\n";
-    // }
-
-    if ($verified !== 1) {
-        return response()->json(['error' => 'Invalid signature'], 401);
-    }
-
-    // // Signature valid → Generate JWT access token
-    // $privateKey = file_get_contents(storage_path('app/private_key.pem'));
-    $ttl = env('JWT_TTL', 3600); // 1 jam default
-
-    $payload = [
-        'iss' => request()->server('SERVER_NAME'),
-        'sub' => $clientId,
-        'iat' => time(),
-        'exp' => time() + $ttl,
-    ];
-
-    $jwt = JWTFactory::encode($payload, "tetststst", 'RS256');
-
-    return response()->json([
-        'access_token' => $jwt,
-        'expires_in' => $ttl,
-    ]);
-}
-
     public function RequestToken(Request $request)
     {
         Log::info('Request RequestToken:', $request->headers->all());
@@ -193,7 +142,7 @@ public function getAccessToken(Request $request)
             if (!$publicKey) {
                 return response()->json(['message' => 'Public key not configured'], 500);
             }
-            
+    
             // Validasi signature
             $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
             if (!$isValid) {
@@ -204,7 +153,7 @@ public function getAccessToken(Request $request)
             }
     
             // Jika validasi berhasil, lanjutkan ke proses permintaan token
-            return $this->getAccessToken($request);
+            return $this->requestAccessToken($request);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
