@@ -99,7 +99,7 @@ class PaymentMandiriController extends Controller
     }
 
     // Token generation atau JWT atau non-JWT sesuai pilihan lu
-    $secret = env('ACCESS_TOKEN_SECRET', 'rahasiaGila');
+    $secret = env('ACCESS_TOKEN_SECRET');
     $rand = bin2hex(random_bytes(10));
     $payload = "{$clientId}|{$timestamp}|{$rand}";
     $hmac = hash_hmac('sha256', $payload, $secret);
@@ -156,14 +156,14 @@ class PaymentMandiriController extends Controller
             }
     
             // Batasi waktu request untuk 10 menit
-            // $now = time();
-            // $timeDifference = $now - $requestTime;
-            // if ($timeDifference > 10 * 60 || $timeDifference < -10 * 60) {
-            //     return response()->json([
-            //         'responseCode' => '4007301',
-            //         'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
-            //     ], 400);
-            // }
+            $now = time();
+            $timeDifference = $now - $requestTime;
+            if ($timeDifference > 10 * 60 || $timeDifference < -10 * 60) {
+                return response()->json([
+                    'responseCode' => '4007301',
+                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+                ], 400);
+            }
             $grantType = $request->input('grantType');
             
             if (!$grantType || $grantType !== 'client_credentials') {
