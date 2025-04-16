@@ -80,9 +80,9 @@ class PaymentMandiriController extends Controller
 
 public function getAccessToken(Request $request)
 {
-    $clientId = $request->input('client_id');
-    $timestamp = $request->input('timestamp');
-    $signatureBase64 = $request->input('signature');
+    $clientId = $request->input('X-CLIENT-KEY');
+    $timestamp = $request->input('X-TIMESTAMP');
+    $signatureBase64 = $request->input('X-SIGNATURE');
 
     $data = "{$clientId}|{$timestamp}";
     $signature = base64_decode($signatureBase64);
