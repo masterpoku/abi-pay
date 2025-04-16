@@ -161,7 +161,7 @@ class PaymentMandiriController extends Controller
             if ($timeDifference > 10 * 60 || $timeDifference < -10 * 60) {
                 return response()->json([
                     'responseCode' => '4007301',
-                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]d'
+                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
                 ], 400);
             }
             $grantType = $request->input('grantType');
