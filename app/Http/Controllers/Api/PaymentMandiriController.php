@@ -106,8 +106,12 @@ class PaymentMandiriController extends Controller
     $token = base64_encode("{$hmac}|{$clientId}|{$timestamp}");
 
     return response()->json([
-        'access_token' => $token,
+        "responseCode" => "2007300",
+        "responseMessage" => "Success",
+        "accessToken" => $token,
+        "tokenType" => "Bearer",
         'expires_in' => 900,
+
     ]);
 }
 
