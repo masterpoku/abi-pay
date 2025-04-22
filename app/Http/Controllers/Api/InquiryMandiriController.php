@@ -368,9 +368,9 @@ class InquiryMandiriController extends Controller
         $cok = hash('sha256', $bodyToHash);
         
         $stringToSign = $method.":".$this->getRelativeUrl($url) . ":" . $auth_token . ":" . $cok . ":" . $isoTime;
-        Log::info('String to sign: '.$stringToSign);
+        // Log::info('String to sign: '.$stringToSign);
         $signature = base64_encode(hash_hmac('sha512', $stringToSign, $client_secret, true));
-		$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
+		//$signature = hash_hmac('sha512', $stringToSign, $client_secret, false);
         return $signature;
     }
 
