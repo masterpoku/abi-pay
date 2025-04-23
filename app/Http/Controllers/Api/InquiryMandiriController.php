@@ -522,8 +522,8 @@ else {
             ],
             "freeTexts" => [
                 [
-                    "english" => $user_data->free_texts,
-                    "indonesia" => $user_data->free_texts
+                    "english" => "free text",
+                    "indonesia" => "free text"
                 ]
             ]
         ],
