@@ -247,7 +247,7 @@ class InquiryMandiriController extends Controller
             }
         }
         
-        if ($validated['partnerServiceId'] !== '87648') {
+        if (preg_replace('/\D/', '', $validated['partnerServiceId']) !== '87648') {
             return response()->json([
                 "responseCode" => "4002401",
                 "responseMessage" => "Invalid Field Format {partnerServiceId}",
