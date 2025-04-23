@@ -512,7 +512,7 @@ else {
             "subCompany" => "00000",
             "billDetails" => [
                 [
-                    "billCode" => $billCode,
+                    "billCode" => "01",
                     "billName" => $user_data->virtual_account_name." ".$user_data->virtual_account_phone,
                     "billAmount" => [
                         "value" => number_format($user_data->total_amount, 2, '.', ''),
