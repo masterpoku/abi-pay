@@ -449,6 +449,7 @@ private function buildSuccessResponse($validated, $user_data)
     $english = "Bill has been expired";
     $indonesia = "Tagihan telah kadaluarsa";
     $inquiryStatus = "01";
+    $billCode = "02";
     $code = 404;
     Log::info('handlePaymentResponse "Invalid Bill/Virtual Account"');
 } 
@@ -459,6 +460,7 @@ elseif ($user_data->status_pembayaran == '1') {
     $english = "Bill has been paid";
     $indonesia = "Tagihan telah dibayar";
     $inquiryStatus = "01";
+    $billCode = "02";
     $code = 404;
     Log::info('handlePaymentResponse "Paid Bill"');
 } 
@@ -469,6 +471,7 @@ else {
     $english = "Success";
     $indonesia = "Sukses";
     $inquiryStatus = "00";
+    $billCode = "01";
     $code = 200;
 
     if (!is_numeric($validated['customerNo'])) {
@@ -477,6 +480,7 @@ else {
         $english = "Invalid Mandatory Field [customerNo]";
         $indonesia = "Isian wajib [customerNo] tidak valid";
         $inquiryStatus = "01";
+        $billCode = "02";
         $code = 400;
     }
 
@@ -506,7 +510,16 @@ else {
                 "currency" => "IDR"
             ],
             "subCompany" => "00000",
-            "billDetails" => [],
+            "billDetails" => [
+                [
+                    "billCode" => $billCode,
+                    "billName" => $user_data->virtual_account_name." ".$user_data->virtual_account_phone,
+                    "billAmount" => [
+                        "value" => number_format($user_data->total_amount, 2, '.', ''),
+                        "currency" => "IDR"
+                    ]
+                ]
+            ],
             "freeTexts" => [
                 [
                     "english" => $user_data->free_texts,
