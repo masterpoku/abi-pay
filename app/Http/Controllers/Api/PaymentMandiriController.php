@@ -513,7 +513,7 @@ if ($existingExternalId) {
                 "currency" => "IDR"
             ],
             "totalAmount" => [
-                "value" =>  $totalAmount,
+                "value" =>  $nominalTagihan,
                 "currency" => "IDR"
             ],
             "trxDateTime" => $validated['trxDateTime'] ?? "",
