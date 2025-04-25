@@ -446,7 +446,7 @@ Log::info('Validating amounts:', [
 ]);
 
 // Validasi jika amount tidak sesuai
-if (md5($paidAmount) !== md5($nominalTagihan) || md5($totalAmount) !== md5($nominalTagihan)) {
+if (md5($paidAmount) !== md5($nominalTagihan)) {
     $responseCode = "4042513";
     $responstatus = "Invalid Amount";
     $english = "Invalid Amount";
