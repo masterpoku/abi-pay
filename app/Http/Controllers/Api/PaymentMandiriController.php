@@ -363,15 +363,7 @@ private function handleDuplicatePaymentRequestId($userData, $validated)
             "trxDateTime" => $validated['trxDateTime'],
             "referenceNo" =>  $validated['referenceNo'],
             "paymentFlagStatus" => "01",
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => "",
-                    "indonesia" => ""
-                ]
-            ]
-        ],
-        "additionalInfo" => (object) []
+        ]
     ], 409);
 }
 
@@ -518,16 +510,9 @@ if ($existingExternalId) {
             ],
             "trxDateTime" => $validated['trxDateTime'] ?? "",
             "referenceNo" => $validated['referenceNo'] ?? "",
-            "paymentFlagStatus" => $responflag,
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => "Free text",
-                    "indonesia" => "Tulisan bebas"
-                ]
-            ]
+            "paymentFlagStatus" => $responflag
         ],
-        "additionalInfo" => (object) []
+      
     ], $code);
 }
 
@@ -625,16 +610,9 @@ private function buildNotFoundResponse($validated, $externalId)
             ],
             "trxDateTime" => $validated['trxDateTime'] ?? now()->toIso8601String(),
             "referenceNo" => $validated['referenceNo'] ?? "",
-            "paymentFlagStatus" => "01",
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => "",
-                    "indonesia" => ""
-                ]
-            ]
+            "paymentFlagStatus" => "01"
+            
         ],
-        "additionalInfo" => (object) []
     ], $httpStatus);
 }
 
@@ -667,16 +645,8 @@ private function mandatoryFields()
                     "value" => $validatedData['totalAmount']['value'] ?? "",
                     "currency" => "IDR"
                 ],
-                "subCompany" => "00000",
-                "billDetails" => [],
-                "freeTexts" => [
-                    [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object) []
+                "subCompany" => "00000"
+            ]
         ], 400);
     }
     

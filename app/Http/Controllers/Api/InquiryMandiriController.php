@@ -89,16 +89,8 @@ class InquiryMandiriController extends Controller
                         'value' => '',
                         'currency' => '',
                     ],
-                    'subCompany' => '00000',
-                    'billDetails' => [],
-                    'freeTexts' => [
-                        [
-                            'english' => '',
-                            'indonesia' => '',
-                        ],
-                    ],
-                ],
-                'additionalInfo' => (object) [],
+                    'subCompany' => '00000'
+                ]
             ], 409);
 
 
@@ -199,16 +191,9 @@ class InquiryMandiriController extends Controller
                             "value" => $user_data->total_amount ?? "",
                             "currency" => "IDR"
                         ],
-                        "subCompany" => "00000",
-                        "billDetails" => [],
-                        "freeTexts" => [
-                            [
-                                "english" => $user_data->free_texts ?? "",
-                                "indonesia" => $user_data->free_texts ?? ""
-                            ]
-                        ]
-                    ],
-                    "additionalInfo" => (object) []
+                        "subCompany" => "00000"
+                    ]
+                  
                 ], 400);
             }
 
@@ -233,16 +218,8 @@ class InquiryMandiriController extends Controller
                             "value" => $validatedData['totalAmount']['value']  ?? "",
                             "currency" => "IDR"
                         ],
-                        "subCompany" => "00000",
-                        "billDetails" => [],
-                        "freeTexts" => [
-                            [
-                                "english" => $user_data->free_texts ?? "",
-                                "indonesia" => $user_data->free_texts ?? ""
-                            ]
-                        ]
-                    ],
-                    "additionalInfo" => (object) []
+                        "subCompany" => "00000"
+                    ]
                 ], 400);
             }
         }
@@ -269,16 +246,8 @@ class InquiryMandiriController extends Controller
                         "value" => $validatedData['totalAmount']['value'] ?? "",
                         "currency" => ""
                     ],
-                    "subCompany" => "",
-                    "billDetails" => [],
-                    "freeTexts" => [
-                        [
-                            "english" => "",
-                            "indonesia" => ""
-                        ]
-                    ]
-                ],
-                "additionalInfo" => (object) []
+                    "subCompany" => ""
+                ]
             ], 400);
         }
         
@@ -319,16 +288,8 @@ class InquiryMandiriController extends Controller
                     "value" => $validatedData['totalAmount']['value']  ?? "",
                     "currency" => "IDR"
                 ],
-                "subCompany" => "00000",
-                "billDetails" => [],
-                "freeTexts" => [
-                    [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object) []
+                "subCompany" => "00000"
+            ]
         ], 400);
     }
     
@@ -427,16 +388,9 @@ class InquiryMandiriController extends Controller
                 "value" => $user_data->total_amount,
                 "currency" => "IDR"
             ],
-            "subCompany" => "00000",
-            "billDetails" => [],
-            "freeTexts" => [
-                [
-                    "english" => $user_data->free_texts,
-                    "indonesia" => $user_data->free_texts
-                ]
-            ]
-        ],
-        "additionalInfo" => (object) []
+            "subCompany" => "00000"
+            
+        ]
     ], $code);
 }
 private function buildSuccessResponse($validated, $user_data)
@@ -519,15 +473,8 @@ else {
                         "currency" => "IDR"
                     ]
                 ]
-            ],
-            "freeTexts" => [
-                [
-                    "english" => "free text",
-                    "indonesia" => "free text"
-                ]
             ]
         ],
-        "additionalInfo" => (object)[]
     ], $code);
 }
 
@@ -564,16 +511,9 @@ else {
                     "value" => "",
                     "currency" => ""
                 ],
-                "subCompany" => "",
-                "billDetails" => [],
-                "freeTexts" => [
-                    [
-                        "english" => "",
-                        "indonesia" => ""
-                    ]
-                ]
-            ],
-            "additionalInfo" => (object) []
+                "subCompany" => ""
+               
+            ]
         ];
     }
 }
