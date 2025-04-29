@@ -416,7 +416,7 @@ if (!$externalId) {
             Log::info('Paid Bill: Payment already completed');
         } elseif ($user_data->status_pembayaran == '2') {
             $responseCode = "4042519";
-            $responstatus = "Invalid Bill/Virtual Account";
+            $responstatus = "The Bill Is Expired";
             $english = "Bill has expired";
             $indonesia = "Tagihan telah kadaluarsa";
             $responflag = "01";

@@ -399,7 +399,7 @@ private function buildSuccessResponse($validated, $user_data)
 
    if ($user_data->status_pembayaran == '2') {  
     $responseCode = "4042419";
-    $responstatus = "Invalid Bill/Virtual Account";
+    $responstatus = "The Bill Is Expired";
     $english = "Bill has been expired";
     $indonesia = "Tagihan telah kadaluarsa";
     $inquiryStatus = "01";
