@@ -158,9 +158,71 @@ class InquiryMandiriController extends Controller
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
+        if (!isset($validatedData['X-TIMESTAMP']) || !strtotime($validatedData['X-TIMESTAMP'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or missing timestamp.'
+            ], 400);
+        }
         $mandatoryFields = $this->mandatoryFields();
     
+        // foreach ($mandatoryFields as $field) {
+        //     if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
+        //         return response()->json([
+        //             "responseCode" => '4002402',
+        //             "responseMessage" => "Invalid Mandatory Field {$field}",
+        //             "virtualAccountData" => [
+        //                 "inquiryStatus" => '01',
+        //                 "inquiryReason" => [
+        //                     "english" => "Invalid Mandatory Field [$field]",
+        //                     "indonesia" => "Isian wajib [$field] tidak valid"
+        //                 ],
+        //                 "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
+        //                 "customerNo" => $validatedData['customerNo'] ?? "",
+        //                 "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
+        //                 "virtualAccountName" => $user_data->virtual_account_name ?? "",
+        //                 "virtualAccountEmail" => "admin@abitour.id",
+        //                 "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
+        //                 "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
+        //                 "totalAmount" => [
+        //                     "value" => $user_data->total_amount ?? "",
+        //                     "currency" => "IDR"
+        //                 ],
+        //                 "subCompany" => "00000"
+        //             ]
+                  
+        //         ], 400);
+        //     }
+
+        //     if ($field === 'virtualAccountNo' && (!is_numeric($validatedData[$field]) || is_array($validatedData[$field]))) {
+        //         return response()->json([
+        //             "responseCode" => '4002402',
+        //             "responseMessage" => "Invalid Field Format {$field}",
+        //             "virtualAccountData" => [
+        //                 "inquiryStatus" => '01',
+        //                 "inquiryReason" => [
+        //                     "english" => "Invalid Field Format [$field]",
+        //                     "indonesia" => "Isian format [$field] tidak valid"
+        //                 ],
+        //                 "partnerServiceId" => "   " . $validatedData['partnerServiceId']    ?? "",
+        //                 "customerNo" => $validatedData['customerNo'] ?? "" ,
+        //                 "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
+        //                 "virtualAccountName" => $user_data->virtual_account_name ?? "",
+        //                 "virtualAccountEmail" => "admin@abitour.id",
+        //                 "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
+        //                 "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
+        //                 "totalAmount" => [
+        //                     "value" => $validatedData['totalAmount']['value']  ?? "",
+        //                     "currency" => "IDR"
+        //                 ],
+        //                 "subCompany" => "00000"
+        //             ]
+        //         ], 400);
+        //     }
+        // }
+
         foreach ($mandatoryFields as $field) {
+            // Cek field kosong
             if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
                 return response()->json([
                     "responseCode" => '4002402',
@@ -184,10 +246,39 @@ class InquiryMandiriController extends Controller
                         ],
                         "subCompany" => "00000"
                     ]
-                  
                 ], 400);
             }
-
+    
+            // Validasi format X-TIMESTAMP
+            if ($field === 'X-TIMESTAMP') {
+                if (!strtotime($validatedData[$field])) {
+                    return response()->json([
+                        "responseCode" => '4002402',
+                        "responseMessage" => "Invalid Timestamp Format {$field}",
+                        "virtualAccountData" => [
+                            "inquiryStatus" => '01',
+                            "inquiryReason" => [
+                                "english" => "Invalid Timestamp Format [$field]",
+                                "indonesia" => "Format waktu [$field] tidak valid"
+                            ],
+                            "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
+                            "customerNo" => $validatedData['customerNo'] ?? "",
+                            "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
+                            "virtualAccountName" => $user_data->virtual_account_name ?? "",
+                            "virtualAccountEmail" => "admin@abitour.id",
+                            "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
+                            "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
+                            "totalAmount" => [
+                                "value" => $user_data->total_amount ?? "",
+                                "currency" => "IDR"
+                            ],
+                            "subCompany" => "00000"
+                        ]
+                    ], 400);
+                }
+            }
+    
+            // Validasi format virtualAccountNo
             if ($field === 'virtualAccountNo' && (!is_numeric($validatedData[$field]) || is_array($validatedData[$field]))) {
                 return response()->json([
                     "responseCode" => '4002402',
@@ -198,15 +289,15 @@ class InquiryMandiriController extends Controller
                             "english" => "Invalid Field Format [$field]",
                             "indonesia" => "Isian format [$field] tidak valid"
                         ],
-                        "partnerServiceId" => "   " . $validatedData['partnerServiceId']    ?? "",
-                        "customerNo" => $validatedData['customerNo'] ?? "" ,
-                        "virtualAccountNo" => "   " . $validatedData['virtualAccountNo'] ?? "",
+                        "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
+                        "customerNo" => $validatedData['customerNo'] ?? "",
+                        "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
                         "virtualAccountName" => $user_data->virtual_account_name ?? "",
                         "virtualAccountEmail" => "admin@abitour.id",
                         "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
-                        "inquiryRequestId" => $validatedData['inquiryRequestId']    ?? "",
+                        "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
                         "totalAmount" => [
-                            "value" => $validatedData['totalAmount']['value']  ?? "",
+                            "value" => $validatedData['totalAmount']['value'] ?? "",
                             "currency" => "IDR"
                         ],
                         "subCompany" => "00000"
