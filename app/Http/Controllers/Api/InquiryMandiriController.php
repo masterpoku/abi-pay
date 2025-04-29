@@ -190,7 +190,7 @@ class InquiryMandiriController extends Controller
 
             if ($field === 'virtualAccountNo' && (!is_numeric($validatedData[$field]) || is_array($validatedData[$field]))) {
                 return response()->json([
-                    "responseCode" => '4002401',
+                    "responseCode" => '4002402',
                     "responseMessage" => "Invalid Field Format {$field}",
                     "virtualAccountData" => [
                         "inquiryStatus" => '01',
