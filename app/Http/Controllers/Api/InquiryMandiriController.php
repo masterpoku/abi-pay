@@ -132,23 +132,13 @@ class InquiryMandiriController extends Controller
             'responseMessage' => 'Invalid token (B2B)',
         ], 401);
     }
-        // Validasi Signature
-        if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
-            
-            
-
-            
-                return response()->json([
-                    'responseCode' => '4012400',
-                    'responseMessage' => 'Unauthorized. [Signature]',
-                ], 401);
-        }
+       
   
             
             
 
         $validatedData = $request->all();
-        $mandatoryFields = $this->mandatoryFields();
+      
 
             $virtualAccountNo = $request->virtualAccountNo;
             // Log::info('Virtual Account No:', [$virtualAccountNo]);
@@ -168,6 +158,7 @@ class InquiryMandiriController extends Controller
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
+        $mandatoryFields = $this->mandatoryFields();
     
         foreach ($mandatoryFields as $field) {
             if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
@@ -223,6 +214,17 @@ class InquiryMandiriController extends Controller
                 ], 400);
             }
         }
+         // Validasi Signature
+         if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
+            
+            
+
+            
+            return response()->json([
+                'responseCode' => '4012400',
+                'responseMessage' => 'Unauthorized. [Signature]',
+            ], 401);
+    }
         
         if ((int)preg_replace('/\D/', '', $validated['partnerServiceId']) !== 87648) {
             
