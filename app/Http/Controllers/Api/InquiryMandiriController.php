@@ -116,6 +116,13 @@ class InquiryMandiriController extends Controller
         }
        
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
+        if (!$this->isValidIso8601($isoTime)) {
+            return response()->json([
+                'responseCode' => '4007301',
+                'responseMessage' => 'Invalid field format [X-TIMESTAMP]',
+            ], 400);
+        }
+        
         $requestTime = \Carbon\Carbon::parse($isoTime);
         if (now()->diffInMinutes($requestTime) > 5) {
             return response()->json([
@@ -280,6 +287,10 @@ class InquiryMandiriController extends Controller
             'virtualAccountNo',
             'X-TIMESTAMP'
         ];
+    }
+    private function isValidIso8601($timestamp)
+    {
+        return (bool) date_create($timestamp);
     }
     public function handleInvalidFieldFormat($fieldName, $validatedData)
     {
