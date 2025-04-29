@@ -163,7 +163,7 @@ class InquiryMandiriController extends Controller
         foreach ($mandatoryFields as $field) {
             if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
                 return response()->json([
-                    "responseCode" => '4002401',
+                    "responseCode" => '4002402',
                     "responseMessage" => "Invalid Mandatory Field {$field}",
                     "virtualAccountData" => [
                         "inquiryStatus" => '01',
