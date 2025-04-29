@@ -224,7 +224,8 @@ EOF;
     public function flagPayment(Request $request) {
         Log::info('flagPayment Request Data:', $request->all());
         Log::info('flagPayment Request Header:', $request->headers->all());
-        return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
+
+        // return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
         try {
             $clientSecret = env('MANDIRI_CLIENT_SECRET');
             $method = strtoupper($request->method());
@@ -236,7 +237,7 @@ EOF;
             $externalId = $request->header('X-EXTERNAL-ID')??'00';
             $partnerId = $request->header('X-PARTNER-ID');
             $today = now()->toDateString();
-    
+ 
             
             if (!$this->validateServiceSignature($clientSecret, $method, $url, $authToken, $isoTime, $bodyToHash, $signature)) {
                 return response()->json(["responseCode" => "4012500", "responseMessage" => "Unauthorized. [Signature]"], 401);
@@ -304,6 +305,17 @@ EOF;
             // Cek apakah invoice sudah ada    
             $userData = DB::table('tagihan')->where('virtual_account_no', $validated['virtualAccountNo'])->first();
     
+            if ($request->input('flagAdvise') == 'Y') {
+                $now = now();
+                DB::table('tagihan')
+            ->where('virtual_account_no', $validated['virtualAccountNo'])
+            ->update([
+                'status_pembayaran' => '1',
+                'external_id' => $externalId,
+                'payment_request_id' => $validated['paymentRequestId'],
+                'updated_at' => $now,
+            ]);
+            }
             // $existingPayment = DB::table('tagihan')
             //     ->where('external_id', $externalId)
             //     ->where('payment_request_id', $validated['paymentRequestId'])
