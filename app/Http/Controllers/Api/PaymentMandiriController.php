@@ -635,6 +635,7 @@ private function mandatoryFields()
             'partnerServiceId',
             'customerNo',
             'virtualAccountNo',
+            'X-TIMESTAMP'
         ];
     }
     public function handleInvalidFieldFormat($fieldName, $validatedData)
