@@ -254,11 +254,11 @@ class InquiryMandiriController extends Controller
                 if (!strtotime($validatedData[$field])) {
                     return response()->json([
                         "responseCode" => '4002402',
-                        "responseMessage" => "Invalid Timestamp Format {$field}",
+                        "responseMessage" => "Invalid Mandatory Field {$field}",
                         "virtualAccountData" => [
                             "inquiryStatus" => '01',
                             "inquiryReason" => [
-                                "english" => "Invalid Timestamp Format [$field]",
+                                "english" => "Invalid Mandatory Field [$field]",
                                 "indonesia" => "Format waktu [$field] tidak valid"
                             ],
                             "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
