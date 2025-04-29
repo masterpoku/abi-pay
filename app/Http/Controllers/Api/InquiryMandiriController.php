@@ -118,7 +118,7 @@ class InquiryMandiriController extends Controller
         // Validasi timestamp (pastikan tidak lebih dari 5 menit)
         if (!$this->isValidIso8601($isoTime)) {
             return response()->json([
-                'responseCode' => '4007301',
+                'responseCode' => '4002401',
                 'responseMessage' => 'Invalid field format [X-TIMESTAMP]',
             ], 400);
         }
