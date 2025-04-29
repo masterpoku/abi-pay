@@ -263,18 +263,54 @@ EOF;
             if (!$authToken || !DB::table('token')->where('token', $authToken)->exists()) {
                 return response()->json(["responseCode" => "4012401", "responseMessage" => "Invalid token (B2B)"], 401);
             }
+            // foreach ($request->all() as $key => $value) {
+            //     // Cek apakah field kosong untuk mandatory fields
+            //     if (empty($value) && in_array($key, $this->mandatoryFields())) {
+            //         return response()->json([
+            //             'responseCode' => '4002402',
+            //             'responseMessage' => "Invalid Mandatory Field {virtualAccountNo}",
+            //             'statusCode' => 400,
+            //             'virtualAccountData' => [
+            //                 'paymentStatus' => '01',
+            //                 'paymentReason' => [
+            //                     'english' => "Invalid Mandatory Field {virtualAccountNo}",
+            //                     'indonesia' => "Isian wajib {virtualAccountNo} tidak valid"
+            //                 ]
+            //             ]
+            //         ], 400);
+            //     }
+            
+            //     // Cek apakah mengandung alfabet atau simbol (hanya boleh angka)
+            //     if (in_array($key, ['partnerServiceId', 'customerNo', 'virtualAccountNo'])) {
+            //         if (!is_string($value) || !preg_match('/^\d+$/', $value)) {
+            //             return response()->json([
+            //                 'responseCode' => '4002401',
+            //                 'responseMessage' => "Invalid Field Format {$key}",
+            //                 'statusCode' => 400,
+            //             'virtualAccountData' => [
+            //                 'paymentStatus' => '01',
+            //                 'paymentReason' => [
+            //                     'english' => "Invalid Field Format [{$key}]",
+            //                     'indonesia' => "Isian format [{$key}] tidak valid"
+            //                 ]
+            //             ]
+            //         ], 400);
+            //             }
+            //     }
+                
+            // }
             foreach ($request->all() as $key => $value) {
                 // Cek apakah field kosong untuk mandatory fields
                 if (empty($value) && in_array($key, $this->mandatoryFields())) {
                     return response()->json([
-                        'responseCode' => '4002402',
-                        'responseMessage' => "Invalid Mandatory Field {virtualAccountNo}",
+                        'responseCode' => '4002401',
+                        'responseMessage' => "Invalid Mandatory Field {$key}",
                         'statusCode' => 400,
                         'virtualAccountData' => [
                             'paymentStatus' => '01',
                             'paymentReason' => [
-                                'english' => "Invalid Mandatory Field {virtualAccountNo}",
-                                'indonesia' => "Isian wajib {virtualAccountNo} tidak valid"
+                                'english' => "Invalid Mandatory Field [{$key}]",
+                                'indonesia' => "Isian wajib [{$key}] tidak valid"
                             ]
                         ]
                     ], 400);
@@ -287,17 +323,34 @@ EOF;
                             'responseCode' => '4002401',
                             'responseMessage' => "Invalid Field Format {$key}",
                             'statusCode' => 400,
-                        'virtualAccountData' => [
-                            'paymentStatus' => '01',
-                            'paymentReason' => [
-                                'english' => "Invalid Field Format [{$key}]",
-                                'indonesia' => "Isian format [{$key}] tidak valid"
+                            'virtualAccountData' => [
+                                'paymentStatus' => '01',
+                                'paymentReason' => [
+                                    'english' => "Invalid Field Format [{$key}]",
+                                    'indonesia' => "Isian format [{$key}] tidak valid"
+                                ]
                             ]
-                        ]
-                    ], 400);
-                        }
+                        ], 400);
+                    }
                 }
-                
+            
+                // Validasi format timestamp
+                if ($key === 'X-TIMESTAMP') {
+                    if (!strtotime($value)) {
+                        return response()->json([
+                            'responseCode' => '4002401',
+                            'responseMessage' => "Invalid Field Format {$key}",
+                            'statusCode' => 400,
+                            'virtualAccountData' => [
+                                'paymentStatus' => '01',
+                                'paymentReason' => [
+                                    'english' => "Invalid Field Format [{$key}]",
+                                    'indonesia' => "Isian format [{$key}] tidak valid"
+                                ]
+                            ]
+                        ], 400);
+                    }
+                }
             }
             
             $validated = $request->all();
