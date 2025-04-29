@@ -224,7 +224,7 @@ EOF;
     public function flagPayment(Request $request) {
         Log::info('flagPayment Request Data:', $request->all());
         Log::info('flagPayment Request Header:', $request->headers->all());
-        // return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
+        return response()->json(["responseCode" => "5002500", "responseMessage" => "Internal Server Error"], 500);
         try {
             $clientSecret = env('MANDIRI_CLIENT_SECRET');
             $method = strtoupper($request->method());
