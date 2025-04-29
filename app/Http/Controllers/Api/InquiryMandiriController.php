@@ -264,6 +264,7 @@ class InquiryMandiriController extends Controller
             'partnerServiceId',
             'customerNo',
             'virtualAccountNo',
+            'X-TIMESTAMP'
         ];
     }
     public function handleInvalidFieldFormat($fieldName, $validatedData)
