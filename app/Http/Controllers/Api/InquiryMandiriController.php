@@ -177,8 +177,21 @@ class InquiryMandiriController extends Controller
         $mandatoryFields = $this->mandatoryFields();
     
         foreach ($mandatoryFields as $field) {
-            if ($field === 'X-TIMESTAMP' && !strtotime($validatedData[$field])) {
-                return $this->handleInvalidFieldFormat($field, $validatedData);
+            if ($field === 'X-TIMESTAMP') {
+                if (!strtotime($isoTime)) {
+                    return response()->json([
+                        'responseCode' => '4002402',
+                        'responseMessage' => "Invalid Field Format {$field}",
+                        'statusCode' => 400,
+                        'virtualAccountData' => [
+                            'paymentStatus' => '01',
+                            'paymentReason' => [
+                                'english' => "Invalid Field Format [{$field}]",
+                                'indonesia' => "Isian format [{$field}] tidak valid"
+                            ]
+                        ]
+                    ], 400);
+                }
             }
             if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
                 return response()->json([
