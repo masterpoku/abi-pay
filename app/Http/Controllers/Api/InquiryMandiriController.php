@@ -164,12 +164,7 @@ class InquiryMandiriController extends Controller
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
-        if (!isset($validatedData['X-TIMESTAMP']) || !strtotime($validatedData['X-TIMESTAMP'])) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid or missing timestamp.'
-            ], 400);
-        }
+
 
               
                 
