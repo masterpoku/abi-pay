@@ -31,7 +31,6 @@ class InquiryMandiriController extends Controller
         $isoTime = $request->header('X-TIMESTAMP'); // ISO8601 timestamp dari header
         $signature = $request->header('X-SIGNATURE'); // Signature dari header
         $bodyToHash = $request->getContent(); // Body request untuk hashing
-        
         $channelId = $request->header('CHANNEL-ID');
         $partnerId = $request->header('X-PARTNER-ID');
         $externalId = $request->header('X-EXTERNAL-ID');
@@ -165,35 +164,48 @@ class InquiryMandiriController extends Controller
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
-        // if (!isset($validatedData['X-TIMESTAMP']) || !strtotime($validatedData['X-TIMESTAMP'])) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Invalid or missing timestamp.'
-        //     ], 400);
-        // }
+        if (!isset($validatedData['X-TIMESTAMP']) || !strtotime($validatedData['X-TIMESTAMP'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or missing timestamp.'
+            ], 400);
+        }
 
               
                 
         $mandatoryFields = $this->mandatoryFields();
     
         foreach ($mandatoryFields as $field) {
-            if ($field === 'X-TIMESTAMP') {
-                if (!strtotime($isoTime)) {
+            if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
+                
+
+                if (!$isoTime  || !Carbon::hasFormat($isoTime , 'Y-m-d\TH:i:sP')) {
                     return response()->json([
-                        'responseCode' => '4002402',
-                        'responseMessage' => "Invalid Field Format {$field}",
-                        'statusCode' => 400,
-                        'virtualAccountData' => [
-                            'paymentStatus' => '01',
-                            'paymentReason' => [
-                                'english' => "Invalid Field Format [{$field}]",
-                                'indonesia' => "Isian format [{$field}] tidak valid"
-                            ]
+                        "responseCode" => '4002402',
+                        "responseMessage" => "Invalid Mandatory Field X-TIMESTAMP",
+                        "virtualAccountData" => [
+                            "inquiryStatus" => '01',
+                            "inquiryReason" => [
+                                "english" => "Invalid Mandatory Field [X-TIMESTAMP]",
+                                "indonesia" => "Isian wajib [X-TIMESTAMP] tidak valid"
+                            ],
+                            "partnerServiceId" => "   " . ($validatedData['partnerServiceId'] ?? ""),
+                            "customerNo" => $validatedData['customerNo'] ?? "",
+                            "virtualAccountNo" => $validatedData['virtualAccountNo'] ?? "",
+                            "virtualAccountName" => $user_data->virtual_account_name ?? "",
+                            "virtualAccountEmail" => "admin@abitour.id",
+                            "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
+                            "inquiryRequestId" => $validatedData['inquiryRequestId'] ?? "",
+                            "totalAmount" => [
+                                "value" => $user_data->total_amount ?? "",
+                                "currency" => "IDR"
+                            ],
+                            "subCompany" => "00000"
                         ]
                     ], 400);
                 }
-            }
-            if (!isset($validatedData[$field]) || $validatedData[$field] === '') {
+
+
                 return response()->json([
                     "responseCode" => '4002402',
                     "responseMessage" => "Invalid Mandatory Field {$field}",
@@ -298,7 +310,6 @@ class InquiryMandiriController extends Controller
             'partnerServiceId',
             'customerNo',
             'virtualAccountNo',
-            'X-TIMESTAMP'
         ];
     }
     private function isValidIso8601($timestamp)
