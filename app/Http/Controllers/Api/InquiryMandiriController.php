@@ -164,9 +164,6 @@ class InquiryMandiriController extends Controller
         if (!$user_data) {
             return response()->json($this->buildNotFoundResponse($validated),404);
         }
-
-
-              
                 
         $mandatoryFields = $this->mandatoryFields();
     
