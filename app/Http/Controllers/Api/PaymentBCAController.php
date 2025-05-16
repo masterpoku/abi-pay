@@ -76,6 +76,48 @@ class PaymentBCAController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+        public function getAccessToken(Request $request)
+    {
+        $clientId = $request->header('X-CLIENT-KEY');
+        $timestamp = $request->header('X-TIMESTAMP');
+        $signatureBase64 = $request->header('X-SIGNATURE');
+
+        $data = "{$clientId}|{$timestamp}";
+        $signature = base64_decode($signatureBase64);
+
+        $public_key_str = env('BCA_PUBLIC_KEY');
+        // Ambil public key dari env
+        $clientPublicKey = "-----BEGIN CERTIFICATE-----\n" . $public_key_str . "\n-----END CERTIFICATE-----";
+        if (!$clientPublicKey) {
+            return response()->json(['error' => 'Public key tidak ditemukan'], 401);
+        }
+
+        $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
+
+        if ($verified !== 1) {
+            return response()->json(['error' => 'Invalid signature'], 401);
+        }
+
+        // Token generation atau JWT atau non-JWT sesuai pilihan lu
+        $secret = env('ACCESS_TOKEN_SECRET');
+        $rand = bin2hex(random_bytes(10));
+        $payload = "{$clientId}|{$timestamp}|{$rand}";
+        $hmac = hash_hmac('sha256', $payload, $secret);
+        $token = base64_encode("{$hmac}|{$clientId}|{$timestamp}");
+        DB::table('token')->insert([
+            'token' =>$token,
+            'created_at' => DB::raw('CURRENT_TIMESTAMP')
+        ]);
+        return response()->json([
+            "responseCode" => "2007300",
+            "responseMessage" => "Success",
+            "accessToken" => $token,
+            "tokenType" => "Bearer",
+            'expires_in' => 900,
+
+        ]);
+    }
     public function RequestToken(Request $request)
     {
         try {
@@ -151,7 +193,7 @@ class PaymentBCAController extends Controller
             }
     
             // Jika validasi berhasil, lanjutkan ke proses permintaan token
-            return $this->requestAccessToken($request);
+            return $this->getAccessToken($request);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
