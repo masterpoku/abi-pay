@@ -120,6 +120,7 @@ class PaymentBCAController extends Controller
     }
     public function RequestToken(Request $request)
     {
+        log::info('Request Header BCA:', $request->headers->all());
         try {
             // Ambil header dari request
             $clientId = $request->header('X-CLIENT-KEY');
