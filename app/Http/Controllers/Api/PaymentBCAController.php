@@ -221,8 +221,8 @@ EOF;
 
 
     public function flagPayment(Request $request) {
-        Log::info('flagPayment Request Data:', $request->all());
-        Log::info('flagPayment Request Header:', $request->headers->all());
+        Log::info('flagPayment BCA Request Data:', $request->all());
+        Log::info('flagPayment BCA Request Header:', $request->headers->all());
         
         try {
             $clientSecret = env('BCA_CLIENT_SECRET');
