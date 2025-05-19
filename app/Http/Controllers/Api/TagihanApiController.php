@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class TagihanApiController extends Controller
 {
     public function store(Request $request)
     {
+        log::info('Request Header:', $request->headers->all());
+        Log::info('Request Data:', $request->all());
         $headers = [
             'Authorization' => trim($request->header('Authorization')),
             'X-TIMESTAMP' => trim($request->header('X-TIMESTAMP')),
