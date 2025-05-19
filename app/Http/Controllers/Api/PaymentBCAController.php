@@ -77,51 +77,61 @@ class PaymentBCAController extends Controller
         }
     }
 
-        public function getAccessToken(Request $request)
+    public function getAccessToken(Request $request)
     {
-        $clientId = $request->header('X-CLIENT-KEY');
-        $timestamp = $request->header('X-TIMESTAMP');
+        $clientId        = $request->header('X-CLIENT-KEY');
+        $timestamp       = $request->header('X-TIMESTAMP');
         $signatureBase64 = $request->header('X-SIGNATURE');
-
-        $data = "{$clientId}|{$timestamp}";
+    
+        $data      = "{$clientId}|{$timestamp}";
         $signature = base64_decode($signatureBase64);
-
-//         $public_key_str = env('BCA_PUBLIC_KEY');
-//         // Ambil public key dari env
-//         $clientPublicKey = <<<EOF
-// -----BEGIN PUBLIC KEY-----
-// $public_key_str
-// -----END PUBLIC KEY-----
-// EOF;
-//         if (!$clientPublicKey) {
-//             return response()->json(['error' => 'Public key tidak ditemukan'], 401);
-//         }
-
-//         $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
-//         log::info('Verified: ' . $verified);
-//         if ($verified !== 1) {
-//             return response()->json(['error' => 'Invalid signature'], 401);
-//         }
-
-        // Token generation atau JWT atau non-JWT sesuai pilihan lu
+    
+        // Ambil public key (PEM) dari ENV, sudah termasuk header/footer
+        $publicKeyPem = env('BCA_PUBLIC_KEY_PEM');
+        if (empty($publicKeyPem)) {
+            Log::error('Public key kosong');
+            return response()->json(['error' => 'Public key tidak ditemukan'], 401);
+        }
+    
+        // Load menjadi resource kunci publik
+        $pubKey = openssl_pkey_get_public($publicKeyPem);
+        if (!$pubKey) {
+            while ($err = openssl_error_string()) {
+                Log::error("OpenSSL error: {$err}");
+            }
+            return response()->json(['error' => 'Format public key invalid'], 401);
+        }
+    
+        // Verifikasi signature
+        $verified = openssl_verify($data, $signature, $pubKey, OPENSSL_ALGO_SHA256);
+        openssl_free_key($pubKey);
+        Log::info("Signature verified = {$verified}");
+    
+        if ($verified !== 1) {
+            return response()->json(['error' => 'Invalid signature'], 401);
+        }
+    
+        // Jika valid, buat token
         $secret = env('ACCESS_TOKEN_SECRET');
-        $rand = bin2hex(random_bytes(10));
+        $rand   = bin2hex(random_bytes(10));
         $payload = "{$clientId}|{$timestamp}|{$rand}";
-        $hmac = hash_hmac('sha256', $payload, $secret);
-        $token = base64_encode("{$hmac}|{$clientId}|{$timestamp}");
+        $hmac    = hash_hmac('sha256', $payload, $secret);
+        $token   = base64_encode("{$hmac}|{$clientId}|{$timestamp}");
+    
         DB::table('token')->insert([
-            'token' =>$token,
-            'created_at' => DB::raw('CURRENT_TIMESTAMP')
+            'token'      => $token,
+            'created_at' => DB::raw('CURRENT_TIMESTAMP'),
         ]);
+    
         return response()->json([
-            "responseCode" => "2007300",
-            "responseMessage" => "Success",
-            "accessToken" => $token,
-            "tokenType" => "Bearer",
-            'expires_in' => 900,
-
+            'responseCode'    => '2007300',
+            'responseMessage' => 'Success',
+            'accessToken'     => $token,
+            'tokenType'       => 'Bearer',
+            'expires_in'      => 900,
         ]);
     }
+    
     public function RequestToken(Request $request)
     {
         log::info('Request Header BCA:', $request->headers->all());
