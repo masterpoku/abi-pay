@@ -87,7 +87,9 @@ class PaymentBCAController extends Controller
         $signature = base64_decode($signatureBase64);
     
         // Ambil public key (PEM) dari ENV, sudah termasuk header/footer
-        $publicKeyPem = env('BCA_PUBLIC_KEY_PEM');
+        $publicKey = env('BCA_PUBLIC_KEY');
+        $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n".$publicKey."\n-----END PUBLIC KEY-----";
+
         if (empty($publicKeyPem)) {
             Log::error('Public key kosong');
             return response()->json(['error' => 'Public key tidak ditemukan'], 401);
