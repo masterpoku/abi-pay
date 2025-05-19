@@ -140,7 +140,7 @@ class PaymentBCAController extends Controller
             if ($clientId !== $clientKey) {
                 return response()->json([
                     'responseCode' => '4017300',
-                    'responseMessage' => 'Unauthorized. [Unknown clientp]'
+                    'responseMessage' => 'Unauthorized. [Unknown client]'
                 ], 401);
             }
     
@@ -162,14 +162,14 @@ class PaymentBCAController extends Controller
             }
     
             // Batasi waktu request untuk 10 menit
-            $now = time();
-            $timeDifference = $now - $requestTime;
-            if ($timeDifference > 10 * 60 || $timeDifference < -10 * 60) {
-                return response()->json([
-                    'responseCode' => '4007301',
-                    'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
-                ], 400);
-            }
+            // $now = time();
+            // $timeDifference = $now - $requestTime;
+            // if ($timeDifference > 10 * 60 || $timeDifference < -10 * 60) {
+            //     return response()->json([
+            //         'responseCode' => '4007301',
+            //         'responseMessage' => 'Invalid field format [X-TIMESTAMP]'
+            //     ], 400);
+            // }
             $grantType = $request->input('grantType');
             
             if (!$grantType || $grantType !== 'client_credentials') {
