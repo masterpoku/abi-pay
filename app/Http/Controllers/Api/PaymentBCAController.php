@@ -88,7 +88,11 @@ class PaymentBCAController extends Controller
 
         $public_key_str = env('BCA_PUBLIC_KEY');
         // Ambil public key dari env
-        $clientPublicKey = "-----BEGIN CERTIFICATE-----\n" . $public_key_str . "\n-----END CERTIFICATE-----";
+        $clientPublicKey = <<<EOF
+-----BEGIN PUBLIC KEY-----
+$public_key_str
+-----END PUBLIC KEY-----
+EOF;
         if (!$clientPublicKey) {
             return response()->json(['error' => 'Public key tidak ditemukan'], 401);
         }
