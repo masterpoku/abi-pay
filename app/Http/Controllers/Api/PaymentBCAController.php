@@ -86,22 +86,22 @@ class PaymentBCAController extends Controller
         $data = "{$clientId}|{$timestamp}";
         $signature = base64_decode($signatureBase64);
 
-        $public_key_str = env('BCA_PUBLIC_KEY');
-        // Ambil public key dari env
-        $clientPublicKey = <<<EOF
------BEGIN PUBLIC KEY-----
-$public_key_str
------END PUBLIC KEY-----
-EOF;
-        if (!$clientPublicKey) {
-            return response()->json(['error' => 'Public key tidak ditemukan'], 401);
-        }
+//         $public_key_str = env('BCA_PUBLIC_KEY');
+//         // Ambil public key dari env
+//         $clientPublicKey = <<<EOF
+// -----BEGIN PUBLIC KEY-----
+// $public_key_str
+// -----END PUBLIC KEY-----
+// EOF;
+//         if (!$clientPublicKey) {
+//             return response()->json(['error' => 'Public key tidak ditemukan'], 401);
+//         }
 
-        $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
-        log::info('Verified: ' . $verified);
-        if ($verified !== 1) {
-            return response()->json(['error' => 'Invalid signature'], 401);
-        }
+//         $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
+//         log::info('Verified: ' . $verified);
+//         if ($verified !== 1) {
+//             return response()->json(['error' => 'Invalid signature'], 401);
+//         }
 
         // Token generation atau JWT atau non-JWT sesuai pilihan lu
         $secret = env('ACCESS_TOKEN_SECRET');
