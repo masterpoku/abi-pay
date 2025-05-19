@@ -140,7 +140,7 @@ class PaymentBCAController extends Controller
             if ($clientId !== $clientKey) {
                 return response()->json([
                     'responseCode' => '4017300',
-                    'responseMessage' => 'Unauthorized. [Unknown client]'
+                    'responseMessage' => 'Unauthorized. [Unknown clientp]'
                 ], 401);
             }
     
