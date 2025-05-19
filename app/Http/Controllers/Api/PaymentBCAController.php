@@ -201,13 +201,13 @@ class PaymentBCAController extends Controller
             }
     
             // Validasi signature
-            // $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
-            // if (!$isValid) {
-            //     return response()->json([
-            //         'responseCode' => '4012500',
-            //         'responseMessage' => 'Unauthorized. [Signature]'
-            //     ], 401);
-            // }
+            $isValid = $this->validateOauthSignature($publicKey, $clientId, $timeStamp, $signature);
+            if (!$isValid) {
+                return response()->json([
+                    'responseCode' => '4012500',
+                    'responseMessage' => 'Unauthorized. [Signature]'
+                ], 401);
+            }
     
             // Jika validasi berhasil, lanjutkan ke proses permintaan token
             return $this->getAccessToken($request);
