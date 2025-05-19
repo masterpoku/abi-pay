@@ -207,7 +207,7 @@ class PaymentBCAController extends Controller
     {
         $public_key = <<<EOF
 -----BEGIN PUBLIC KEY-----
-$public_key_str
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6pTYBc5uIYmeURnQvhvWeGnzAMERfIOHMncqHvx14981RZH1pcfCi66ESoR/Qr2oL05d92dq7bxkUFHNQ/0+YX8KchbsTCYiT9xwi2ufMRPJu2hmFWqfvCU0qYTb1K2yX7w8lNZYAj+25xGzcgUdOU5ft1w/RKoeu6ifaCtNOwdEnuF7ZaH+aTZwm5Ylws3iqc33WnQqqxOQuIR1uYzsoVnceQSs6rsRL43+ctUGsXtKj5cLzeHjIGp/Qd35qzXryz2akJgDzgdTOXYs1MWegujOD8LnL9zjcbFeU3zm0f0rtbsV3dF8bwvxDbt3LzwwLLskWJODCBE63IKJSf/bzQIDAQAB
 -----END PUBLIC KEY-----
 EOF;
 
