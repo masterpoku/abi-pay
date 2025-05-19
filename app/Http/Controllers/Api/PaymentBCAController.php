@@ -98,7 +98,7 @@ EOF;
         }
 
         $verified = openssl_verify($data, $signature, $clientPublicKey, OPENSSL_ALGO_SHA256);
-
+        log::info('Verified: ' . $verified);
         if ($verified !== 1) {
             return response()->json(['error' => 'Invalid signature'], 401);
         }
