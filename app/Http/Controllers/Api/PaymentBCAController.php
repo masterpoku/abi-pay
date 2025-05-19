@@ -198,7 +198,7 @@ EOF;
             }
     
             // Jika validasi berhasil, lanjutkan ke proses permintaan token
-            return $this->getAccessToken($request);
+            return $this->requestAccessToken($request);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
