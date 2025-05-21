@@ -504,7 +504,7 @@ else {
             "virtualAccountPhone" => $user_data->virtual_account_phone ?? "",
             "inquiryRequestId" => $validated['inquiryRequestId'] ?? "",
             "totalAmount" => [
-                "value" => number_format($user_data->total_amount, 2, '.', ''),
+                "value" => number_format($user_data->total_amount + 2500, 2, '.', ''),
                 "currency" => "IDR"
             ],
             "subCompany" => "00000",
