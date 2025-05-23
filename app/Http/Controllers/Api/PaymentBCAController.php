@@ -436,6 +436,7 @@ if (!$externalId) {
             $responflag = "01";
             $code = 404;
             Log::info('Paid Bill: Payment already completed');
+            $this->sendPaymentCallback($user_data->virtual_account_no);
         } elseif ($user_data->status_pembayaran == '2') {
             $responseCode = "4042519";
             $responstatus = "Invalid Bill/Virtual Account";
@@ -506,6 +507,7 @@ if ($existingExternalId) {
                 'payment_request_id' => $validated['paymentRequestId'],
                 'updated_at' => $now,
             ]);
+        $this->sendPaymentCallback($user_data->virtual_account_no);
     }
 
     // Return response
@@ -751,5 +753,36 @@ public function validateServiceSignature($client_secret, $method,$url, $auth_tok
     }
     return $is_valid;
 }
+
+
+function sendPaymentCallback($tagihan)
+{
+    // Ambil secret key dan URL dari environment
+    $secret_key = env('KEY_SHA1');
+    $callback_url = env('BASE_URL');
+    $destiny = $tagihan;
+
+    // Generate signature dengan HMAC SHA256
+    $signature = hash_hmac('sha256', $destiny, $secret_key);
+
+    // Buat payload request
+    $payload = [
+        'signature' => $signature,
+        'destiny' => $destiny
+    ];
+    Log::info('send to callback Payment Payload:', $payload);
+
+    // Kirim request CURL
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $callback_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $response = json_decode(curl_exec($ch), true);
+    Log::info('send to callback Payment Response:', $response);
+    curl_close($ch);
+}
+
 
 }
