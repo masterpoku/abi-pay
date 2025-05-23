@@ -463,6 +463,7 @@ elseif ($user_data->status_pembayaran == '1') {
     $inquiryStatus = "01";
     $code = 404;
     Log::info('handlePaymentResponse "Paid Bill"');
+    $this->sendPaymentCallback($user_data->virtual_account_no);
 } 
 // Kalau tidak kadaluarsa & tidak dibayar, berarti sukses
 else {  
@@ -565,6 +566,34 @@ else {
             "additionalInfo" => (object) []
         ];
     }
+    function sendPaymentCallback($tagihan)
+{
+    // Ambil secret key dan URL dari environment
+    $secret_key = env('KEY_SHA1');
+    $callback_url = env('BASE_URL');
+    $destiny = $tagihan;
+
+    // Generate signature dengan HMAC SHA256
+    $signature = hash_hmac('sha256', $destiny, $secret_key);
+
+    // Buat payload request
+    $payload = [
+        'signature' => $signature,
+        'destiny' => $destiny
+    ];
+    Log::info('send to callback Payment Payload:', $payload);
+
+    // Kirim request CURL
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $callback_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $response = json_decode(curl_exec($ch), true);
+    Log::info('send to callback Payment Response:', $response);
+    curl_close($ch);
+}
 
 }
 
